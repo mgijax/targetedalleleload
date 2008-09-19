@@ -1,0 +1,69 @@
+#format: sh
+#
+#  tal_regeneron.config.default
+#
+#  This file sets up environment variables that are needed for
+#  loading the Regeneron Alleles 
+#
+###########################################################################
+
+
+#  Java applications
+INTERPRETER=org.jax.mgi.app.targetedalleleload.RegeneronInterpreter
+
+INPUT_DIR=/data/downloads
+INFILE_NAME=${INPUT_DIR}/ftp.regeneron/regn_clones.tab
+
+export INFILE_NAME
+
+#  Complete path name of the log files
+LOG_PROC=${LOGDIR}/regeneron_tal.proc.log
+LOG_DIAG=${LOGDIR}/regeneron_tal.diag.log
+LOG_CUR=${LOGDIR}/regeneron_tal.cur.log
+LOG_VAL=${LOGDIR}/regeneron_tal.val.log
+
+#
+# Allele provider name (will be stored in ALL_Allele.provider
+#
+ALLELE_PROVIDER='Velocigene'
+
+#
+# JNumber reference for Regeneron Alleles
+#
+JNUMBER='J:136110'
+
+#
+# New Alleles are created using the folloing template as the Allele Symbol.  
+# ~~SYMBOL~~ is replaced with the Symbol of the gene
+# ~~SEQUENCE~~ is replaced with the (number of Existing Alleles)+1
+#
+SYMBOL_TEMPLATE='~~SYMBOL~~<tm~~SEQUENCE~~Vlcg>'
+
+#
+# New Alleles are created using the following template as the Allele name.  
+# ~~SYMBOL~~ is replaced with the Symbol of the gene
+# ~~SEQUENCE~~ is replaced with the (number of Existing Alleles)+1
+#
+NAME_TEMPLATE='targeted mutation ~~SEQUENCE~~ Velocigene'
+
+#
+# New Alleles are created using the following template as a moleculare note.  
+# ~~CASSETTE~~ is replaced with the cassette used
+# ~~SIZE~~ is replaced with the size of the deletion
+# ~~START~~ is replaced with the start of the deletion
+# ~~END~~ is replaced with the end of the deletion
+# ~~CHROMOSOME~~ is replaced with the chromosome of the deletion
+# ~~BUILD~~ is replaced with the genome build specified in the file
+# ~~JNUMBER~~ is replaced with the JNUMBER specified in this file
+#
+NOTE_TEMPLATE='The insertion of Velocigene cassette ~~CASSETTE~~ created a deletion of size ~~SIZE~~bp starting at position ~~START~~ and ending at position ~~END~~ of Chromosome ~~CHROMOSOME~~ (Genome Build ~~BUILD~~).'
+
+#
+# New alleles are created with the following mutation types
+#
+MUTATION_TYPES='Insertion, Intragenic deletion'
+
+#
+# New ES Cells are created with in the following logical database
+#
+LOGICAL_DB='109'

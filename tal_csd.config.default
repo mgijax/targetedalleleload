@@ -1,0 +1,26 @@
+#format: sh
+#
+#  tal_csd.config.default
+#
+#  This file sets up environment variables that are needed for
+#  loading the CSD Alleles 
+#
+###########################################################################
+
+
+#  Java applications
+INTERPRETER=org.jax.mgi.app.targetedalleleload.CSDInterpreter
+
+INPUT_DIR=/data/downloads
+INFILE_NAME=${INPUT_DIR}/www.sanger.ac.uk/catalyst/HTGT/report/report/CSD_Alleles.tab
+
+export INFILE_NAME
+
+#  Complete path name of the log files
+LOG_PROC=${LOGDIR}/csd_tal.proc.log
+LOG_DIAG=${LOGDIR}/csd_tal.diag.log
+LOG_CUR=${LOGDIR}/csd_tal.cur.log
+LOG_VAL=${LOGDIR}/csd_tal.val.log
+
+
+
