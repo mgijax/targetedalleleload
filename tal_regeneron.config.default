@@ -44,7 +44,7 @@ SYMBOL_TEMPLATE='~~SYMBOL~~<tm~~SEQUENCE~~Vlcg>'
 # ~~SYMBOL~~ is replaced with the Symbol of the gene
 # ~~SEQUENCE~~ is replaced with the (number of Existing Alleles)+1
 #
-NAME_TEMPLATE='targeted mutation ~~SEQUENCE~~ Velocigene'
+NAME_TEMPLATE='targeted mutation ~~SEQUENCE~~, Velocigene'
 
 #
 # New Alleles are created using the following template as a moleculare note.  
