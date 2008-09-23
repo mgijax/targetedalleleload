@@ -96,7 +96,7 @@ MGD_BCP_PATH=${OUTPUTDIR}
 MGD_BCP_PREVENT_EXECUTE=false
 MGD_BCP_TRUNCATE_LOG=true
 MGD_BCP_DROP_INDEXES=false
-MGD_BCP_RECORD_STAMPING=true
+MGD_BCP_RECORD_STAMPING=false
 MGD_BCP_AUTO_FLUSH=true
 MGD_BCP_OK_TO_OVERWRITE=true
 
@@ -114,8 +114,7 @@ export MGD_BCP_OK_TO_OVERWRITE
 MAIL_LOADNAME="TargetedAllele Load"
 
 #  Recipient list for mailing the log files (comma-separated)
-#MAIL_LOG_PROC="mgiadmin"
-MAIL_LOG_PROC="jmason"
+MAIL_LOG_PROC="mgiadmin"
 
 export MAIL_LOADNAME MAIL_LOG_PROC
 
