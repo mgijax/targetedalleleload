@@ -1,6 +1,7 @@
-TAG: targetedalleleload-4-1-1-1
-DATE: 08/18/2008
+TAG: targetedalleleload-4-1-2-1
+DATE: September 23, 2008
 STAFF: jmason
-CHANGES: Initial implementation of the Targeted Allele Load
-
+CHANGES:
+    - Initial implementation of the Targeted Allele Load
+    - Create KOMP allele objects in MGD 
 
