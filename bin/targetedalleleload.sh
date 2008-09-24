@@ -135,18 +135,6 @@ then
     exit 1
 fi
 
-#
-# run qc reports
-#
-${APP_QCRPT} ${RPTDIR} ${JOBKEY}
-STAT=$?
-if [ ${STAT} -ne 0 ]
-then
-    echo "Running QC reports failed.	Return status: ${STAT}" >> ${LOG_PROC}
-    postload
-    exit 1
-fi
-
 echo "targetedalleleLoad application completed successfully" >> ${LOG_PROC}
 
 postload
