@@ -1,3 +1,9 @@
+TAG: targetedalleleload-4-1-2-2
+DATE: September 24, 2008
+STAFF: jmason
+CHANGES:
+    - Remove extra QC processing from wrapper scrpit
+
 TAG: targetedalleleload-4-1-2-1
 DATE: September 23, 2008
 STAFF: jmason
