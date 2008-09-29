@@ -1,11 +1,15 @@
 package org.jax.mgi.app.targetedalleleload;
 
+import java.util.Vector;
+
 import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
 import org.jax.mgi.shr.config.ConfigException;
 
 import org.jax.mgi.shr.dbutils.dao.SQLStream;
 import org.jax.mgi.shr.dbutils.DBException;
 import org.jax.mgi.shr.cache.CacheException;
+
+import org.jax.mgi.dbs.mgd.AccessionLib;
 
 import org.jax.mgi.dbs.mgd.dao.ACC_AccessionState;
 import org.jax.mgi.dbs.mgd.dao.ACC_AccessionDAO;
@@ -111,26 +115,26 @@ public class ESCell
         this.key = cDAO.getKey().getKey().intValue();
 
         // Create the Accession entry attaching it to the ESCell
-        ACC_AccessionState accState =  new ACC_AccessionState();
+        //
+        ACC_AccessionState accState = new ACC_AccessionState();
+
+        // Split the accession ID into its prefix and numeric parts.
+        //
+        Vector vParts = AccessionLib.splitAccID(this.getName());
+
+        // Set any remaining required attributes of the ACC_AccessionState
+        // object.
+        //
+        accState.setPrefixPart((String)vParts.get(0));
+        accState.setNumericPart((Integer)vParts.get(1));
+
+        accState.setAccID(this.getName());
         accState.setLogicalDBKey(new Integer(this.logicalDB));
         accState.setObjectKey(new Integer(this.key));
         accState.setMGITypeKey(new Integer(this.mgiType));
         accState.setPrivateVal(Boolean.FALSE);
         accState.setPreferred(Boolean.TRUE);
-        accState.setAccID(this.name);
         
-        // Remove the last numeric part of the name using the regex
-        // \d - digits 
-        // * - zero or more 
-        // $ - at the end of the string
-        String prefix = this.name.replaceAll("\\d*$", "");
-        
-        // Get the numeric part by striping off the prefix part
-        Integer numeric = Integer.valueOf(this.name.replaceAll(prefix, ""));
-
-        accState.setNumericPart(numeric);
-        accState.setPrefixPart(prefix);
-
         ACC_AccessionDAO accDAO = new ACC_AccessionDAO(accState);
         stream.insert(accDAO);
 

@@ -411,13 +411,26 @@ public class KnockoutAllele implements Comparable
         stream.insert(ncDAO);
 
         // Create the Accession entry attaching it to the Allele
-        ACC_AccessionState accState =  new ACC_AccessionState();
+        //
+        // Get an ACC_AccessionState object that contains a new MGI ID.
+        //
+        ACC_AccessionState accState = AccessionLib.getNextAccState();
+
+        // Split the accession ID into its prefix and numeric parts.
+        //
+        Vector vParts = AccessionLib.splitAccID(accState.getAccID());
+
+        // Set any remaining required attributes of the ACC_AccessionState
+        // object.
+        //
+        accState.setPrefixPart((String)vParts.get(0));
+        accState.setNumericPart((Integer)vParts.get(1));
+
         accState.setLogicalDBKey(new Integer(Constants.LOGICALDB_MGI));
         accState.setObjectKey(new Integer(this.alleleKey));
         accState.setMGITypeKey(new Integer(Constants.ALLELE_MGI_TYPE));
         accState.setPrivateVal(Boolean.FALSE);
         accState.setPreferred(Boolean.TRUE);
-        accState.setAccID(AccessionLib.getNextMGIID());
         
         ACC_AccessionDAO accDAO = new ACC_AccessionDAO(accState);
         stream.insert(accDAO);        

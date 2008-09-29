@@ -14,6 +14,8 @@ import org.jax.mgi.shr.datetime.DateTime;
 import org.jax.mgi.shr.dbutils.BatchProcessor;
 import org.jax.mgi.shr.dla.loader.DLALoader;
 
+import org.jax.mgi.dbs.mgd.AccessionLib;
+
 import org.jax.mgi.shr.dbutils.SQLDataManager;
 import org.jax.mgi.shr.dbutils.SQLDataManagerFactory;
 import org.jax.mgi.dbs.SchemaConstants;
@@ -130,7 +132,6 @@ public class TargetedAlleleLoad extends DLALoader
     protected void run()
     throws MGIException
     {
-        Vector allelesToAdd = new Vector();
         HashMap alleleCount = getKnockoutAlleleCount();
         
         while(iter.hasNext())
@@ -283,15 +284,23 @@ public class TargetedAlleleLoad extends DLALoader
     }
 
     /**
-     * No postprocessing needed for this load
+     * Must close the BCP file stream and commit the new maximum MGI \
+     * number back to the database
      * @assumes nothing
-     * @effects nothing
-     * @throws nothing
+     * @effects Updates the database row in ACC_AccessionMax for MGI IDs
+     * @throws MGIException if something goes wrong
      */
     protected void postprocess()
     throws MGIException
     {
         loadStream.close();
+
+        // If any new MGI IDs have been generated during processing, the
+        // ACC_AccessionMax table needs to be updated with the new maximum
+        // value.
+        //
+        AccessionLib.commitAccessionMax();
+
         super.logger.logInfo("Process Finishing");
         return;
     }
