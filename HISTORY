@@ -1,3 +1,11 @@
+TAG: targetedalleleload-4-1-2-3
+DATE: September 29, 2008
+STAFF: jmason
+CHANGES:
+    - Commit accession max id updates to database
+    - Use AccessionLib to automatically populate the
+      prefixPart and numericPart in ACC_Accession
+
 TAG: targetedalleleload-4-1-2-2
 DATE: September 24, 2008
 STAFF: jmason
