@@ -37,7 +37,7 @@ JNUMBER='J:136110'
 # ~~SYMBOL~~ is replaced with the Symbol of the gene
 # ~~SEQUENCE~~ is replaced with the (number of Existing Alleles)+1
 #
-SYMBOL_TEMPLATE='~~SYMBOL~~<tm~~SEQUENCE~~Vlcg>'
+SYMBOL_TEMPLATE='~~SYMBOL~~<tm~~SEQUENCE~~(KOMP)Vlcg>'
 
 #
 # New Alleles are created using the following template as the Allele name.  
@@ -66,4 +66,9 @@ MUTATION_TYPES='Insertion, Intragenic deletion'
 #
 # New ES Cells are created with in the following logical database
 #
-LOGICAL_DB='109'
+ESCELL_LOGICAL_DB='109'
+
+#
+# The projects for regeneron are stored using the following logical db
+#
+PROJECT_LOGICAL_DB='125'

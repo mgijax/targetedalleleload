@@ -59,7 +59,7 @@ public class StrainLookup extends FullCachedLookup {
      * @return the initialization query
      */
     public String getFullInitQuery() {
-        return "select strainKey=_Strain_key, name=strain from PRB_Strain";
+        return "SELECT strainKey=_Strain_key, name=strain FROM PRB_Strain";
     }
 
     /**

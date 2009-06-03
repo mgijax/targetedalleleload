@@ -1,6 +1,8 @@
 package org.jax.mgi.app.targetedalleleload;
 
 import java.lang.Integer;
+import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
+import org.jax.mgi.shr.exception.MGIException;
 
 /**
  * @is An object that represents a Regeneron Knockout Allele Input record.
@@ -25,7 +27,7 @@ public class RegeneronAlleleInput implements KnockoutAlleleInput
     /////////////////
 
     // fields parsed from an input record:
-    // 0 - alleleId
+    // 0 - esCellName
     // 1 - Parental ES Cell
     // 2 - Mouse Strain 
     // 3 - REGN Allele ID
@@ -38,10 +40,11 @@ public class RegeneronAlleleInput implements KnockoutAlleleInput
     // 10 - Cassette
 
     // From file
-    private String alleleId = null;
+    private String esCellName = null;
     private String parentalESCellName = null;
     private String strainName = null;
-    private String projectName = null;
+    private String projectId = null;
+    private String projectLogicalDb = null;
     private String geneSymbol = null;
     private String geneMgiId = null;
     private Integer delStart = new Integer(0);
@@ -50,17 +53,23 @@ public class RegeneronAlleleInput implements KnockoutAlleleInput
     private String build = null;
     private String cassette = null;
 
+    private static MarkerLookup markerLookup = null;
+    TargetedAlleleLoadCfg cfg = null;
+
     /**
      * Constructs a Knockout Allele Input object
      * @assumes Nothing
      * @effects Set the class variables.
      */
     public RegeneronAlleleInput ()
+    throws MGIException
     {
+        cfg = new TargetedAlleleLoadCfg();
+        markerLookup = new MarkerLookup();
     }
 
-	public String getAlleleId() {
-		return alleleId;
+	public String getESCellName() {
+		return esCellName;
 	}
 
 	public String getParentalESCellName() {
@@ -71,8 +80,11 @@ public class RegeneronAlleleInput implements KnockoutAlleleInput
 		return strainName;
 	}
 
-	public String getProjectName() {
-		return projectName;
+	public String getProjectId() {
+		return projectId;
+	}
+	public String getProjectLogicalDb() {
+	    return projectLogicalDb;
 	}
 
 	public String getGeneSymbol() {
@@ -103,8 +115,21 @@ public class RegeneronAlleleInput implements KnockoutAlleleInput
 		return cassette;
 	}
 
-	public void setAlleleId(String alleleId) {
-		this.alleleId = alleleId;
+	public String getAlleleSymbol()
+	throws MGIException 
+	{
+	    String name = this.cfg.getNameTemplate();
+	    String projectLogicalDb = this.cfg.getProjectLogicalDb();
+	    Marker marker = this.markerLookup.lookup(this.getGeneMgiId());
+	    String symbol = marker.getSymbol(); // This is the gene symbol
+	    
+	    // Now build the allele symbol
+	    name = name.replaceAll("~~SYMBOL~~", symbol);
+		return name;
+	}
+
+	public void setESCellName(String esCellName) {
+		this.esCellName = esCellName;
 	}
 
 	public void setParentalESCellName(String parentalESCellName) {
@@ -115,8 +140,12 @@ public class RegeneronAlleleInput implements KnockoutAlleleInput
 		this.strainName = strainName;
 	}
 
-	public void setProjectName(String projectName) {
-		this.projectName = projectName;
+	public void setProjectId(String projectId) {
+		this.projectId = projectId;
+	}
+	
+	public void setProjectLogicalDb() {
+	    this.projectLogicalDb = projectLogicalDb;
 	}
 
 	public void setGeneSymbol(String geneSymbol) {

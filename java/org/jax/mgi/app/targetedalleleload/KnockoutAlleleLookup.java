@@ -31,7 +31,9 @@ import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
  *
  */
 
-public class KnockoutAlleleLookup extends FullCachedLookup {
+public class KnockoutAlleleLookup
+extends FullCachedLookup
+{
 
     private TargetedAlleleLoadCfg cfg = null;
     private MarkerLookup markerLookup = null;
@@ -50,7 +52,8 @@ public class KnockoutAlleleLookup extends FullCachedLookup {
     throws CacheException,ConfigException,DBException
     {
         super(SQLDataManagerFactory.getShared(SchemaConstants.MGD));
-        try {
+        try
+        {
             cfg = new TargetedAlleleLoadCfg();
             markerLookup = new MarkerLookup();
             markerLookup.initCache();
@@ -60,9 +63,10 @@ public class KnockoutAlleleLookup extends FullCachedLookup {
 
 		    escellLookup = new ESCellLookup(strainLookup);
             escellLookup.initCache();
-		} catch (DLALoggingException e) {
+		}
+		catch (DLALoggingException e)
+		{
 		    System.out.println("KnockoutAlleleLookup DLALoggingException exception");
-	    
 		}
     }
 
@@ -94,20 +98,22 @@ public class KnockoutAlleleLookup extends FullCachedLookup {
         }
         catch( ConfigException e)
         {
-            System.out.println("Config Exception while trying to retrieve JNUMBER");
+            System.out.println("Config Exception retrieving JNUMBER");
         }
 
-        return "SELECT alleleKey=a._Allele_key, alleleName=a.name, alleleSymbol=a.symbol, " +
-               "alleleType=a._Allele_Type_key, geneSymbol=mrk.symbol, chr=mrk.chromosome, " +
+        return "SELECT alleleKey=a._Allele_key, alleleName=a.name, " +
+               "alleleSymbol=a.symbol, alleleType=a._Allele_Type_key, " +
+               "geneSymbol=mrk.symbol, chr=mrk.chromosome, " +
                "geneKey=mrk._Marker_key, geneMgiid=acc.accID, " +
                "mescKey=mesc._CellLine_key, mescName = mesc.cellline, " +
                "pescKey=pesc._CellLine_key, pescName = pesc.cellline, " +
                "provider=mesc.provider, alleleNote=nc.note, " +
-               "jNumber=bc.jnumID " +
+               "jNumber=bc.jnumID, projectId=acc2.accId  " +
                "FROM ALL_Allele a, BIB_Citation_Cache bc, " +
                "MGI_Reference_Assoc ra,MGI_RefAssocType rat, " +
                "MRK_Marker mrk, ALL_CellLine mesc, ALL_CellLine pesc, " +
-               "MGI_Note n, MGI_NoteChunk nc, ACC_Accession acc " +
+               "MGI_Note n, MGI_NoteChunk nc, ACC_Accession acc, " +
+               "ACC_Accession acc2 " + 
                "WHERE bc.jnumID = '"+jNumber+"' " +
                "AND ra._Refs_key = bc._Refs_key " +
                "AND ra._Object_key = a._Allele_key " +
@@ -122,9 +128,14 @@ public class KnockoutAlleleLookup extends FullCachedLookup {
                "and acc.prefixpart='MGI:' " +
                "and acc._LogicalDB_key=1 " +
                "and acc._MGIType_key=2 " +
-               "and n._Object_key = a._Allele_key " + 
-               "and n._MGIType_key = 11 " + 
-               "and n._NoteType_key = 1021 " + 
+               "and acc2.preferred=1 " +
+               "and acc2.private=1 " +
+               "and acc2._Object_key = a._Allele_key " +
+               "and acc2._LogicalDB_key in (125,126) " +
+               "and acc2._MGIType_key=11 " +
+               "and n._Object_key = a._Allele_key " +
+               "and n._MGIType_key = 11 " +
+               "and n._NoteType_key = 1021 " +
                "and n._Note_key = nc._Note_key " ;
     }
 
@@ -137,12 +148,16 @@ public class KnockoutAlleleLookup extends FullCachedLookup {
         return new Interpreter();
     }
 
-    private class Interpreter implements RowDataInterpreter
+    private class Interpreter
+    implements RowDataInterpreter
     {
         public Object interpret(RowReference row)
         throws DBException
         {
             DLALogger logger = null;
+            String jNumber = null;
+            KnockoutAllele koAllele = null;
+
             try
             {
                 logger = DLALogger.getInstance();
@@ -153,7 +168,6 @@ public class KnockoutAlleleLookup extends FullCachedLookup {
                 return null;
             }
             
-            KnockoutAllele koAllele = null;
             try
             {
                 koAllele = new KnockoutAllele();
@@ -168,7 +182,7 @@ public class KnockoutAlleleLookup extends FullCachedLookup {
                 logger.logdInfo(e.getMessage(), true);
                 return null;
             }
-            String jNumber = null;
+
             try
             {
                 jNumber = cfg.getJNumber();
@@ -177,13 +191,15 @@ public class KnockoutAlleleLookup extends FullCachedLookup {
             {
                 logger.logdInfo(e.getMessage(), true);
             }
-            koAllele.setAlleleId(row.getString("mescName"));
+
+            koAllele.setESCellName(row.getString("mescName"));
             koAllele.setAlleleType(new Integer(row.getInt("alleleType").intValue()));
             koAllele.setAlleleName(row.getString("alleleName"));
             koAllele.setAlleleSymbol(row.getString("alleleSymbol"));
             koAllele.setAlleleKey(row.getInt("alleleKey").intValue());
             koAllele.setAlleleName(row.getString("alleleName"));
             koAllele.setProvider(row.getString("provider"));
+            koAllele.setProjectId(row.getString("projectId"));
             koAllele.setAlleleNote(row.getString("alleleNote"));
             koAllele.setJNumber(jNumber);
 
@@ -222,7 +238,7 @@ public class KnockoutAlleleLookup extends FullCachedLookup {
                 return null;
             }
 
-            return new KeyValue(row.getString("mescName"), koAllele);
+            return new KeyValue(row.getString("projectId"), koAllele);
         }
     }
 

@@ -69,15 +69,27 @@ public class TargetedAlleleLoadCfg extends InputDataCfg {
 */
 
     /**
-     * Get the mutation types string - a string indicating a _LogicalDB_Key
-     * @assumes The "LOGICAL_DB" constant is defined in the config file and
+     * Get the mutation types string - a string indicating the project's logical db for cell lines
+     * @assumes The "ESCELL_LOGICAL_DB" constant is defined in the config file and
      * that the logical DB specifed there aligns with the database
      * @effects Nothing
      * @return The configuration value
      * @throws ConfigException if the value is not found
      */
-    public String getLogicalDB() throws ConfigException {
-        return getConfigString("LOGICAL_DB");
+    public String getEsCellLogicalDb() throws ConfigException {
+        return getConfigString("ESCELL_LOGICAL_DB");
+    }
+
+    /**
+     * Get the mutation types string - a string indicating the private logical DB for the project identifiers
+     * @assumes The "PROJECT_LOGICAL_DB" constant is defined in the config file and
+     * that the logical DB specifed there aligns with the database
+     * @effects Nothing
+     * @return The configuration value
+     * @throws ConfigException if the value is not found
+     */
+    public String getProjectLogicalDb() throws ConfigException {
+        return getConfigString("PROJECT_LOGICAL_DB");
     }
 
 

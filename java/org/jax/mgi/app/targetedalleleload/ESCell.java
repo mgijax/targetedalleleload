@@ -36,9 +36,6 @@ public class ESCell
     private boolean isMutant = false;
     private int logicalDB = 0;
     
-    // Constants
-    private int mgiType = 28;           // ALL_CellLine
-
     /**
      * constructor
      * @param key the databse key of object
@@ -131,7 +128,7 @@ public class ESCell
         accState.setAccID(this.getName());
         accState.setLogicalDBKey(new Integer(this.logicalDB));
         accState.setObjectKey(new Integer(this.key));
-        accState.setMGITypeKey(new Integer(this.mgiType));
+        accState.setMGITypeKey(new Integer(Constants.ESCELL_MGITYPE_KEY));
         accState.setPrivateVal(Boolean.FALSE);
         accState.setPreferred(Boolean.TRUE);
         

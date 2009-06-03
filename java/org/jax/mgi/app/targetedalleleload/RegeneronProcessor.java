@@ -3,6 +3,8 @@ package org.jax.mgi.app.targetedalleleload;
 import java.lang.Integer;
 import java.util.Vector;
 import java.util.Iterator;
+import java.util.HashSet;
+
 import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
 import org.jax.mgi.shr.ioutils.RecordDataInterpreter;
 import org.jax.mgi.dbs.mgd.lookup.VocabKeyLookup;
@@ -46,6 +48,8 @@ public class RegeneronProcessor extends KnockoutAlleleProcessor
     private StrainLookup strainLookup = null;
     private ESCellLookup escellLookup = null;
     private VocabKeyLookup vocabLookup = null;
+    private AlleleByMarkerLookup allelesByMarkerLookup = null;
+    
 
     /**
      * Constructs a KnockoutAllele processor object.
@@ -62,6 +66,7 @@ public class RegeneronProcessor extends KnockoutAlleleProcessor
     DBException,CacheException,TranslationException
     {
         cfg = new TargetedAlleleLoadCfg();
+        allelesByMarkerLookup = new AlleleByMarkerLookup(cfg.getProjectLogicalDb());
         markerLookup = new MarkerLookup();
         strainLookup = new StrainLookup();
 		escellLookup = new ESCellLookup(strainLookup);
@@ -73,7 +78,7 @@ public class RegeneronProcessor extends KnockoutAlleleProcessor
      * input record and providing Regeneron Specific constant values.
      * @assumes Nothing
      * @effects Loads the clone object.
-     * @param rec A record from the Regeneron allele input file
+     * @param inputData A record from the Regeneron allele input file
      * @return An KnockoutAllele object
      * @throws RecordFormatException
      * @throws ConfigException
@@ -93,7 +98,7 @@ public class RegeneronProcessor extends KnockoutAlleleProcessor
         Marker marker = markerLookup.lookup(in.getGeneMgiId());
         Strain strain = strainLookup.lookup(in.getStrainName());
 		ESCell parental = escellLookup.lookupExisting(in.getParentalESCellName());
-		ESCell mutant = escellLookup.lookup(in.getAlleleId());
+		ESCell mutant = escellLookup.lookup(in.getESCellName());
 		
 		// If the mutant cell line doesn't exist, we must create
 		// a new one.
@@ -103,17 +108,20 @@ public class RegeneronProcessor extends KnockoutAlleleProcessor
 		    // for all the KOMP generated alleles
 		    mutant = new ESCell(0,
                 strain,
-                in.getAlleleId(),
+                in.getESCellName(),
                 cfg.getProvider(),
                 true
                 );
-            mutant.setLogicalDB(Integer.valueOf(cfg.getLogicalDB()).intValue());
+            String esCellDB = cfg.getEsCellLogicalDb();
+            mutant.setLogicalDB(Integer.parseInt(esCellDB));
 		}
 
-        clone.setAlleleId(in.getAlleleId());
+        clone.setESCellName(in.getESCellName());
         clone.setGene(marker);
         clone.setMutant(mutant);
         clone.setParental(parental);
+        clone.setProjectId(in.getProjectId());
+        clone.setProjectLogicalDb(cfg.getProjectLogicalDb());
         clone.setStrain(strain);
         clone.setProvider(cfg.getProvider());
         clone.setDelStart(in.getDelStart());
@@ -132,13 +140,27 @@ public class RegeneronProcessor extends KnockoutAlleleProcessor
         }
         clone.setMutationTypes(mutationTypeKeys);
 
+        // get the NEXT allele symbol sequence number which is one higher than
+        // the sum of CURRENT KOMP ALELLES attached to this marker BY THIS
+        // PROVIDER
+        HashSet allProj = allelesByMarkerLookup.lookup(marker.getSymbol());
+
+        int seq = 1; // Default to the first project
+        if (allProj != null) {
+            // There is already a project (or projects) associated to this
+            // marker.  Increment the count for this allele
+            seq = (allProj.size()) + 1;
+        }
+
         // Set the clone's constructed values
         String alleleName = cfg.getNameTemplate();
         alleleName = alleleName.replaceAll("~~SYMBOL~~", clone.getGeneSymbol()); 
+        alleleName = alleleName.replaceAll("~~SEQUENCE~~", Integer.toString(seq)); 
         clone.setAlleleName(alleleName);
 
         String alleleSymbol = cfg.getSymbolTemplate();
         alleleSymbol = alleleSymbol.replaceAll("~~SYMBOL~~", clone.getGeneSymbol()); 
+        alleleSymbol = alleleSymbol.replaceAll("~~SEQUENCE~~", Integer.toString(seq)); 
         clone.setAlleleSymbol(alleleSymbol);
 
         String jNumber = cfg.getJNumber();

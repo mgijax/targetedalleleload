@@ -66,7 +66,7 @@ public class KnockoutAllele implements Comparable
     private Vector mutationTypes = null;
 
     // From file
-    private String alleleId = null;
+    private String esCellName = null;
     private Integer alleleType = new Integer(Constants.ALLELE_TYPE);
     private Integer delStart = new Integer(0);
     private Integer delEnd = new Integer(0);
@@ -75,6 +75,8 @@ public class KnockoutAllele implements Comparable
     private String build = null;
     private String cassette = null;
     private String provider = null;
+    private String projectId = null;
+    private int projectLogicalDb = 0;
 
     // From cfg file
     private String jNumber = null;          // Reference J Number
@@ -121,6 +123,16 @@ public class KnockoutAllele implements Comparable
         this.mutationTypes = mutationTypes;
     }
 
+    public void setProjectId(String projectId)
+    {
+        this.projectId = projectId;
+    }
+
+    public void setProjectLogicalDb(String projectLogicalDb)
+    {
+        this.projectLogicalDb = Integer.parseInt(projectLogicalDb);
+    }
+
     public void setParental(ESCell parental)
     {
         this.parental = parental;
@@ -140,9 +152,9 @@ public class KnockoutAllele implements Comparable
         this.gene = gene;
     }
     
-    public void setAlleleId(String alleleId)
+    public void setESCellName(String esCellName)
     {
-        this.alleleId = alleleId;
+        this.esCellName = esCellName;
     }
 
     public void setAlleleType(Integer alleleType)
@@ -221,6 +233,12 @@ public class KnockoutAllele implements Comparable
 
     /////////////////////////////////////////////////////////////////////
     // Getters
+
+    public int getAlleleKey()
+    {
+        return this.alleleKey;
+    }
+
 	public Marker getGene()
 	{
 	    return this.gene;
@@ -234,6 +252,16 @@ public class KnockoutAllele implements Comparable
 	public Strain getStrain()
 	{
 	    return this.strain;
+	}
+	
+	public String getProjectId()
+	{
+	    return this.projectId;
+	}
+
+	public int getProjectLogicalDb()
+	{
+	    return this.projectLogicalDb;
 	}
 
 	public ESCell getParental()
@@ -280,9 +308,9 @@ public class KnockoutAllele implements Comparable
 	    return new Integer(Math.abs(start - end) + 1);
 	}
 
-	public String getAlleleId()
+	public String getESCellName()
 	{
-	    return this.alleleId;
+	    return this.esCellName;
 	}
 
 	public Integer getAlleleType()
@@ -308,7 +336,7 @@ public class KnockoutAllele implements Comparable
     public String toString()
     {
         return "Allele key: " + this.alleleKey+"\n"+
-            "id: " + this.alleleId+"\n"+
+            "id: " + this.esCellName+"\n"+
             "name: " + this.alleleName+"\n"+
             "symbol: " + this.alleleSymbol+"\n"+
             "note: " + this.alleleNote+"\n"+
@@ -328,6 +356,12 @@ public class KnockoutAllele implements Comparable
     public void insert (SQLStream stream)
     throws ConfigException,DBException,CacheException
     {
+        // Verify that the logical DB has been set
+        if (this.projectLogicalDb == 0)
+        {
+            throw new ConfigException("Project Logical DB not configured", true);
+        }
+
         // if the mutant cell line doesn't already exist, then
         //Create the mutant es cell line and insert it into the database
         if (this.mutant.getKey() == 0)
@@ -410,30 +444,29 @@ public class KnockoutAllele implements Comparable
         MGI_NoteChunkDAO ncDAO = new MGI_NoteChunkDAO(ncState);
         stream.insert(ncDAO);
 
-        // Create the Accession entry attaching it to the Allele
-        //
-        // Get an ACC_AccessionState object that contains a new MGI ID.
-        //
-        ACC_AccessionState accState = AccessionLib.getNextAccState();
-
-        // Split the accession ID into its prefix and numeric parts.
-        //
-        Vector vParts = AccessionLib.splitAccID(accState.getAccID());
-
-        // Set any remaining required attributes of the ACC_AccessionState
-        // object.
-        //
-        accState.setPrefixPart((String)vParts.get(0));
-        accState.setNumericPart((Integer)vParts.get(1));
-
-        accState.setLogicalDBKey(new Integer(Constants.LOGICALDB_MGI));
-        accState.setObjectKey(new Integer(this.alleleKey));
-        accState.setMGITypeKey(new Integer(Constants.ALLELE_MGI_TYPE));
-        accState.setPrivateVal(Boolean.FALSE);
-        accState.setPreferred(Boolean.TRUE);
+        // Create the Allele Accession object
+        // note the missing AccID parameter which indicates this is an MGI ID
+        AccessionId alleleAccId = new AccessionId(
+            Constants.LOGICALDB_MGI, // Logical DB
+            this.alleleKey,    // Allele object key
+            Constants.ALLELE_MGI_TYPE,        // MGI type
+            Boolean.FALSE,  // Private?
+            Boolean.TRUE    // Preferred?
+            );
         
-        ACC_AccessionDAO accDAO = new ACC_AccessionDAO(accState);
-        stream.insert(accDAO);        
+        alleleAccId.insert(stream);
+
+        // Create the Project (private) Accession object
+        AccessionId projectAccId = new AccessionId(
+            this.projectId,    // Create the private project ID for this allele
+            this.projectLogicalDb, // Logical DB
+            this.alleleKey,    // Allele object key
+            Constants.ALLELE_MGI_TYPE,        // MGI type
+            Boolean.TRUE,  // Private?
+            Boolean.TRUE    // Preferred?
+            );
+        
+        projectAccId.insert(stream);
 
     }
 
@@ -452,10 +485,11 @@ public class KnockoutAllele implements Comparable
         this.mutant = null;
         this.alleleNote = null;
 
-        this.alleleId = null;
+        this.esCellName = null;
         this.provider = null;
         this.cassette = null;
         this.build = null;
+        this.projectId = null;
         this.delStart = new Integer(0);
         this.delEnd = new Integer(0);
         this.delSize = new Integer(0);

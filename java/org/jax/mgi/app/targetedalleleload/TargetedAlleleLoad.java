@@ -3,6 +3,7 @@ package org.jax.mgi.app.targetedalleleload;
 import java.util.*;
 import java.io.File;
 import java.lang.Integer;
+import java.lang.Integer;
 
 import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
 import org.jax.mgi.shr.config.InputDataCfg;
@@ -15,13 +16,9 @@ import org.jax.mgi.shr.dbutils.BatchProcessor;
 import org.jax.mgi.shr.dla.loader.DLALoader;
 
 import org.jax.mgi.dbs.mgd.AccessionLib;
-
-import org.jax.mgi.shr.dbutils.SQLDataManager;
-import org.jax.mgi.shr.dbutils.SQLDataManagerFactory;
 import org.jax.mgi.dbs.SchemaConstants;
-import org.jax.mgi.dbs.mgd.LogicalDBConstants;
-import org.jax.mgi.shr.dbutils.Table;
 
+import org.jax.mgi.shr.dbutils.Table;
 import org.jax.mgi.shr.dbutils.DBException;
 import org.jax.mgi.shr.cache.CacheException;
 import org.jax.mgi.shr.config.ConfigException;
@@ -48,13 +45,17 @@ import org.jax.mgi.shr.ioutils.IOUException;
  *
  */
 
-public class TargetedAlleleLoad extends DLALoader
+public class TargetedAlleleLoad
+extends DLALoader
 {
 
     private RecordDataIterator iter = null;
+    private AlleleLookup alleleLookup = null;
     private KnockoutAlleleLookup koAlleleLookup = null;
+    private CellLineLookup cellLineLookup = null;
     private KnockoutAlleleProcessor processor = null;
     KnockoutAlleleFactory alleleFactory = null;
+    TargetedAlleleLoadCfg cfg = null;
 
     /**
      * constructor
@@ -64,13 +65,22 @@ public class TargetedAlleleLoad extends DLALoader
     public TargetedAlleleLoad()
     throws MGIException
     {
+        // Instance the configuration object
+        cfg = new TargetedAlleleLoadCfg();         
+
+        String esCellLogicalDb = cfg.getEsCellLogicalDb();
+        String projectLogicalDb = cfg.getProjectLogicalDb();
+
+        // Instance the caches with appropriate data that has been identified 
+        // by the configuration variables specified in the configuration file
+        alleleLookup = new AlleleLookup(projectLogicalDb);
+        cellLineLookup = new CellLineLookup(esCellLogicalDb, projectLogicalDb);
         koAlleleLookup = new KnockoutAlleleLookup();
 
-        // Prime the Knockout Allele lookup
+        // Prime the lookups
+        alleleLookup.initCache();
+        cellLineLookup.initCache();
         koAlleleLookup.initCache();
-
-        SQLDataManager sqlMgr =
-            SQLDataManagerFactory.getShared(SchemaConstants.MGD);
 
         alleleFactory = KnockoutAlleleFactory.getFactory();
     }
@@ -83,15 +93,10 @@ public class TargetedAlleleLoad extends DLALoader
     protected void initialize()
     throws MGIException
     {
-        super.logger.logInfo("Opening report files");
-
         super.logger.logInfo("Reading input files");
 
         String basedir = super.dlaConfig.getReportsDir() + File.separator;
         
-        // Get the configuration object and read in the input file
-        TargetedAlleleLoadCfg cfg = new TargetedAlleleLoadCfg(); 
-
         InputDataFile inputFile = new InputDataFile(cfg);
 
         // Get an appropriate Interpreter for the file
@@ -132,154 +137,187 @@ public class TargetedAlleleLoad extends DLALoader
     protected void run()
     throws MGIException
     {
-        HashMap alleleCount = getKnockoutAlleleCount();
+
+        HashSet qcd = new HashSet();
         
+        // For each input record
         while(iter.hasNext())
         {
-            KnockoutAllele allele = null;
+            // Instance the input records
+            KnockoutAlleleInput in = null;
 
             try
             {
-                KnockoutAlleleInput in = (KnockoutAlleleInput)iter.next();
-                allele = processor.process(in);
+                in = (KnockoutAlleleInput)iter.next();
             }
             catch (MGIException e)
             {
                 super.logger.logdInfo(e.toString(), true);
-                
                 continue;
             }
 
-            // If the allele exists in the database already,
-            // do the QC check then skip it
-            KnockoutAllele existingAllele = 
-                koAlleleLookup.lookup(allele.getAlleleId());
+            // Get the set of alleles already associated to this
+            // project
+            HashSet alleles = alleleLookup.lookup(in.getProjectId());
 
-            if (existingAllele != null)
+            if (alleles != null && alleles.size() > 1)
             {
 
-                // Used for QC checking
-                String existing = null;
-                String fromFile = null;
-                int changes = 0;
-                
-                // QC Check 1
-                //  - Verify that the note is the same as the 
-                //    one generated from the file (This garantees that the 
-                //    deletion start, end, size, build, cassette haven't
-                //    changed).  Strip the whitespace out to compare content only
-                existing = existingAllele.getAlleleNote();
-                existing = existing.replaceAll("\\W*","");
-                existing = existing.replaceAll("\\n*","");
-                fromFile = allele.getAlleleNote();
-                fromFile = fromFile.replaceAll("\\W*","");
-                fromFile = fromFile.replaceAll("\\n*","");
-                if (!(existing.equals(fromFile)))
-                {
-                    String message = existingAllele.getAlleleSymbol();
-                    message += "\nNONSTANDARD ALLELE MOLECULAR NOTE";
-                    message += "\nold: "+existingAllele.getAlleleNote().replaceAll("\\n*","").trim();
-                    message += "\nnew: "+allele.getAlleleNote().trim();
-                    message += "\n";
-                    super.logger.logcInfo(message, false);
-                    changes += 1;   // count the change
-                }
-
-                // QC Check 2
-                //  - Verify that the Mutant ES Cell line of the existing
-                //    allele is the same as the one reported in the file
-                existing = existingAllele.getMutant().getName();
-                fromFile = allele.getMutant().getName();
-                 if (!(existing.equals(fromFile)))
-                {
-                    String message = existingAllele.getAlleleSymbol();
-                    message += "\nALLELE MUTANT ES CELL NAME CHANGED";
-                    message += "\nold: "+existing;
-                    message += "\nnew: "+fromFile;
-                    message += "\n";
-                    super.logger.logcInfo(message, false);
-                    changes += 1;   // count the change
-                }
-
-                // QC Check 3
-                //  - Verify that the type the existing
-                //    allele has not changed from Targeted (Knockout)
-                existing = existingAllele.getAlleleType().toString();
-                fromFile = allele.getAlleleType().toString();
-                if (!(existing.equals(fromFile)))
-                {
-                    String message = existingAllele.getAlleleSymbol();
-                    message = "\nALLELE TYPE CHANGED";
-                    message += "\nold: "+existing;
-                    message += "\nnew: "+fromFile;
-                    message += "\n";
-                    super.logger.logcInfo(message, false);
-                    changes += 1;   // count the change
-                }
-
-                // QC Check 4
-                //  - Verify that the marker the existing
-                //    allele has not changed from the file (use MGI ID)
-                existing = existingAllele.getGene().getAccid().toString();
-                fromFile = allele.getGene().getAccid().toString();
-                if (!(existing.equals(fromFile)))
-                {
-                    String message = existingAllele.getAlleleSymbol();
-                    message = "\nALLELE MARKER MGI ID CHANGED";
-                    message += "\nold: "+existing;
-                    message += "\nnew: "+fromFile;
-                    message += "\n";
-                    super.logger.logcInfo(message, false);
-                    changes += 1;   // count the change
-                }
-
-                super.logger.logdInfo(
-                    "Allele exists: "+allele.getAlleleId(), false);
-
-                if (changes > 0)
-                {
-                    super.logger.logdInfo(
-                        "  +-- Allele has changed since loading", false);
-                }
+                // Is this project associated with more than ONE allele
+                String msg = "SKIPPING THIS RECORD: ";
+                msg += "This project has multiple allele records.'\n";
+                msg += "Project: " + in.getProjectId();
+                msg += " points to allele keys: " + alleles + "\n";
+                super.logger.logcInfo(msg, false);
                 continue;
+
             }
-
-            // Allele sequential naming starts at 1 for the clone numbering
-            Integer sequence = new Integer(1);
-
-            // The sequence is based on the number of alleles of this type for
-            // this gene
-            String geneSymbol = allele.getGene().getSymbol();
-            
-            // Check to see if we've seen alleles for this gene already
-            if (alleleCount.containsKey(geneSymbol))
+            else if (alleles == null || alleles.size() < 1)
             {
-                // The gene already has allele entries, update the 
-                // allele per gene count 
-                String count = alleleCount.get(geneSymbol).toString();
-                int current = Integer.valueOf(count).intValue();
-                sequence = new Integer(current + 1);
+
+                // The allele doesn't exist! Create the allele
+                // with all appropriate supporting objects
+
+                try
+                {
+                    KnockoutAllele allele = processor.process(in);
+
+                    allele.insert(loadStream);
+
+                    String e ="Added allele: "+allele.toString();
+                    super.logger.logdInfo(e.toString(), false);
+
+                    // Add the allele to the fullcachedlookups 
+                    // (allele lookup and marker allele lookup)
+                    String escellKey = Integer.toString(allele.getMutant().getKey());
+
+                    HashMap alleleInfo = new HashMap();
+                    alleleInfo.put("allele", Integer.toString(allele.getAlleleKey()));
+                    alleleInfo.put("escell", escellKey);
+
+                    alleles = new HashSet();
+                    alleles.add(alleleInfo);
+
+                    alleleLookup.addToCache(in.getProjectId(), alleles);
+                    
+                }
+                catch (MGIException e)
+                {
+                    super.logger.logdInfo(e.toString(), false);
+                    continue;
+                }
+
+            }
+            else
+            {
+
+                // We're here so we know:
+                //     alleles != null && alleles.size() == 1
+                // The allele exists so all we need to do is add
+                // entries into the ACC_Accession table for the cell line
+
+                String projectId = in.getProjectId();
+                String currentCellLine = in.getESCellName();
+
+                // Get the existing allele from the database
+                KnockoutAllele existing = koAlleleLookup.lookup(projectId);
+
+                if (existing == null)
+                {
+                    // There is nothing to QC because the allele doesn't 
+                    // exist in the database yet (only the input file).
+                    // We're done QCing it, add it to the "done" pile
+                    qcd.add(projectId);
+                }
+                
+                if (!qcd.contains(projectId))
+                {
+                    // QC check the allele
+                    //  Two QC checks
+                    //  1) Compare calculated note to stored note
+                    //  2) Compare calculated project to marker association 
+                    //      to stored association
+                    String msg = projectId + " allele exists, QCing";
+                    super.logger.logdInfo(msg, false);
+
+                    // We're going to QC this now.  Add it to the "done" pile
+                    qcd.add(projectId);
+
+                    // let the QC BEGIN!
+
+                    // Construct this allele from the input file
+                    KnockoutAllele constructed = processor.process(in);
+
+                    // Compare the notes to see if anything changed.
+                    String existingNote = existing.getAlleleNote().replaceAll("\\s", "");
+                    String constructedNote = constructed.getAlleleNote().replaceAll("\\s", "");
+
+                    String existingSymbol = existing.getAlleleSymbol();
+                    String constructedSymbol = constructed.getAlleleSymbol();
+
+
+                    if (existingNote.compareTo(constructedNote) != 0)
+                    {
+                        String noteMsg = "\nALLELE NOTE CHANGED";
+                        noteMsg += "\nExisting allele note/Input file note:\n";
+                        noteMsg += existingNote + "\n";
+                        noteMsg += constructedNote + "\n";
+                        super.logger.logcInfo(noteMsg, false);
+                        super.logger.logdInfo(noteMsg, false);
+                    }
+
+                    if (existingSymbol.compareTo(constructedSymbol) != 0)
+                    {
+                        String symMsg = "\nALLELE SYMBOL CHANGED";
+                        symMsg += "\nExisting allele symbol/Input file symbol:\n";
+                        symMsg += existingSymbol + "\n";
+                        symMsg += constructedSymbol + "\n";
+                        super.logger.logcInfo(symMsg, false);
+                        super.logger.logdInfo(symMsg, false);
+                    }
+
+                }
+
+
+                // Get the set of cell lines already associated to this
+                // project to see if this cell line already exists
+                HashSet cellLines = cellLineLookup.lookup(projectId);
+
+                if (cellLines != null && cellLines.contains(currentCellLine))
+                {
+                    // Cell line already exists, we've already QCd the allele, 
+                    // so just skip to the next record
+                    continue;
+                } 
+
+                // What allele does this belong to?
+                HashMap allele = (HashMap)alleles.toArray()[0];
+                int escKey = Integer.parseInt((String)allele.get("escell"));
+
+                // Constants for the Accession entry
+                int esCellDB = Integer.parseInt(cfg.getEsCellLogicalDb());
+                int esCellType = Constants.ESCELL_MGITYPE_KEY;
+                int typeKey = esCellType;
+
+                // Create the ES Cell Accession object
+                AccessionId accId = new AccessionId(
+                    currentCellLine,  // Cell line name
+                    esCellDB,         // Logical DB
+                    escKey,           // ES cell object key
+                    typeKey,          // MGI type
+                    Boolean.FALSE,    // Private?
+                    Boolean.TRUE      // Preferred?
+                    );
+
+                accId.insert(loadStream);
+
+                String e ="Added accession id: "+accId.toString();
+                super.logger.logdInfo(e.toString(), false);
+
             }
 
-            // We've added an allele for this gene - Update the hashmap
-            alleleCount.put(geneSymbol, sequence);
-
-            // Update the allele attributes to reflect the sequence
-            String aName = allele.getAlleleName();
-            String aSymbol = allele.getAlleleSymbol();
-            aName = aName.replaceAll("~~SEQUENCE~~", sequence.toString());
-            aSymbol = aSymbol.replaceAll("~~SEQUENCE~~", sequence.toString());
-
-            allele.setAlleleName(aName);
-            allele.setAlleleSymbol(aSymbol);
-
-            // This allele doesn't exist in the database.  Add it to the
-            // database 
-            super.logger.logdInfo("Adding: "+allele.getAlleleId(), false);
-            super.logger.logdInfo("Adding: "+allele.getAlleleSymbol(), false);
-            allele.insert(loadStream);
         }
-
+        
         return;
     }
 
@@ -305,38 +343,4 @@ public class TargetedAlleleLoad extends DLALoader
         return;
     }
 
-    /**
-     * Generate a map containing gene symbol to number of alleles in the db
-     * @assumes this.koAlleleLookup exists and is primed
-     * @assumes this.koAlleleLookup contains alleles for this provider only
-     * @effects nothing
-     * @throws nothing
-     */
-    private HashMap getKnockoutAlleleCount()
-    throws MGIException
-    {
-        HashMap alleleCount = new HashMap();
-        
-        Map koAlleleMap = koAlleleLookup.getCache();
-
-        for (Iterator i = koAlleleMap.keySet().iterator(); i.hasNext();)
-        {
-            String sym = (String)i.next();
-            KnockoutAllele allele = 
-                (KnockoutAllele)koAlleleLookup.lookup(sym);
-
-            String geneSymbol = allele.getGene().getSymbol();
-            if (alleleCount.containsKey(geneSymbol))
-            {
-                String count = alleleCount.get(geneSymbol).toString();
-                int newCount = Integer.valueOf(count).intValue() + 1;
-                alleleCount.put(geneSymbol, new Integer(newCount));
-            }
-            else
-            {
-                alleleCount.put(geneSymbol, new Integer(1));
-            }
-        }
-        return alleleCount;
-    }
 }

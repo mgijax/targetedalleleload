@@ -1,6 +1,7 @@
 package org.jax.mgi.app.targetedalleleload;
 
 import java.lang.Integer;
+import org.jax.mgi.shr.exception.MGIException;
 
 /**
  * @is An object that represents a Regeneron Knockout Allele Input record.
@@ -20,4 +21,7 @@ import java.lang.Integer;
 
 interface KnockoutAlleleInput
 {
+    String getAlleleSymbol() throws MGIException;
+    String getProjectId();
+    String getESCellName();
 }
