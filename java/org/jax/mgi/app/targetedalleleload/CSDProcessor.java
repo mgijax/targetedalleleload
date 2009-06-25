@@ -1,6 +1,7 @@
 package org.jax.mgi.app.targetedalleleload;
 
 import java.lang.Integer;
+import java.lang.Math;
 import java.util.Vector;
 import java.util.Iterator;
 import java.util.HashSet;
@@ -21,14 +22,14 @@ import org.jax.mgi.shr.exception.MGIException;
 
 /**
  * @is An object that knows how to create KOMP Clone objects from 
- * the Regeneron allele file 
+ * the CSD allele file 
  * @has
  *   <UL>
  *   <LI> KOMP Clone object.
  *   </UL>
  * @does
  *   <UL>
- *   <LI> Parses a Regeneron Allele file record into a KOMP Clone object
+ *   <LI> Parses a CSD Allele file record into a KOMP Clone object
  *   <LI>
  *   </UL>
  * @company The Jackson Laboratory
@@ -36,7 +37,7 @@ import org.jax.mgi.shr.exception.MGIException;
  * @version 1.0
  */
 
-public class RegeneronProcessor extends KnockoutAlleleProcessor
+public class CSDProcessor extends KnockoutAlleleProcessor
 {
     /////////////////
     //  Variables  //
@@ -50,7 +51,11 @@ public class RegeneronProcessor extends KnockoutAlleleProcessor
     private ESCellLookup escellLookup = null;
     private VocabKeyLookup vocabLookup = null;
     private AlleleByMarkerLookup allelesByMarkerLookup = null;
+    private StrainByEsCellLookup strainByEsCellLookup = null;
     
+
+    private static final String PROMOTER_DRIVEN = "L1L2_Bact_P|L1L2_PGK_P";
+    private static final String PROMOTER_LESS = "L1L2_gt0|L1L2_gt1|L1L2_gt2|L1L2_gtK|L1L2_st0|L1L2_st1|L1L2_st2";
 
     /**
      * Constructs a KnockoutAllele processor object.
@@ -62,7 +67,7 @@ public class RegeneronProcessor extends KnockoutAlleleProcessor
      * @throws CacheException 
      * @throws TranslationException 
      */
-    public RegeneronProcessor ()
+    public CSDProcessor ()
     throws ConfigException,DLALoggingException,
     DBException,CacheException,TranslationException
     {
@@ -70,6 +75,7 @@ public class RegeneronProcessor extends KnockoutAlleleProcessor
         allelesByMarkerLookup = new AlleleByMarkerLookup(cfg.getProjectLogicalDb());
         markerLookup = new MarkerLookup();
         strainLookup = new StrainLookup();
+        strainByEsCellLookup = new StrainByEsCellLookup();
 		escellLookup = new ESCellLookup();
 		vocabLookup = new VocabKeyLookup(Constants.ALLELE_VOCABULARY);
     }
@@ -91,14 +97,14 @@ public class RegeneronProcessor extends KnockoutAlleleProcessor
     throws RecordFormatException,ConfigException,KeyNotFoundException,
     DBException,CacheException,TranslationException,MGIException
     {
-        RegeneronAlleleInput in = (RegeneronAlleleInput)inputData;
+        CSDAlleleInput in = (CSDAlleleInput)inputData;
 
         KnockoutAllele clone = new KnockoutAllele();
 
         // Get the external dependencies referenced in this row
-        Marker marker = markerLookup.lookup(in.getGeneMgiId());
-        Strain strain = strainLookup.lookup(in.getStrainName());
-		ESCell parental = escellLookup.lookupExisting(in.getParentalESCellName());
+        Marker marker = markerLookup.lookup(in.getGeneId());
+		ESCell parental = escellLookup.lookupExisting(in.getParentESCellName());
+        Strain strain = strainByEsCellLookup.lookup(parental.getName());
 		ESCell mutant = escellLookup.lookup(in.getESCellName());
 		
 		// If the mutant cell line doesn't exist, we must create
@@ -164,13 +170,75 @@ public class RegeneronProcessor extends KnockoutAlleleProcessor
         String jNumber = cfg.getJNumber();
         clone.setJNumber(jNumber);
 
-        String note = cfg.getNoteTemplate();
+
+        String note = "";
+        int delSize = 0;
+
+        if (in.getMutationType().compareTo("Deletion") == 0)
+        {
+            if (in.getCassette().matches(PROMOTER_DRIVEN))
+            {
+                note = cfg.getNoteTemplateDeletionPromoter();
+            }
+            else if (in.getCassette().matches(PROMOTER_LESS))
+            {
+                note = cfg.getNoteTemplateDeletionPromoterless();
+            }
+            
+            // Calculate the deletion size
+            if (in.getLocus1().compareTo("0") != 0 && 
+                in.getLocus2().compareTo("0") != 0 )
+            {
+                int delStart = Integer.parseInt(in.getLocus1());
+                int delEnd = Integer.parseInt(in.getLocus2());
+                delSize = Math.abs(delEnd - delStart);
+            }
+            else
+            {
+                throw new MGIException(
+                    "SKIPPING THIS RECORD: missing coordinate\n"+clone
+                );
+            }
+        }
+        else if (in.getMutationType().compareTo("Conditional") == 0)
+        {
+            if (in.getCassette().matches(PROMOTER_DRIVEN))
+            {
+                note = cfg.getNoteTemplateCondPromoter();
+            }
+            else if (in.getCassette().matches(PROMOTER_LESS))
+            {
+                note = cfg.getNoteTemplateCondPromoterless();
+            }
+        }
+        else if (in.getMutationType().compareTo("Targeted non-conditional") == 0)
+        {
+            if (in.getCassette().matches(PROMOTER_DRIVEN))
+            {
+                note = cfg.getNoteTemplateNonCondPromoter();
+            }
+            else if (in.getCassette().matches(PROMOTER_LESS))
+            {
+                note = cfg.getNoteTemplateNonCondPromoterless();
+            }
+        }
+        else
+        {
+            throw new MGIException(
+                "SKIPPING THIS RECORD: Unknown mutation type\n"+clone
+            );
+        }
+
         note = note.replaceAll("~~CASSETTE~~", clone.getCassette()); 
-        note = note.replaceAll("~~SIZE~~", in.getDelSize().toString());
-        note = note.replaceAll("~~START~~", in.getDelStart().toString());
-        note = note.replaceAll("~~END~~", in.getDelEnd().toString());
-        note = note.replaceAll("~~CHROMOSOME~~", clone.getChromosome()); 
-        note = note.replaceAll("~~BUILD~~", clone.getGenomeBuild()); 
+        note = note.replaceAll("~~LOCUS1~~", in.getLocus1());
+        note = note.replaceAll("~~LOCUS2~~", in.getLocus2());
+        note = note.replaceAll("~~CHROMOSOME~~", marker.getChromosome());
+        note = note.replaceAll("~~DELSIZE~~", Integer.toString(delSize));
+        note = note.replaceAll("~~BUILD~~", clone.getGenomeBuild());
+        if (in.getCassette().matches(PROMOTER_DRIVEN))
+        {
+            note = note.replaceAll("~~PROMOTER~~", cfg.getPromoter(clone.getCassette()));
+        }
         clone.setAlleleNote(note);
 
         // Return the populated clone object.

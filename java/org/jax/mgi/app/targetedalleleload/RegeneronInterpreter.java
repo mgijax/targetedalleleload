@@ -121,7 +121,8 @@ public class RegeneronInterpreter implements RecordDataInterpreter
      * @return Indicator of whether the input record is valid (true)
      * or not (false)
      */
-    public boolean isValid (String rec) {
+    public boolean isValid (String rec)
+    {
         // If the first character of the input record is a "#", it is a
         // comment and should be ignored.
         // The first line is a header starting with the string "CloneID"

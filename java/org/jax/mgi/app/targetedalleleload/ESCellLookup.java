@@ -24,9 +24,9 @@ import org.jax.mgi.shr.cache.KeyNotFoundException;
  *
  */
 
-public class ESCellLookup extends FullCachedLookup {
-
-	private StrainLookup strainLookup = null;
+public class ESCellLookup extends FullCachedLookup
+{
+	private static StrainLookup strainLookup = null;
 
     /**
      * constructor
@@ -36,13 +36,14 @@ public class ESCellLookup extends FullCachedLookup {
      * @throws CacheException thrown if there is an error accessing the
      * cache
      */
-    public ESCellLookup(StrainLookup strainLookup) 
+    public ESCellLookup() 
 	throws ConfigException, DBException, CacheException
 	{
         super(SQLDataManagerFactory.getShared(SchemaConstants.MGD));
-
-        this.strainLookup = strainLookup;
-
+	    if (strainLookup == null)
+	    {
+	        strainLookup = new StrainLookup();
+	    }
     }
 
     /**
@@ -78,7 +79,8 @@ public class ESCellLookup extends FullCachedLookup {
      * mouse ESCells by name
      * @return the initialization query
      */
-    public String getFullInitQuery() {
+    public String getFullInitQuery()
+    {
         return "SELECT strainKey=a._Strain_key, celllineKey=a._CellLine_Key, " +
                 "name=a.cellLine, a.isMutant, a.provider, strainName=s.strain " +
                 "FROM ALL_CellLine a, PRB_Strain s " + 
@@ -89,11 +91,13 @@ public class ESCellLookup extends FullCachedLookup {
      * get the RowDataInterpreter for interpreting initialization query
      * @return the RowDataInterpreter
      */
-    public RowDataInterpreter getRowDataInterpreter() {
+    public RowDataInterpreter getRowDataInterpreter()
+    {
         return new Interpreter(this.strainLookup);
     }
 
-    private class Interpreter implements RowDataInterpreter {
+    private class Interpreter implements RowDataInterpreter
+    {
         private StrainLookup strainLookup = null;
         public Interpreter(StrainLookup strainLookup)
         {

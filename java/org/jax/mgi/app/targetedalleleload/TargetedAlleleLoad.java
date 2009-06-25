@@ -29,6 +29,10 @@ import org.jax.mgi.shr.ioutils.RecordFormatException;
 import org.jax.mgi.shr.ioutils.IOUException;
 
 
+import org.jax.mgi.dbs.SchemaConstants;
+import org.jax.mgi.shr.dbutils.SQLDataManager;
+import org.jax.mgi.shr.dbutils.SQLDataManagerFactory;
+
 /**
  * @is a DLALoader for loading KOMP produced Alleles into the database
  * and associating them with appropriate marker annotations, strains,
@@ -54,8 +58,9 @@ extends DLALoader
     private KnockoutAlleleLookup koAlleleLookup = null;
     private CellLineLookup cellLineLookup = null;
     private KnockoutAlleleProcessor processor = null;
-    KnockoutAlleleFactory alleleFactory = null;
-    TargetedAlleleLoadCfg cfg = null;
+    private KnockoutAlleleFactory alleleFactory = null;
+    private TargetedAlleleLoadCfg cfg = null;
+    private SQLDataManager sqlDBMgr = null;
 
     /**
      * constructor
@@ -66,7 +71,8 @@ extends DLALoader
     throws MGIException
     {
         // Instance the configuration object
-        cfg = new TargetedAlleleLoadCfg();         
+        cfg = new TargetedAlleleLoadCfg();    
+        sqlDBMgr = SQLDataManagerFactory.getShared(SchemaConstants.MGD);
 
         String esCellLogicalDb = cfg.getEsCellLogicalDb();
         String projectLogicalDb = cfg.getProjectLogicalDb();
@@ -94,6 +100,10 @@ extends DLALoader
     throws MGIException
     {
         super.logger.logInfo("Reading input files");
+
+        sqlDBMgr.setLogger(super.logger);
+        logger.logdDebug("TargetedAlleleLoader sqlDBMgr.server " + sqlDBMgr.getServer());
+        logger.logdDebug("TargetedAlleleLoader sqlDBMgr.database " + sqlDBMgr.getDatabase());
 
         String basedir = super.dlaConfig.getReportsDir() + File.separator;
         
@@ -137,7 +147,7 @@ extends DLALoader
     protected void run()
     throws MGIException
     {
-
+        
         HashSet qcd = new HashSet();
         
         // For each input record
@@ -155,7 +165,7 @@ extends DLALoader
                 super.logger.logdInfo(e.toString(), true);
                 continue;
             }
-
+            
             // Get the set of alleles already associated to this
             // project
             HashSet alleles = alleleLookup.lookup(in.getProjectId());
@@ -237,8 +247,6 @@ extends DLALoader
                     //  1) Compare calculated note to stored note
                     //  2) Compare calculated project to marker association 
                     //      to stored association
-                    String msg = projectId + " allele exists, QCing";
-                    super.logger.logdInfo(msg, false);
 
                     // We're going to QC this now.  Add it to the "done" pile
                     qcd.add(projectId);
@@ -249,33 +257,68 @@ extends DLALoader
                     KnockoutAllele constructed = processor.process(in);
 
                     // Compare the notes to see if anything changed.
-                    String existingNote = existing.getAlleleNote().replaceAll("\\s", "");
-                    String constructedNote = constructed.getAlleleNote().replaceAll("\\s", "");
+                    String existingNote = existing.getAlleleNote().replaceAll("\\n", "");
+                    String constructedNote = constructed.getAlleleNote().replaceAll("\\n", "");
 
-                    String existingSymbol = existing.getAlleleSymbol();
-                    String constructedSymbol = constructed.getAlleleSymbol();
+                    String existingGeneSymbol = existing.getGeneSymbol();
+                    String constructedGeneSymbol = constructed.getGeneSymbol();
 
 
                     if (existingNote.compareTo(constructedNote) != 0)
                     {
-                        String noteMsg = "\nALLELE NOTE CHANGED";
-                        noteMsg += "\nExisting allele note/Input file note:\n";
-                        noteMsg += existingNote + "\n";
-                        noteMsg += constructedNote + "\n";
+                        String noteMsg = "\nMOLECULAR NOTE CHANGED\n";
+                        
+                        // If the note was entered by this load, go ahead and
+                        // update the note to reflect the current note,
+                        // otherwise, a curator updated the note, so we 
+                        // shouldn't update it.
+                        Integer jobStreamKey = cfg.getJobStreamKey();
+                        Integer noteCreatedBy = existing.getAlleleNoteCreatedBy();
+                        Integer noteModifiedBy = existing.getAlleleNoteModifiedBy();
+                        if (jobStreamKey.compareTo(noteCreatedBy) == 0 && 
+                            jobStreamKey.compareTo(noteModifiedBy) == 0)
+                        {
+                            // Delete the existing note
+                            String query = "DELETE FROM MGI_Note WHERE ";
+                            query += "_Note_key = ";
+                            query += existing.getAlleleNoteKey();
+                            sqlDBMgr.executeUpdate(query);
+
+                            // Set the new note in the existing allele,
+                            // and save the allele
+                            String newNote = constructed.getAlleleNote();
+                            existing.updateNote(loadStream, newNote);
+
+                            noteMsg += "Allele : ";
+                            noteMsg += existing.getAlleleSymbol() + "\n";                            
+                            noteMsg += "Updated molecular note to:\n";
+                            noteMsg += constructedNote + "\n";
+                        }
+                        else
+                        {
+                            noteMsg += "Allele : ";
+                            noteMsg += existing.getAlleleSymbol() + "\n";
+                            noteMsg += "NOT UPDATING\n";
+                            noteMsg += "Jobstream: " + jobStreamKey;
+                            noteMsg += "\nCreatedBy: " + noteCreatedBy;
+                            noteMsg += "\nModifiedBy: " + noteModifiedBy;                            
+                            noteMsg += "\nExisting note/New note:\n";
+                            noteMsg += existingNote + "\n";
+                            noteMsg += constructedNote + "\n";
+                        }
                         super.logger.logcInfo(noteMsg, false);
                         super.logger.logdInfo(noteMsg, false);
                     }
 
-                    if (existingSymbol.compareTo(constructedSymbol) != 0)
+                    if (existingGeneSymbol.compareTo(constructedGeneSymbol) != 0)
                     {
-                        String symMsg = "\nALLELE SYMBOL CHANGED";
-                        symMsg += "\nExisting allele symbol/Input file symbol:\n";
-                        symMsg += existingSymbol + "\n";
-                        symMsg += constructedSymbol + "\n";
+                        String symMsg = "\nMARKER ASSOCIATION CHANGED\n";
+                        symMsg += "Allele : " + existing.getAlleleSymbol() + "\n";
+                        symMsg += "Existing allele marker : " + existingGeneSymbol + "\n";
+                        symMsg += "New marker             : " + constructedGeneSymbol + "\n";
                         super.logger.logcInfo(symMsg, false);
                         super.logger.logdInfo(symMsg, false);
                     }
-
                 }
 
 

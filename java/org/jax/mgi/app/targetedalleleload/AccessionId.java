@@ -111,7 +111,8 @@ public class AccessionId
         //
         ACC_AccessionState accState = null;
 
-        if(this.accessionId == null) {
+        if (this.accessionId == null)
+        {
 
             // If the caller did not specify an Accession ID, then the 
             // default action of this class is triggered.  Insert an MGI ID 
@@ -124,7 +125,9 @@ public class AccessionId
             accState.setPrefixPart((String)vParts.get(0));
             accState.setNumericPart((Integer)vParts.get(1));
             
-        } else {
+        }
+        else
+        {
 
             // The user supplied an Accession ID, populate all the appropriate
             // appropriate fields

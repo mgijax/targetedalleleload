@@ -68,113 +68,124 @@ public class RegeneronAlleleInput implements KnockoutAlleleInput
         markerLookup = new MarkerLookup();
     }
 
-	public String getESCellName() {
+	public String getESCellName()
+	{
 		return esCellName;
 	}
 
-	public String getParentalESCellName() {
+	public String getParentalESCellName()
+	{
 		return parentalESCellName;
 	}
 
-	public String getStrainName() {
+	public String getStrainName()
+	{
 		return strainName;
 	}
 
-	public String getProjectId() {
+	public String getProjectId()
+	{
 		return projectId;
 	}
-	public String getProjectLogicalDb() {
+
+	public String getProjectLogicalDb()
+	{
 	    return projectLogicalDb;
 	}
 
-	public String getGeneSymbol() {
+	public String getGeneSymbol()
+	{
 		return geneSymbol;
 	}
 
-	public String getGeneMgiId() {
+	public String getGeneMgiId()
+	{
 		return geneMgiId;
 	}
 
-	public Integer getDelStart() {
+	public Integer getDelStart()
+	{
 		return delStart;
 	}
 
-	public Integer getDelEnd() {
+	public Integer getDelEnd()
+	{
 		return delEnd;
 	}
 
-	public Integer getDelSize() {
+	public Integer getDelSize()
+	{
 		return delSize;
 	}
 
-	public String getBuild() {
+	public String getBuild()
+	{
 		return build;
 	}
 
-	public String getCassette() {
+	public String getCassette()
+	{
 		return cassette;
 	}
 
-	public String getAlleleSymbol()
-	throws MGIException 
+	public void setESCellName(String esCellName)
 	{
-	    String name = this.cfg.getNameTemplate();
-	    String projectLogicalDb = this.cfg.getProjectLogicalDb();
-	    Marker marker = this.markerLookup.lookup(this.getGeneMgiId());
-	    String symbol = marker.getSymbol(); // This is the gene symbol
-	    
-	    // Now build the allele symbol
-	    name = name.replaceAll("~~SYMBOL~~", symbol);
-		return name;
-	}
-
-	public void setESCellName(String esCellName) {
 		this.esCellName = esCellName;
 	}
 
-	public void setParentalESCellName(String parentalESCellName) {
+	public void setParentalESCellName(String parentalESCellName)
+	{
 		this.parentalESCellName = parentalESCellName;
 	}
 
-	public void setStrainName(String strainName) {
+	public void setStrainName(String strainName)
+	{
 		this.strainName = strainName;
 	}
 
-	public void setProjectId(String projectId) {
+	public void setProjectId(String projectId)
+	{
 		this.projectId = projectId;
 	}
 	
-	public void setProjectLogicalDb() {
+	public void setProjectLogicalDb()
+	{
 	    this.projectLogicalDb = projectLogicalDb;
 	}
 
-	public void setGeneSymbol(String geneSymbol) {
+	public void setGeneSymbol(String geneSymbol)
+	{
 		this.geneSymbol = geneSymbol;
 	}
 
-	public void setGeneMgiId(String geneMgiId) {
+	public void setGeneMgiId(String geneMgiId)
+	{
 		this.geneMgiId = geneMgiId;
 	}
 
-	public void setDelStart(Integer delStart) {
+	public void setDelStart(Integer delStart)
+	{
 		this.delStart = delStart;
 	}
 
-	public void setDelEnd(Integer delEnd) {
+	public void setDelEnd(Integer delEnd)
+	{
 		this.delEnd = delEnd;
 	}
 
-	public void setDelSize(Integer delSize) {
+	public void setDelSize(Integer delSize)
+	{
 		this.delSize = delSize;
 	}
 
-	public void setBuild(String build) {
+	public void setBuild(String build)
+	{
 		this.build = build;
 	}
 
-	public void setCassette(String cassette) {
+	public void setCassette(String cassette)
+	{
 		this.cassette = cassette;
 	}
-
 
 }

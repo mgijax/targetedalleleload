@@ -1,5 +1,8 @@
 package org.jax.mgi.app.targetedalleleload;
 
+import java.util.Vector;
+import java.util.Iterator;
+
 import org.jax.mgi.shr.cache.KeyValue;
 import org.jax.mgi.shr.cache.FullCachedLookup;
 import org.jax.mgi.shr.dbutils.SQLDataManager;
@@ -7,8 +10,10 @@ import org.jax.mgi.shr.dbutils.SQLDataManagerFactory;
 import org.jax.mgi.dbs.SchemaConstants;
 import org.jax.mgi.dbs.mgd.LogicalDBConstants;
 import org.jax.mgi.shr.dbutils.RowDataInterpreter;
+import org.jax.mgi.shr.dbutils.MultiRowInterpreter;
 import org.jax.mgi.shr.dbutils.RowReference;
 
+import org.jax.mgi.shr.exception.MGIException;
 import org.jax.mgi.shr.dbutils.DBException;
 import org.jax.mgi.shr.cache.CacheException;
 import org.jax.mgi.shr.config.ConfigException;
@@ -61,13 +66,13 @@ extends FullCachedLookup
             strainLookup = new StrainLookup();
             strainLookup.initCache();
 
-		    escellLookup = new ESCellLookup(strainLookup);
+            escellLookup = new ESCellLookup();
             escellLookup.initCache();
-		}
-		catch (DLALoggingException e)
-		{
-		    System.out.println("KnockoutAlleleLookup DLALoggingException exception");
-		}
+        }
+        catch (DLALoggingException e)
+        {
+            System.out.println("KnockoutAlleleLookup DLALoggingException exception");
+        }
     }
 
     /**
@@ -108,12 +113,15 @@ extends FullCachedLookup
                "mescKey=mesc._CellLine_key, mescName = mesc.cellline, " +
                "pescKey=pesc._CellLine_key, pescName = pesc.cellline, " +
                "provider=mesc.provider, alleleNote=nc.note, " +
+               "alleleNoteSeq=nc.sequenceNum, alleleNoteKey=nc._note_key, " +
+               "alleleNoteModifiedBy=n._ModifiedBy_key, " +
+               "alleleNoteCreatedBy=n._CreatedBy_key, " +
                "jNumber=bc.jnumID, projectId=acc2.accId  " +
                "FROM ALL_Allele a, BIB_Citation_Cache bc, " +
                "MGI_Reference_Assoc ra,MGI_RefAssocType rat, " +
                "MRK_Marker mrk, ALL_CellLine mesc, ALL_CellLine pesc, " +
                "MGI_Note n, MGI_NoteChunk nc, ACC_Accession acc, " +
-               "ACC_Accession acc2 " + 
+               "ACC_Accession acc2 " +
                "WHERE bc.jnumID = '"+jNumber+"' " +
                "AND ra._Refs_key = bc._Refs_key " +
                "AND ra._Object_key = a._Allele_key " +
@@ -136,111 +144,146 @@ extends FullCachedLookup
                "and n._Object_key = a._Allele_key " +
                "and n._MGIType_key = 11 " +
                "and n._NoteType_key = 1021 " +
-               "and n._Note_key = nc._Note_key " ;
+               "and n._Note_key = nc._Note_key " +
+               "order by alleleKey, alleleNoteSeq " ;
     }
 
     /**
-     * get the RowDataInterpreter for interpreting initialization query
-     * @return the RowDataInterpreter
+     * return the RowDataInterpreter for creating KeyValue objects from the 
+     *        query results
+     * @return the RowDataInterpreter for this query
      */
     public RowDataInterpreter getRowDataInterpreter()
     {
+        class Interpreter implements MultiRowInterpreter
+        {
+            public Object interpret(RowReference ref)
+            throws DBException
+            {
+                return new RowData(ref);
+            }
+
+            public Object interpretKey(RowReference row)
+            throws DBException
+            {
+                return row.getString("projectId");
+            }
+
+            public Object interpretRows(Vector v)
+            {
+                // All rows return the same values for every columns EXCEPT
+                // for the alleleNote column (one row per note chunk)
+                RowData rd = (RowData)v.get(0);
+                
+                String projectId = rd.projectId;
+                String completeNote = "";
+
+                DLALogger logger = null;
+                KnockoutAllele koAllele = null;
+                
+                try
+                {
+                    logger = DLALogger.getInstance();
+                }
+                catch (DLALoggingException e)
+                {
+                    logger.logdInfo(e.getMessage(), true);
+                    return null;
+                }
+
+                try
+                {
+                    koAllele = new KnockoutAllele();
+                }
+                catch (MGIException e)
+                {
+                    logger.logdInfo(e.getMessage(), true);
+                    return null;
+                }
+
+                koAllele.setESCellName(rd.esCellName);
+                koAllele.setAlleleType(rd.alleleType);
+                koAllele.setAlleleName(rd.alleleName);
+                koAllele.setAlleleSymbol(rd.alleleSymbol);
+                koAllele.setAlleleKey(rd.alleleKey);
+                koAllele.setAlleleName(rd.alleleName);
+                koAllele.setProvider(rd.provider);
+                koAllele.setProjectId(rd.projectId);
+                koAllele.setAlleleNote(rd.alleleNote);
+                koAllele.setAlleleNoteKey(rd.alleleNoteKey);
+                koAllele.setAlleleNoteCreatedBy(rd.alleleNoteCreatedBy);
+                koAllele.setAlleleNoteModifiedBy(rd.alleleNoteModifiedBy);
+                koAllele.setJNumber(rd.jNumber);
+
+                for (Iterator it = v.iterator(); it.hasNext();)
+                {
+                    rd = (RowData)it.next();
+
+                    // Concat all the notechunks together in the allele note
+                    completeNote += rd.alleleNote;
+                }
+                
+                koAllele.setAlleleNote(completeNote.trim());
+
+                try
+                {
+                    koAllele.setGene(markerLookup.lookup(rd.geneMgiid));
+                    koAllele.setParental(escellLookup.lookup(rd.pescName));
+                    koAllele.setMutant(escellLookup.lookup(rd.mescName));
+                }
+                catch (MGIException e)
+                {
+                    logger.logdInfo(e.getMessage(), true);
+                    return null;
+                }
+
+                return new KeyValue(projectId, koAllele);
+            }
+        }
+
         return new Interpreter();
     }
 
-    private class Interpreter
-    implements RowDataInterpreter
+    /**
+     * Simple data object representing a row of data from the query
+     */
+    class RowData
     {
-        public Object interpret(RowReference row)
-        throws DBException
+        protected String esCellName;
+        protected Integer alleleType;
+        protected String alleleName;
+        protected String alleleSymbol;
+        protected int alleleKey;
+        protected String provider;
+        protected String projectId;
+        protected String alleleNote;
+        protected String alleleNoteKey;
+        protected String alleleNoteCreatedBy;
+        protected String alleleNoteModifiedBy;
+        protected String jNumber;
+        protected Marker gene;
+        protected String pescName;
+        protected String mescName;
+        protected String geneMgiid;
+
+        public RowData (RowReference row) throws DBException
         {
-            DLALogger logger = null;
-            String jNumber = null;
-            KnockoutAllele koAllele = null;
-
-            try
-            {
-                logger = DLALogger.getInstance();
-            }
-            catch (DLALoggingException e)
-            {
-                logger.logdInfo(e.getMessage(), true);
-                return null;
-            }
-            
-            try
-            {
-                koAllele = new KnockoutAllele();
-            }
-            catch (ConfigException e)
-            {
-                logger.logdInfo(e.getMessage(), true);
-                return null;
-            }
-            catch (CacheException e)
-            {
-                logger.logdInfo(e.getMessage(), true);
-                return null;
-            }
-
-            try
-            {
-                jNumber = cfg.getJNumber();
-            }
-            catch( ConfigException e)
-            {
-                logger.logdInfo(e.getMessage(), true);
-            }
-
-            koAllele.setESCellName(row.getString("mescName"));
-            koAllele.setAlleleType(new Integer(row.getInt("alleleType").intValue()));
-            koAllele.setAlleleName(row.getString("alleleName"));
-            koAllele.setAlleleSymbol(row.getString("alleleSymbol"));
-            koAllele.setAlleleKey(row.getInt("alleleKey").intValue());
-            koAllele.setAlleleName(row.getString("alleleName"));
-            koAllele.setProvider(row.getString("provider"));
-            koAllele.setProjectId(row.getString("projectId"));
-            koAllele.setAlleleNote(row.getString("alleleNote"));
-            koAllele.setJNumber(jNumber);
-
-            try
-            {
-                koAllele.setGene(markerLookup.lookup(row.getString("geneMgiid")));
-            }
-            catch (CacheException e)
-            {
-                logger.logdInfo(e.getMessage(), true);
-                return null;
-            }
-            catch (KeyNotFoundException e)
-            {
-                logger.logdInfo(e.getMessage(), true);
-                return null;
-            }
-            
-            try
-            {
-                koAllele.setParental(escellLookup.lookup(row.getString("pescName")));
-            }
-            catch (CacheException e)
-            {
-                logger.logdInfo(e.getMessage(), true);
-                return null;
-            }
-
-            try
-            {
-                koAllele.setMutant(escellLookup.lookup(row.getString("mescName")));
-            }
-            catch (CacheException e)
-            {
-                logger.logdInfo(e.getMessage(), true);
-                return null;
-            }
-
-            return new KeyValue(row.getString("projectId"), koAllele);
+            esCellName = row.getString("mescName");
+            mescName = row.getString("mescName");
+            pescName = row.getString("pescName");
+            alleleType = new Integer(row.getInt("alleleType").intValue());
+            alleleName = row.getString("alleleName");
+            alleleSymbol = row.getString("alleleSymbol");
+            alleleKey = row.getInt("alleleKey").intValue();
+            provider = row.getString("provider");
+            projectId = row.getString("projectId");
+            alleleNote = row.getString("alleleNote");
+            alleleNoteKey = row.getString("alleleNoteKey");
+            alleleNoteCreatedBy = row.getString("alleleNoteCreatedBy");
+            alleleNoteModifiedBy = row.getString("alleleNoteModifiedBy");
+            jNumber = row.getString("jNumber");
+            geneMgiid = row.getString("geneMgiid");
         }
     }
-
 }
 

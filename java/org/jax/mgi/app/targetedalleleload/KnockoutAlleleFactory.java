@@ -19,13 +19,12 @@ abstract class KnockoutAlleleFactory
             // Regeneron
             return new RegeneronFactory();
         }
-/*
-        else if (provider.equals("CSD"))
+        else if (provider.equals("Wellcome Trust Sanger Institute"))
         {
             // CSD
             return new CSDFactory();
         }
-*/
+
     return null;
     }
     

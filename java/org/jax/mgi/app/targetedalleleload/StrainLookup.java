@@ -23,7 +23,8 @@ import org.jax.mgi.shr.cache.KeyNotFoundException;
  *
  */
 
-public class StrainLookup extends FullCachedLookup {
+public class StrainLookup extends FullCachedLookup
+{
 
     /**
      * constructor
@@ -33,7 +34,9 @@ public class StrainLookup extends FullCachedLookup {
      * @throws CacheException thrown if there is an error accessing the
      * cache
      */
-    public StrainLookup() throws ConfigException, DBException, CacheException {
+    public StrainLookup()
+    throws ConfigException, DBException, CacheException
+    {
         super(SQLDataManagerFactory.getShared(SchemaConstants.MGD));
     }
 
@@ -58,7 +61,8 @@ public class StrainLookup extends FullCachedLookup {
      * mouse strains by name
      * @return the initialization query
      */
-    public String getFullInitQuery() {
+    public String getFullInitQuery()
+    {
         return "SELECT strainKey=_Strain_key, name=strain FROM PRB_Strain";
     }
 
@@ -66,7 +70,8 @@ public class StrainLookup extends FullCachedLookup {
      * get the RowDataInterpreter for interpreting initialization query
      * @return the RowDataInterpreter
      */
-    public RowDataInterpreter getRowDataInterpreter() {
+    public RowDataInterpreter getRowDataInterpreter()
+    {
         return new Interpreter();
     }
 

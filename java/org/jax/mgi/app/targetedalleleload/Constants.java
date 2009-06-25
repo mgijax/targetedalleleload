@@ -9,7 +9,8 @@ package org.jax.mgi.app.targetedalleleload;
  *
  */
 
-public class Constants {
+public class Constants
+{
 
     /*
      * ACC_LogicalDB key for MGI

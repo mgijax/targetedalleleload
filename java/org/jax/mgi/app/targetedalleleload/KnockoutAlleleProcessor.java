@@ -7,6 +7,7 @@ import org.jax.mgi.shr.dbutils.DBException;
 import org.jax.mgi.shr.cache.CacheException;
 import org.jax.mgi.dbs.mgd.lookup.TranslationException;
 import org.jax.mgi.shr.cache.KeyNotFoundException;
+import org.jax.mgi.shr.exception.MGIException;
 
 /**
  * @is An abstract object that knows how to create KOMP Clone objects from 
@@ -29,5 +30,5 @@ abstract class KnockoutAlleleProcessor
 {
     public abstract KnockoutAllele process(KnockoutAlleleInput in)
     throws RecordFormatException,ConfigException,KeyNotFoundException,
-    DBException,CacheException,TranslationException;
+    DBException,CacheException,TranslationException,MGIException;
 }
