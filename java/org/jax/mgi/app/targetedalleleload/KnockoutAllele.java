@@ -348,9 +348,10 @@ public class KnockoutAllele implements Comparable
 
 
     /**
-     * Insert this Knockout Allele object into the stream to create the 
+     * Insert this molucular note object into the stream to create the 
      * required bcp records.
-     * @assumes Nothing
+     * @assumes There is no existing molecular note (either deleted, or
+     *          never created
      * @effects Nothing
      * @param stream The bcp stream to write the bcp records to.
      * @return Nothing

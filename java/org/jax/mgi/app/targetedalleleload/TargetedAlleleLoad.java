@@ -290,7 +290,7 @@ extends DLALoader
                             existing.updateNote(loadStream, newNote);
 
                             noteMsg += "Allele : ";
-                            noteMsg += existing.getAlleleSymbol() + "\n";                            
+                            noteMsg += existing.getAlleleSymbol() + "\n";
                             noteMsg += "Updated molecular note to:\n";
                             noteMsg += constructedNote + "\n";
                         }
@@ -301,7 +301,7 @@ extends DLALoader
                             noteMsg += "NOT UPDATING\n";
                             noteMsg += "Jobstream: " + jobStreamKey;
                             noteMsg += "\nCreatedBy: " + noteCreatedBy;
-                            noteMsg += "\nModifiedBy: " + noteModifiedBy;                            
+                            noteMsg += "\nModifiedBy: " + noteModifiedBy;
                             noteMsg += "\nExisting note/New note:\n";
                             noteMsg += existingNote + "\n";
                             noteMsg += constructedNote + "\n";
@@ -328,7 +328,7 @@ extends DLALoader
 
                 if (cellLines != null && cellLines.contains(currentCellLine))
                 {
-                    // Cell line already exists, we've already QCd the allele, 
+                    // Cell line already exists, we've already QCd the allele
                     // so just skip to the next record
                     continue;
                 } 
