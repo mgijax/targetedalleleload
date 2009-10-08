@@ -9,6 +9,9 @@ import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Vector;
 
+import java.io.OutputStream;
+
+
 import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
 import org.jax.mgi.shr.config.InputDataCfg;
 
@@ -98,7 +101,7 @@ extends DLALoader
         Integer escLogicalDB = cfg.getEsCellLogicalDb();
         Integer projectLogicalDB = cfg.getProjectLogicalDb();
 
-        alleleLookpuByProjectId = new AlleleLookupByProjectId(escLogicalDB);
+        alleleLookpuByProjectId = new AlleleLookupByProjectId(projectLogicalDB);
         alleleLookupByMarker = new AlleleLookupByMarker(projectLogicalDB);
         koMutantCellLineLookup = new KOMutantCellLineLookup(escLogicalDB);
         koAlleleLookup = new KnockoutAlleleLookup();
@@ -170,6 +173,10 @@ extends DLALoader
     protected void run()
     throws MGIException
     {
+        // Keep track of which alleles we've updated the notes for
+        // so we only update it once
+        HashSet alleleNoteUpdated = new HashSet();
+
         // For each input record
         while(iter.hasNext())
         {
@@ -201,6 +208,14 @@ extends DLALoader
                 super.logger.logcInfo(m, false);
                 continue;
             }
+            catch (ConfigException e)
+            {
+                String m = "Configuration error, skipping record:\n"+in.getMutantCellLine();
+                m += e.getMessage();
+                super.logger.logcInfo(m, false);
+                continue;
+            }
+            
 
             if (constructed == null)
             {
@@ -244,13 +259,18 @@ extends DLALoader
                     // shouldn't update it.
                     Integer jobStreamKey = cfg.getJobStreamKey();
                     Integer noteModifiedBy = existing.getNoteModifiedByKey();
-                    if (jobStreamKey.compareTo(noteModifiedBy) == 0)
+                    if (!alleleNoteUpdated.contains(existing.getSymbol()) && (noteModifiedBy == null || jobStreamKey.compareTo(noteModifiedBy) == 0))
                     {
+                        alleleNoteUpdated.add(existing.getSymbol());
+                        // If a note exists
                         // Delete the existing note
-                        String query = "DELETE FROM MGI_Note WHERE ";
-                        query += "_Note_key = ";
-                        query += existing.getNoteKey();
-                        sqlDBMgr.executeUpdate(query);
+                        if (existing.getNoteKey() != null)
+                        {
+                            String query = "DELETE FROM MGI_Note WHERE ";
+                            query += "_Note_key = ";
+                            query += existing.getNoteKey();
+                            sqlDBMgr.executeUpdate(query);                            
+                        }
 
                         // Set the new note in the existing allele,
                         // and save the allele
@@ -367,7 +387,7 @@ extends DLALoader
                 if(alleles != null && alleles.size() > 0)
                 {
                     HashMap allele = (HashMap)alleles.get(constructed.getSymbol());
-
+                    
                     if (allele != null)
                     {
                         // Found an allele with this same name!
