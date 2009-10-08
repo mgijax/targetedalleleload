@@ -54,8 +54,8 @@ public class CSDAlleleInput implements KnockoutAlleleInput
 
     // Getters
     public String getGeneId() {return geneId;}
-	public String getESCellName() {return esCellName;}
-	public String getParentESCellName() {return parentESCellName;}
+	public String getMutantCellLine() {return esCellName;}
+	public String getParentCellLine() {return parentESCellName;}
 	public String getProjectId() {return projectId;}
 	public String getLocus1() {return locus1;}
 	public String getLocus2() {return locus2;}
@@ -76,7 +76,16 @@ public class CSDAlleleInput implements KnockoutAlleleInput
 
 	public void setParentESCellName(String parentESCellName)
 	{
-		this.parentESCellName = parentESCellName;
+	    // The CSD parental cell names come in from CSD with all sorts
+	    // of strange characters.  Strip them off before storing the 
+	    // Parent ES Cell line name so we can do comparisions easier
+		this.parentESCellName = parentESCellName.toUpperCase()
+		    .replaceAll("\\s+", "")
+		    .replaceAll("\\(", "")
+		    .replaceAll("\\)", "")
+		    .replaceAll("/", "")
+		    .replaceAll("\\?", "")
+		    .replaceAll("\\.","");
 	}
 
 	public void setProjectId(String projectId)
@@ -101,7 +110,7 @@ public class CSDAlleleInput implements KnockoutAlleleInput
 
 	public void setBuild(String build)
 	{
-		this.build = build;
+		this.build = build.replaceAll("NCBIM", "");
 	}
 
 	public void setCassette(String cassette)

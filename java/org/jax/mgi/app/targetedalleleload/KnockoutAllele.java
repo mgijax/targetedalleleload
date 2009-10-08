@@ -34,15 +34,16 @@ import org.jax.mgi.dbs.mgd.dao.ACC_AccessionDAO;
 
 
 /**
- * @is An object that represents a KnockOut Allele record.
+ * @is An object that represents a Knockout Allele record in MGD
  * @has
  *   <UL>
- *   <LI> Configuration parameters that are needed to populate the allele object.
+ *   <LI> Configuration parameters that are needed to compare and 
+     populate the allele object
  *   </UL>
  * @does
  *   <UL>
  *   <LI> Provides methods for setting all its attributes.
- *   <LI> Provides a method for inserting an allele record into a BCP stream.
+ *   <LI> Provides a method for inserting an allele record into a BCP stream
  *   <LI> Provides a method to clear its attributes.
  *   </UL>
  * @company The Jackson Laboratory
@@ -55,39 +56,40 @@ public class KnockoutAllele implements Comparable
     /////////////////
     //  Variables  //
     /////////////////
-
     private final int NOTECHUNKSIZE = 255;
-    
     private RecordStampCfg rdCfg = null;
     private JNumberLookup jnumLookup = null;
-
-    private ESCell parental = null;
-    private ESCell mutant = null;
-    private Strain strain = null;
-    private Marker gene = null;
-    private Vector mutationTypes = new Vector();
-
-    // From file
-    private String esCellName = null;
-    private Integer alleleType = new Integer(Constants.ALLELE_TYPE);
-    private Boolean isWildType = new Boolean(false);
-    private String build = null;
-    private String cassette = null;
-    private String provider = null;
+    private Timestamp currentTime = new Timestamp(new Date().getTime());
+    
+    // We will need to compare and save these types of objects to the
+    // database.  Here are the minimum required fields for saving to MGD
+    private Integer key = new Integer(0);
+    private Integer markerKey = new Integer(0);
+    private Integer strainKey = new Integer(0);
+    private String symbol = null;
+    private String name = null;
+    private String note = null;
+    private Integer noteKey = null;
+    private Integer noteModifiedByKey = null;
     private String projectId = null;
-    private int projectLogicalDb = 0;
+    private Integer cellLineKey = null;
 
     // From cfg file
-    private String jNumber = null;          // Reference J Number
+    private String jNumber = null;
+    private Integer projectLogicalDb = null;
+    private Vector mutationTypes = new Vector();
 
-	// Parameters derived from file or read from database
-    private String alleleSymbol = null;
-    private String alleleName = null;
-    private String alleleNote = null;
-    private String alleleNoteKey = null;
-    private Integer alleleNoteCreatedBy = null;
-    private Integer alleleNoteModifiedBy = null;
-    private int alleleKey = 0;
+    // Default values for all KO Alleles
+    private String nomenSymbol = null;
+    private Integer modeKey = new Integer(Constants.ALLELE_MODE);
+    private Integer typeKey = new Integer(Constants.ALLELE_TYPE);
+    private Integer statusKey = new Integer(Constants.ALLELE_STATUS);
+    private Integer transmissionKey = new Integer(Constants.TRANSMISSION_KEY);
+    private Boolean isWildType = new Boolean(false);
+    private Boolean isExtinct = new Boolean(false);
+    private Boolean isMixed = new Boolean(false);
+
+
 
     /**
      * Constructs a Knockout Allele object
@@ -109,6 +111,129 @@ public class KnockoutAllele implements Comparable
         rdCfg = new RecordStampCfg();
     }
 
+    // Getters / Setters
+    public Integer getKey() {
+		return key;
+	}
+
+	public void setKey(Integer key) {
+		this.key = key;
+	}
+
+    public void setTypeKey(Integer typeKey)
+    {
+        this.typeKey = typeKey;
+    }
+    
+    public Integer getTypeKey()
+    {
+        return this.typeKey;
+    }
+    
+    public Integer getCellLineKey() {
+		return cellLineKey;
+	}
+
+	public void setCellLineKey(Integer cellLineKey) {
+		this.cellLineKey = cellLineKey;
+	}
+	public Integer getMarkerKey() {
+		return markerKey;
+	}
+
+	public void setMarkerKey(Integer markerKey) {
+		this.markerKey = markerKey;
+	}
+
+	public Integer getStrainKey() {
+		return strainKey;
+	}
+
+	public void setStrainKey(Integer strainKey) {
+		this.strainKey = strainKey;
+	}
+
+	public String getSymbol() {
+		return symbol;
+	}
+
+	public void setSymbol(String symbol) {
+		this.symbol = symbol;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getProjectId() {
+		return projectId;
+	}
+
+	public void setProjectId(String projectId) {
+		this.projectId = projectId;
+	}
+
+	public String getJNumber() {
+		return jNumber;
+	}
+
+	public void setJNumber(String jNumber) {
+		this.jNumber = jNumber;
+	}
+
+	public Vector getMutationTypes() {
+		return mutationTypes;
+	}
+
+	public void setMutationTypes(Vector mutationTypes) {
+		this.mutationTypes = mutationTypes;
+	}
+
+	public void setProjectLogicalDb(Integer projectLogicalDb) {
+		this.projectLogicalDb = projectLogicalDb;
+	}
+
+	public String getNote() {
+		return note;
+	}
+
+	public void setNote(String note) {
+		this.note = note;
+	}
+
+	public Integer getNoteKey() {
+	    return noteKey;
+	}
+	
+	public void setNoteKey(Integer noteKey) {
+	    this.noteKey = noteKey;
+	}
+
+	public Integer getNoteModifiedByKey() {
+	    return noteModifiedByKey;
+	}
+
+	public void setNoteModifiedByKey(Integer noteModifiedByKey) {
+	    this.noteModifiedByKey = noteModifiedByKey;
+	}
+
+
+
+
+    // Builting overrides for toString and compareTo
+    public String toString()
+    {
+        return "Allele key: " + this.key+"\n"+
+            "name: " + this.name+"\n"+
+            "symbol: " + this.symbol+"\n"+
+            "note: " + this.note+"\n"+
+            "J Number: "+this.jNumber+"\n";
+    }
+
     public int compareTo(Object that) throws ClassCastException
     {
         if (!(that instanceof KnockoutAllele))
@@ -116,235 +241,11 @@ public class KnockoutAllele implements Comparable
             throw new ClassCastException("A KnockoutAllele object expected.");
         }
         
-        String thatESCellName = ((KnockoutAllele) that).getMutant().getName();  
-        return this.getMutant().getName().compareTo(thatESCellName);
+        String thatSymbol = ((KnockoutAllele) that).getSymbol();
+//        String thatNote = ((KnockoutAllele) that).getNote();
+        return this.getSymbol().compareTo(thatSymbol);
     }
 
-    /////////////////////////////////////////////////////////////////////
-    // Setters
-    public void setMutationTypes(Vector mutationTypes)
-    {
-        this.mutationTypes = mutationTypes;
-    }
-
-    public void setProjectId(String projectId)
-    {
-        this.projectId = projectId;
-    }
-
-    public void setProjectLogicalDb(String projectLogicalDb)
-    {
-        this.projectLogicalDb = Integer.parseInt(projectLogicalDb);
-    }
-
-    public void setParental(ESCell parental)
-    {
-        this.parental = parental;
-    }
-    
-    public void setMutant(ESCell mutant)
-    {
-        this.mutant = mutant;
-    }
-    
-    public void setStrain(Strain strain)
-    {
-        this.strain = strain;
-    }
-    
-    public void setGene(Marker gene){
-        this.gene = gene;
-    }
-    
-    public void setESCellName(String esCellName)
-    {
-        this.esCellName = esCellName;
-    }
-
-    public void setAlleleType(Integer alleleType)
-    {
-        this.alleleType = alleleType;
-    }
-
-    public void setGenomeBuild(String build)
-    {
-        this.build = build;
-    }
-
-    public void setCassette(String cassette)
-    {
-        this.cassette = cassette;
-    }
-
-    public void setProvider(String provider)
-    {
-        this.provider = provider;
-    }
-
-    public void setJNumber(String jNumber)
-    {
-        this.jNumber = jNumber;
-    }
-
-    public void setAlleleKey(int key)
-    {
-        this.alleleKey = key;
-    }
-
-    public void setAlleleSymbol(String alleleSymbol)
-    {
-        this.alleleSymbol = alleleSymbol;
-    }
-
-    public void setAlleleSymbol(String template, int sequence)
-    {
-        String seq = Integer.toString(sequence);
-        String symbol = template.replaceAll("~~SEQUENCE~~", seq); 
-        this.alleleSymbol = symbol;
-    }
-
-    public void setAlleleName(String alleleName)
-    {
-        this.alleleName = alleleName;
-    }
-
-    public void setAlleleName(String template, int sequence)
-    {
-        String seq = Integer.toString(sequence);
-        String name = template.replaceAll("~~SEQUENCE~~", seq); 
-        this.alleleName = name;
-    }
-
-    public void setAlleleNote(String alleleNote)
-    {
-        this.alleleNote = alleleNote;
-    }
-
-    public void setAlleleNoteKey(String alleleNoteKey)
-    {
-        this.alleleNoteKey = alleleNoteKey;
-    }
-
-    public void setAlleleNoteCreatedBy(String createdBy)
-    {
-        this.alleleNoteCreatedBy = Integer.valueOf(createdBy);
-    }
-
-    public void setAlleleNoteModifiedBy(String modifiedBy)
-    {
-        this.alleleNoteModifiedBy = Integer.valueOf(modifiedBy);
-    }
-
-
-
-    /////////////////////////////////////////////////////////////////////
-    // Getters
-
-    public int getAlleleKey()
-    {
-        return this.alleleKey;
-    }
-
-	public Marker getGene()
-	{
-	    return this.gene;
-	}
-
-	public ESCell getMutant()
-	{
-	    return this.mutant;
-	}
-
-	public Strain getStrain()
-	{
-	    return this.strain;
-	}
-	
-	public String getProjectId()
-	{
-	    return this.projectId;
-	}
-
-	public int getProjectLogicalDb()
-	{
-	    return this.projectLogicalDb;
-	}
-
-	public ESCell getParental()
-	{
-	    return this.parental;
-	}
-
-	public String getGeneSymbol()
-	{
-	    return this.gene.getSymbol();
-	}
-
-	public String getChromosome()
-	{
-	    return this.gene.getChromosome();
-	}
-
-	public String getCassette()
-	{
-	    return this.cassette;
-	}
-
-	public String getGenomeBuild()
-	{
-	    return this.build;
-	}
-
-	public String getESCellName()
-	{
-	    return this.esCellName;
-	}
-
-	public Integer getAlleleType()
-	{
-	    return this.alleleType;
-	}
-
-	public String getAlleleSymbol()
-	{
-	    return this.alleleSymbol;
-	}
-
-	public String getAlleleName()
-	{
-	    return this.alleleName;
-	}
-
-	public String getAlleleNote()
-	{
-	    return this.alleleNote;
-	}
-
-	public String getAlleleNoteKey()
-	{
-	    return this.alleleNoteKey;
-	}
-
-    public Integer getAlleleNoteCreatedBy()
-    {
-        return this.alleleNoteCreatedBy;
-    }
-
-    public Integer getAlleleNoteModifiedBy()
-    {
-        return this.alleleNoteModifiedBy;
-    }
-
-
-    public String toString()
-    {
-        return "Allele key: " + this.alleleKey+"\n"+
-            "id: " + this.esCellName+"\n"+
-            "name: " + this.alleleName+"\n"+
-            "symbol: " + this.alleleSymbol+"\n"+
-            "note: " + this.alleleNote+"\n"+
-            "J Number: "+this.jNumber+"\n";
-    }
 
 
     /**
@@ -362,11 +263,11 @@ public class KnockoutAllele implements Comparable
     throws ConfigException,DBException,CacheException
     {
         // Save this note as the allele note
-        this.setAlleleNote(newNote);
+        this.setNote(newNote);
 
         // Create the Note and attach it to this Allele
         MGI_NoteState nState =  new MGI_NoteState();
-        nState.setObjectKey(new Integer(alleleKey));
+        nState.setObjectKey(key);
         nState.setMGITypeKey(new Integer(Constants.ALLELE_MGI_TYPE));
         nState.setNoteTypeKey(new Integer(Constants.NOTE_TYPE));
         
@@ -374,14 +275,14 @@ public class KnockoutAllele implements Comparable
         stream.insert(nDAO);
         
         // Set this note key to the newly created note key from the DB
-        int noteKey = nDAO.getKey().getKey().intValue();
+        noteKey = new Integer(nDAO.getKey().getKey().intValue());
 
         // Insert the note chunks for this allele note
         for (int i=0; i<newNote.length(); i+=NOTECHUNKSIZE)
         {
             // Create the NoteChunk
             MGI_NoteChunkState ncState = new MGI_NoteChunkState();
-            ncState.setNoteKey(new Integer(noteKey));
+            ncState.setNoteKey(noteKey);
 
             // Calculate THIS note chunk sequence number based on how many
             // times we've gone through the loop already
@@ -397,7 +298,7 @@ public class KnockoutAllele implements Comparable
             }
             else
             {
-                thisNoteChunk = newNote.substring(i, alleleNote.length());
+                thisNoteChunk = newNote.substring(i, note.length());
             }
             ncState.setNote(thisNoteChunk);
 
@@ -420,41 +321,34 @@ public class KnockoutAllele implements Comparable
     throws ConfigException,DBException,CacheException
     {
         // Verify that the logical DB has been set
-        if (projectLogicalDb == 0)
+        if (projectLogicalDb.equals(new Integer(0)))
         {
             throw new ConfigException("Project Logical DB not configured", true);
-        }
-
-        // if the mutant cell line doesn't already exist, then
-        //Create the mutant es cell line and insert it into the database
-        if (mutant.getKey() == 0)
-        {
-            mutant.insert(stream);            
         }
 
         // Create this allele in the database, attaching the (possibly new)
         // mutant es cell to the allele
         ALL_AlleleState aState = new ALL_AlleleState();
-        aState.setMarkerKey(new Integer(gene.getKey()));
-        aState.setStrainKey(new Integer(strain.getKey()));
-        aState.setModeKey(new Integer(Constants.ALLELE_MODE));
-        aState.setAlleleTypeKey(alleleType);
-        aState.setAlleleStatusKey(new Integer(Constants.ALLELE_STATUS));
-        aState.setESCellLineKey(new Integer(parental.getKey()));
-        aState.setMutantESCellLineKey(new Integer(mutant.getKey()));
-        aState.setSymbol(alleleSymbol);
-        aState.setName(alleleName);
+        aState.setMarkerKey(markerKey);
+        aState.setStrainKey(strainKey);
+        aState.setModeKey(modeKey);
+        aState.setAlleleTypeKey(typeKey);
+        aState.setAlleleStatusKey(statusKey);
+        aState.setTransmissionKey(transmissionKey);
+        aState.setSymbol(symbol);
+        aState.setName(name);
         aState.setNomenSymbol(null);
         aState.setIsWildType(isWildType);
+        aState.setIsExtinct(isExtinct);
+        aState.setIsMixed(isMixed);
         aState.setApprovedByKey(rdCfg.getJobStreamKey());
-        Timestamp t = new Timestamp(new Date().getTime());
-        aState.setApprovalDate(t);
+        aState.setApprovalDate(currentTime);
 
         ALL_AlleleDAO aDAO = new ALL_AlleleDAO(aState);
         stream.insert(aDAO);
         
         // Set this object key to the newly created allele key from the DB
-        alleleKey = aDAO.getKey().getKey().intValue();
+        key = new Integer(aDAO.getKey().getKey().intValue());
 
         // Create the mutation type references in the database
         for (Iterator i = mutationTypes.iterator(); i.hasNext();)
@@ -462,7 +356,7 @@ public class KnockoutAllele implements Comparable
             Integer typeKey = (Integer)i.next();
 
             ALL_Allele_MutationState amState = new ALL_Allele_MutationState();
-            amState.setAlleleKey(new Integer(alleleKey));
+            amState.setAlleleKey(key);
             amState.setMutationKey(typeKey);
             
             ALL_Allele_MutationDAO amDAO = new ALL_Allele_MutationDAO(amState);
@@ -475,7 +369,7 @@ public class KnockoutAllele implements Comparable
         {
             MGI_Reference_AssocState raState = new MGI_Reference_AssocState();
             raState.setRefsKey(jnumLookup.lookup(jNumber));
-            raState.setObjectKey(new Integer(alleleKey));
+            raState.setObjectKey(key);
             raState.setMGITypeKey(new Integer(Constants.ALLELE_MGI_TYPE));
             raState.setRefAssocTypeKey(new Integer(Constants.REFERENCE_ASSOC[i]));
             
@@ -484,14 +378,14 @@ public class KnockoutAllele implements Comparable
         }
 
         // Save the note to the stream
-        this.updateNote(stream, alleleNote);
+        this.updateNote(stream, note);
 
         // Create the Allele Accession object
         // note the missing AccID parameter which indicates this is an MGI ID
         AccessionId alleleAccId = new AccessionId(
-            Constants.LOGICALDB_MGI,    // Logical DB
-            alleleKey,      // Allele object key
-            Constants.ALLELE_MGI_TYPE,  // MGI type
+            new Integer(Constants.LOGICALDB_MGI),    // Logical DB
+            key,      // Allele object key
+            new Integer(Constants.ALLELE_MGI_TYPE),  // MGI type
             Boolean.FALSE,  // Private?
             Boolean.TRUE    // Preferred?
             );
@@ -501,9 +395,9 @@ public class KnockoutAllele implements Comparable
         // Create the Project (private) Accession object
         AccessionId projectAccId = new AccessionId(
             projectId,    // Create the private project ID for this allele
-            projectLogicalDb, // Logical DB
-            alleleKey,    // Allele object key
-            Constants.ALLELE_MGI_TYPE,        // MGI type
+            projectLogicalDb, // Logical DB for these tpyes of project IDs
+            key,    // Allele object key
+            new Integer(Constants.ALLELE_MGI_TYPE),        // MGI type
             Boolean.TRUE,  // Private?
             Boolean.TRUE    // Preferred?
             );
@@ -512,53 +406,4 @@ public class KnockoutAllele implements Comparable
 
     }
 
-    /**
-     * Clear the attributes of this object.
-     * @assumes Nothing
-     * @effects Resets the attributes of this object.
-     * @return Nothing
-     * @throws Nothing
-     */
-    public void clear ()
-    {
-        this.strain = null;
-        this.gene = null;
-        this.parental = null;
-        this.mutant = null;
-        this.alleleNote = null;
-
-        this.esCellName = null;
-        this.provider = null;
-        this.cassette = null;
-        this.build = null;
-        this.projectId = null;
-
-        this.alleleSymbol = null;
-        this.alleleName = null;
-        this.alleleKey = 0;
-    }
 }
-
-
-/**************************************************************************
-*
-* Warranty Disclaimer and Copyright Notice
-*
-*  THE JACKSON LABORATORY MAKES NO REPRESENTATION ABOUT THE SUITABILITY OR
-*  ACCURACY OF THIS SOFTWARE OR DATA FOR ANY PURPOSE, AND MAKES NO WARRANTIES,
-*  EITHER EXPRESS OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR A
-*  PARTICULAR PURPOSE OR THAT THE USE OF THIS SOFTWARE OR DATA WILL NOT
-*  INFRINGE ANY THIRD PARTY PATENTS, COPYRIGHTS, TRADEMARKS, OR OTHER RIGHTS.
-*  THE SOFTWARE AND DATA ARE PROVIDED "AS IS".
-*
-*  This software and data are provided to enhance knowledge and encourage
-*  progress in the scientific community and are to be used only for research
-*  and educational purposes.  Any reproduction or use for commercial purpose
-*  is prohibited without the prior express written permission of The Jackson
-*  Laboratory.
-*
-* Copyright \251 1996, 1999, 2002, 2004 by The Jackson Laboratory
-*
-* All Rights Reserved
-*
-**************************************************************************/

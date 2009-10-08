@@ -72,3 +72,11 @@ ESCELL_LOGICAL_DB='109'
 # The projects for regeneron are stored using the following logical db
 #
 PROJECT_LOGICAL_DB='125'
+
+#
+# The derivation for these types of alleles is determined by the unique
+# combination of Creator, Vector, and Parental Strain.  For Regeneron
+# alleles, there is only one combination of these
+#
+DERIVATION_CREATOR_KEY='4247545'
+DERIVATION_PARENTAL_KEY_VGB6='38684'

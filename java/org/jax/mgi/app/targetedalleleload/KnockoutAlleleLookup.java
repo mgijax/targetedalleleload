@@ -41,9 +41,7 @@ extends FullCachedLookup
 {
 
     private TargetedAlleleLoadCfg cfg = null;
-    private MarkerLookup markerLookup = null;
-    private StrainLookup strainLookup = null;
-    private ESCellLookup escellLookup = null;
+    private MarkerLookupByMGIID markerLookup = null;
 
     /**
      * constructor
@@ -60,14 +58,8 @@ extends FullCachedLookup
         try
         {
             cfg = new TargetedAlleleLoadCfg();
-            markerLookup = new MarkerLookup();
+            markerLookup = new MarkerLookupByMGIID();
             markerLookup.initCache();
-            
-            strainLookup = new StrainLookup();
-            strainLookup.initCache();
-
-            escellLookup = new ESCellLookup();
-            escellLookup.initCache();
         }
         catch (DLALoggingException e)
         {
@@ -77,17 +69,36 @@ extends FullCachedLookup
 
     /**
      * look up an associated KnockoutAllele by a given name
-     * @param name the KnockoutAllele name
+     * @param alleleKey the KnockoutAllele key
      * @return the associated KnockoutAllele
      * @throws DBException thrown if there is an error accessing the database
      * @throws CacheException thrown if there is an error accessing the
      * configuration
      */
-    public KnockoutAllele lookup(String name)
+    public KnockoutAllele lookup(Integer alleleKey)
     throws DBException, CacheException
     {
-        return (KnockoutAllele)super.lookupNullsOk(name);
+        return (KnockoutAllele)super.lookupNullsOk(alleleKey);
     }
+
+
+
+    /**
+     * add a new allele to the cache
+     * @assumes nothing
+     * @effects the value identified by 'projectId' will be added or replaced 
+     * @param alleleKey the key of an existing allele
+     * @param koAllele a knockout allele
+     * @throws DBException thrown if there is an error with the database
+     * @throws CacheException thrown if there is an error with the cache
+     */
+    protected void addToCache(Integer alleleKey, KnockoutAllele koAllele)
+    throws DBException, CacheException
+    {
+        // Replace the current value if it exists
+        super.cache.put(alleleKey, koAllele);
+    }
+
 
     /**
      * get the query for fully initializing the cache
@@ -110,16 +121,14 @@ extends FullCachedLookup
                "alleleSymbol=a.symbol, alleleType=a._Allele_Type_key, " +
                "geneSymbol=mrk.symbol, chr=mrk.chromosome, " +
                "geneKey=mrk._Marker_key, geneMgiid=acc.accID, " +
-               "mescKey=mesc._CellLine_key, mescName = mesc.cellline, " +
-               "pescKey=pesc._CellLine_key, pescName = pesc.cellline, " +
-               "provider=mesc.provider, alleleNote=nc.note, " +
+               "alleleNote=nc.note, " +
                "alleleNoteSeq=nc.sequenceNum, alleleNoteKey=nc._note_key, " +
                "alleleNoteModifiedBy=n._ModifiedBy_key, " +
                "alleleNoteCreatedBy=n._CreatedBy_key, " +
                "jNumber=bc.jnumID, projectId=acc2.accId  " +
                "FROM ALL_Allele a, BIB_Citation_Cache bc, " +
                "MGI_Reference_Assoc ra,MGI_RefAssocType rat, " +
-               "MRK_Marker mrk, ALL_CellLine mesc, ALL_CellLine pesc, " +
+               "MRK_Marker mrk, " +
                "MGI_Note n, MGI_NoteChunk nc, ACC_Accession acc, " +
                "ACC_Accession acc2 " +
                "WHERE bc.jnumID = '"+jNumber+"' " +
@@ -129,8 +138,6 @@ extends FullCachedLookup
                "and ra._MGIType_key = rat._MGIType_key " +
                "and rat.assocType = 'Original' " +
                "and a._Marker_key = mrk._Marker_key " +
-               "and a._MutantESCellLine_key = mesc._CellLine_key " +
-               "and a._ESCellLine_key = pesc._CellLine_key " +
                "and acc.preferred=1 " +
                "and acc._Object_key = mrk._Marker_key " +
                "and acc.prefixpart='MGI:' " +
@@ -201,18 +208,13 @@ extends FullCachedLookup
                     return null;
                 }
 
-                koAllele.setESCellName(rd.esCellName);
-                koAllele.setAlleleType(rd.alleleType);
-                koAllele.setAlleleName(rd.alleleName);
-                koAllele.setAlleleSymbol(rd.alleleSymbol);
-                koAllele.setAlleleKey(rd.alleleKey);
-                koAllele.setAlleleName(rd.alleleName);
-                koAllele.setProvider(rd.provider);
+                koAllele.setName(rd.alleleName);
+                koAllele.setSymbol(rd.alleleSymbol);
+                koAllele.setKey(rd.alleleKey);
                 koAllele.setProjectId(rd.projectId);
-                koAllele.setAlleleNote(rd.alleleNote);
-                koAllele.setAlleleNoteKey(rd.alleleNoteKey);
-                koAllele.setAlleleNoteCreatedBy(rd.alleleNoteCreatedBy);
-                koAllele.setAlleleNoteModifiedBy(rd.alleleNoteModifiedBy);
+                koAllele.setNote(rd.alleleNote);
+                koAllele.setNoteKey(rd.alleleNoteKey);
+                koAllele.setNoteModifiedByKey(rd.alleleNoteModifiedBy);
                 koAllele.setJNumber(rd.jNumber);
 
                 for (Iterator it = v.iterator(); it.hasNext();)
@@ -223,13 +225,11 @@ extends FullCachedLookup
                     completeNote += rd.alleleNote;
                 }
                 
-                koAllele.setAlleleNote(completeNote.trim());
+                koAllele.setNote(completeNote.trim());
 
                 try
                 {
-                    koAllele.setGene(markerLookup.lookup(rd.geneMgiid));
-                    koAllele.setParental(escellLookup.lookup(rd.pescName));
-                    koAllele.setMutant(escellLookup.lookup(rd.mescName));
+                    koAllele.setMarkerKey(markerLookup.lookup(rd.geneMgiid).getKey());
                 }
                 catch (MGIException e)
                 {
@@ -237,7 +237,7 @@ extends FullCachedLookup
                     return null;
                 }
 
-                return new KeyValue(projectId, koAllele);
+                return new KeyValue(rd.alleleKey, koAllele);
             }
         }
 
@@ -249,38 +249,30 @@ extends FullCachedLookup
      */
     class RowData
     {
-        protected String esCellName;
+        protected Integer alleleKey;
+        protected String projectId;
         protected Integer alleleType;
         protected String alleleName;
         protected String alleleSymbol;
-        protected int alleleKey;
-        protected String provider;
-        protected String projectId;
         protected String alleleNote;
-        protected String alleleNoteKey;
-        protected String alleleNoteCreatedBy;
-        protected String alleleNoteModifiedBy;
+        protected Integer alleleNoteKey;
+        protected Integer alleleNoteCreatedBy;
+        protected Integer alleleNoteModifiedBy;
         protected String jNumber;
-        protected Marker gene;
-        protected String pescName;
-        protected String mescName;
         protected String geneMgiid;
 
         public RowData (RowReference row) throws DBException
         {
-            esCellName = row.getString("mescName");
-            mescName = row.getString("mescName");
-            pescName = row.getString("pescName");
-            alleleType = new Integer(row.getInt("alleleType").intValue());
+            alleleKey = row.getInt("alleleKey");
+            projectId = row.getString("projectId");
+            alleleType = row.getInt("alleleType");
             alleleName = row.getString("alleleName");
             alleleSymbol = row.getString("alleleSymbol");
-            alleleKey = row.getInt("alleleKey").intValue();
-            provider = row.getString("provider");
-            projectId = row.getString("projectId");
             alleleNote = row.getString("alleleNote");
-            alleleNoteKey = row.getString("alleleNoteKey");
-            alleleNoteCreatedBy = row.getString("alleleNoteCreatedBy");
-            alleleNoteModifiedBy = row.getString("alleleNoteModifiedBy");
+            alleleNoteKey = row.getInt("alleleNoteKey");
+            alleleNoteCreatedBy = row.getInt("alleleNoteCreatedBy");
+//            alleleNoteModifiedBy = new Integer(row.getInt("alleleNoteModifiedBy").intValue());
+            alleleNoteModifiedBy = row.getInt("alleleNoteModifiedBy");
             jNumber = row.getString("jNumber");
             geneMgiid = row.getString("geneMgiid");
         }

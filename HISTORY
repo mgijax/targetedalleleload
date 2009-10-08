@@ -1,3 +1,10 @@
+TAG: targetedalleleload-4-3-0-1
+DATE: October 08, 2009
+STAFF: jmason
+CHANGES:
+    - Rewrite for GTLF schema changes
+    - Create CSD specific additions
+
 TAG: targetedalleleload-4-1-2-3
 DATE: September 29, 2008
 STAFF: jmason

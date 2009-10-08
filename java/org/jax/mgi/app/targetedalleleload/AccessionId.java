@@ -54,6 +54,18 @@ public class AccessionId
         this.preferred = preferred;
     }
 
+    public AccessionId(Integer logicalDb, Integer objectKey, 
+        Integer mgiTypeKey, Boolean privateVal, Boolean preferred)
+    {
+        this.accessionId = null;
+        this.logicalDb = logicalDb;
+        this.objectKey = objectKey;
+        this.mgiTypeKey = mgiTypeKey;
+        this.privateVal = privateVal;
+        this.preferred = preferred;
+    }
+
+
     /**
      * constructor
      * @param accID the accession id
@@ -64,13 +76,13 @@ public class AccessionId
      * @param privateVal if tge accession ID is private
      * @param preferred if the accession ID is the preferred one
      */
-    public AccessionId(String accID, int logicalDb, int objectKey, 
-        int mgiTypeKey, Boolean privateVal, Boolean preferred)
+    public AccessionId(String accID, Integer logicalDb, Integer objectKey, 
+        Integer mgiTypeKey, Boolean privateVal, Boolean preferred)
     {
         this.accessionId = accID;
-        this.logicalDb = new Integer(logicalDb);
-        this.objectKey = new Integer(objectKey);
-        this.mgiTypeKey = new Integer(mgiTypeKey);
+        this.logicalDb = logicalDb;
+        this.objectKey = objectKey;
+        this.mgiTypeKey = mgiTypeKey;
         this.privateVal = privateVal;
         this.preferred = preferred;
     }
@@ -129,7 +141,7 @@ public class AccessionId
         else
         {
 
-            // The user supplied an Accession ID, populate all the appropriate
+            // The user supplied an Accession ID, populate all the
             // appropriate fields
 
             // Get an empty ACC_AccessionState object, we'll fill in all 

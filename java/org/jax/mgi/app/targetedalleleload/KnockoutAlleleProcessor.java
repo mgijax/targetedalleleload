@@ -1,5 +1,8 @@
 package org.jax.mgi.app.targetedalleleload;
 
+import java.util.HashMap;
+import java.util.HashSet;
+
 import org.jax.mgi.shr.ioutils.RecordFormatException;
 import org.jax.mgi.shr.config.ConfigException;
 import org.jax.mgi.shr.dla.log.DLALoggingException;
@@ -31,4 +34,10 @@ abstract class KnockoutAlleleProcessor
     public abstract KnockoutAllele process(KnockoutAlleleInput in)
     throws RecordFormatException,ConfigException,KeyNotFoundException,
     DBException,CacheException,TranslationException,MGIException;
+    
+    public abstract void addToProjectCache(String projectId, HashMap alleleMap)
+    throws DBException, CacheException;
+    
+    public abstract void addToMarkerCache(String symbol, HashSet alleles)
+    throws DBException, CacheException;
 }

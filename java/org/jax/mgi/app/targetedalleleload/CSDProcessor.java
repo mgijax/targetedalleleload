@@ -1,14 +1,18 @@
 package org.jax.mgi.app.targetedalleleload;
 
 import java.lang.Integer;
-import java.lang.Math;
 import java.util.Vector;
 import java.util.Iterator;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.*;
 
 import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
 import org.jax.mgi.shr.ioutils.RecordDataInterpreter;
 import org.jax.mgi.dbs.mgd.lookup.VocabKeyLookup;
+import org.jax.mgi.dbs.mgd.lookup.StrainKeyLookup;
 
 import org.jax.mgi.shr.ioutils.RecordFormatException;
 import org.jax.mgi.shr.config.ConfigException;
@@ -46,12 +50,14 @@ public class CSDProcessor extends KnockoutAlleleProcessor
     // KOMP Clone object
     //
     private TargetedAlleleLoadCfg cfg = null;
-    private MarkerLookup markerLookup = null;
-    private StrainLookup strainLookup = null;
-    private ESCellLookup escellLookup = null;
+    private MarkerLookupByMGIID markerLookup = null;
     private VocabKeyLookup vocabLookup = null;
-    private AlleleByMarkerLookup allelesByMarkerLookup = null;
-    private StrainByEsCellLookup strainByEsCellLookup = null;
+    private DerivationLookupByVectorCreatorParent derivationLookup = null;
+    private AlleleLookupByProjectId alleleLookpuByProjectId = null;
+    private ProjectLookupByMarker projectByMarkerLookup = null;
+    private AlleleLookupByMarker alleleLookupByMarker = null;
+    
+    
     
 
     private static final String PROMOTER_DRIVEN = "L1L2_Bact_P|L1L2_PGK_P";
@@ -72,12 +78,27 @@ public class CSDProcessor extends KnockoutAlleleProcessor
     DBException,CacheException,TranslationException
     {
         cfg = new TargetedAlleleLoadCfg();
-        allelesByMarkerLookup = new AlleleByMarkerLookup(cfg.getProjectLogicalDb());
-        markerLookup = new MarkerLookup();
-        strainLookup = new StrainLookup();
-        strainByEsCellLookup = new StrainByEsCellLookup();
-		escellLookup = new ESCellLookup();
+        
+        Integer escLogicalDB = cfg.getEsCellLogicalDb();
+        Integer projectLogicalDB = cfg.getProjectLogicalDb();
+
+        alleleLookpuByProjectId = new AlleleLookupByProjectId(escLogicalDB);
+        projectByMarkerLookup = new ProjectLookupByMarker(projectLogicalDB);
+        alleleLookupByMarker = new AlleleLookupByMarker(projectLogicalDB);
+        markerLookup = new MarkerLookupByMGIID();
 		vocabLookup = new VocabKeyLookup(Constants.ALLELE_VOCABULARY);
+    }
+
+    public void addToProjectCache(String projectId, HashMap alleleMap)
+    throws DBException, CacheException
+    {
+        alleleLookpuByProjectId.addToCache(projectId, alleleMap);
+    }
+
+    public void addToMarkerCache(String symbol, HashSet alleles)
+    throws DBException, CacheException
+    {
+        alleleLookupByMarker.addToCache(symbol, alleles);
     }
 
     /**
@@ -99,76 +120,143 @@ public class CSDProcessor extends KnockoutAlleleProcessor
     {
         CSDAlleleInput in = (CSDAlleleInput)inputData;
 
-        KnockoutAllele clone = new KnockoutAllele();
+        KnockoutAllele koAllele = new KnockoutAllele();
 
         // Get the external dependencies referenced in this row
         Marker marker = markerLookup.lookup(in.getGeneId());
-		ESCell parental = escellLookup.lookupExisting(in.getParentESCellName());
-        Strain strain = strainByEsCellLookup.lookup(parental.getName());
-		ESCell mutant = escellLookup.lookup(in.getESCellName());
-		
-		// If the mutant cell line doesn't exist, we must create
-		// a new one.
-		if (mutant == null)
-		{
-		    // The mutant cell line has the same ID as the allele
-		    // for all the KOMP generated alleles
-		    mutant = new ESCell(0,
-                strain,
-                in.getESCellName(),
-                cfg.getProvider(),
-                true
-                );
-            String esCellDB = cfg.getEsCellLogicalDb();
-            mutant.setLogicalDB(Integer.parseInt(esCellDB));
-		}
+        Integer strainKey = cfg.getParentalKey(in.getParentCellLine());
 
-        clone.setESCellName(in.getESCellName());
-        clone.setGene(marker);
-        clone.setMutant(mutant);
-        clone.setParental(parental);
-        clone.setProjectId(in.getProjectId());
-        clone.setProjectLogicalDb(cfg.getProjectLogicalDb());
-        clone.setStrain(strain);
-        clone.setProvider(cfg.getProvider());
-        clone.setGenomeBuild(in.getBuild());
-        clone.setCassette(in.getCassette());
+        koAllele.setMarkerKey(marker.getKey());
+        koAllele.setProjectId(in.getProjectId());
+        koAllele.setProjectLogicalDb(cfg.getProjectLogicalDb());
+        koAllele.setStrainKey(strainKey);
 
-        // Regeneron Specific Mutation types
+        // CSD Specific Mutation types
         Vector mutationTypeKeys = new Vector();
-        String[] types = cfg.getMutationTypes().split(",");
+        String[] types = cfg.getMutationTypes(in.getMutationType()).split(",");
         for (int i=0;i<types.length;i++)
         {
             Integer key = vocabLookup.lookup(types[i].trim());
             mutationTypeKeys.add(key);
         }
-        clone.setMutationTypes(mutationTypeKeys);
+        koAllele.setMutationTypes(mutationTypeKeys);
 
-        // get the NEXT allele symbol sequence number which is one higher than
-        // the sum of CURRENT KOMP ALELLES attached to this marker BY THIS
-        // PROVIDER
-        HashSet allProj = allelesByMarkerLookup.lookup(marker.getSymbol());
 
-        int seq = 1; // Default to the first project
-        if (allProj != null) {
-            // There is already a project (or projects) associated to this
-            // marker.  Increment the count for this allele
-            seq = (allProj.size()) + 1;
+        /////////////////////////////////////////////////////////////////////
+        // get the NEXT allele symbol sequence number and letter
+        /////////////////////////////////////////////////////////////////////
+
+        // Setup the default allele string
+        int seq = 1;
+        HashSet existingAlleles = alleleLookupByMarker.lookup(marker.getSymbol());
+        
+        // If we have existing alleles already, we can go ahead and default
+        // the value to the next one which will be used IF there is not a 
+        // good match already
+        if (existingAlleles != null)
+        {
+            // Loop through the existing alleles counting them up
+            Iterator alleleSetIt = existingAlleles.iterator();
+            while (alleleSetIt.hasNext())
+            {
+                String allSymbol = (String)alleleSetIt.next();
+                Pattern allPattern = Pattern.compile(".*tm(\\d){1,2}[ae]{0,1}.*");
+                Matcher allMatcher = allPattern.matcher(allSymbol);
+                if (allMatcher.find())
+                {
+                    if (Integer.parseInt(allMatcher.group(1)) >= seq)
+                    {
+                        seq = Integer.parseInt(allMatcher.group(1))+1;
+                    }
+                }
+
+            }
         }
+
+        // The sequence letter
+        // Blank (the default) is for deletion alleles
+        String let = "";
+        String mutType = in.getMutationType();
+        if (mutType.compareTo("Conditional") == 0)
+        {
+            let = "a";
+        }
+        else if (mutType.compareTo("Targeted non-conditional") == 0)
+        {
+            let = "e";
+        }
+        String finalSequence = new Integer(seq).toString() + let;
+
+        // Okay... now that we have a sensible default... see if we can
+        // find an actual allele that exists already with the correct
+        // attributes 
+
+        HashMap alleles = alleleLookpuByProjectId.lookup(in.getProjectId());
+        HashMap matchingAllele = null;
+
+        if (alleles != null && alleles.size() > 0)
+        {
+            Boolean alleleFound = Boolean.FALSE;
+            Set entries = alleles.entrySet();
+            Iterator it = entries.iterator();
+
+            while (it.hasNext() && alleleFound != Boolean.TRUE)
+            {
+                Map.Entry entry = (Map.Entry) it.next();
+                HashMap allele = (HashMap)entry.getValue();
+                String allMutType = "Deletion";
+                
+                if (((String)allele.get("symbol")).matches(".*tm\\d{1,2}a.*"))
+                {
+                    allMutType = "Conditional";
+                }
+                else if (((String)allele.get("symbol")).matches(".*tm\\d{1,2}e.*"))
+                {
+                    allMutType = "Targeted non-conditional";
+                }
+
+                // Compare parental cell lines
+                Integer fromFile = cfg.getParentalKey(in.getParentCellLine());
+                Integer fromData = cfg.getParentalKey((String)allele.get("parentCellLine"));
+                if (fromData.compareTo(fromFile) == 0)
+                {
+                    // MATCHES! reset the sequence to match the current allele
+                    Pattern pattern = Pattern.compile(".*<tm(\\d{1,2})[ae]{0,1}\\(.*");
+                    Matcher matcher = pattern.matcher(((String)allele.get("symbol")));
+                    if (matcher.find())
+                    {
+                        finalSequence = matcher.group(1) + let;
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                    alleleFound = Boolean.TRUE;
+                }
+            }
+
+            if (alleleFound != Boolean.TRUE)
+            {
+                Integer newAllele = new Integer(alleles.size() + 1);
+                finalSequence = newAllele.toString() + let;
+            }
+        }
+        
 
         // Set the clone's constructed values
         String alleleName = cfg.getNameTemplate();
-        alleleName = alleleName.replaceAll("~~SYMBOL~~", clone.getGeneSymbol()); 
-        alleleName = alleleName.replaceAll("~~SEQUENCE~~", Integer.toString(seq)); 
-        clone.setAlleleName(alleleName);
+        alleleName = alleleName.replaceAll("~~SYMBOL~~", marker.getSymbol()); 
+        alleleName = alleleName.replaceAll("~~SEQUENCE~~", finalSequence); 
+        koAllele.setName(alleleName);
 
         String alleleSymbol = cfg.getSymbolTemplate();
-        alleleSymbol = alleleSymbol.replaceAll("~~SYMBOL~~", clone.getGeneSymbol()); 
-        alleleSymbol = alleleSymbol.replaceAll("~~SEQUENCE~~", Integer.toString(seq)); 
-        clone.setAlleleSymbol(alleleSymbol);
+        alleleSymbol = alleleSymbol.replaceAll("~~SYMBOL~~", marker.getSymbol()); 
+        alleleSymbol = alleleSymbol.replaceAll("~~SEQUENCE~~", finalSequence); 
+        koAllele.setSymbol(alleleSymbol);
+        
 
         String jNumber = cfg.getJNumber();
-        clone.setJNumber(jNumber);
+        koAllele.setJNumber(jNumber);
 
 
         String note = "";
@@ -176,6 +264,8 @@ public class CSDProcessor extends KnockoutAlleleProcessor
 
         if (in.getMutationType().compareTo("Deletion") == 0)
         {
+            koAllele.setTypeKey(cfg.getAlleleType("DELETION"));
+            
             if (in.getCassette().matches(PROMOTER_DRIVEN))
             {
                 note = cfg.getNoteTemplateDeletionPromoter();
@@ -196,12 +286,14 @@ public class CSDProcessor extends KnockoutAlleleProcessor
             else
             {
                 throw new MGIException(
-                    "SKIPPING THIS RECORD: missing coordinate\n"+clone
+                    "SKIPPING THIS RECORD: missing coordinate\n"+koAllele
                 );
             }
         }
         else if (in.getMutationType().compareTo("Conditional") == 0)
         {
+            koAllele.setTypeKey(cfg.getAlleleType("CONDITIONAL"));
+
             if (in.getCassette().matches(PROMOTER_DRIVEN))
             {
                 note = cfg.getNoteTemplateCondPromoter();
@@ -213,6 +305,8 @@ public class CSDProcessor extends KnockoutAlleleProcessor
         }
         else if (in.getMutationType().compareTo("Targeted non-conditional") == 0)
         {
+            koAllele.setTypeKey(cfg.getAlleleType("NONCONDITIONAL"));
+
             if (in.getCassette().matches(PROMOTER_DRIVEN))
             {
                 note = cfg.getNoteTemplateNonCondPromoter();
@@ -225,25 +319,25 @@ public class CSDProcessor extends KnockoutAlleleProcessor
         else
         {
             throw new MGIException(
-                "SKIPPING THIS RECORD: Unknown mutation type\n"+clone
+                "SKIPPING THIS RECORD: Unknown mutation type\n"+in.getMutationType() + "|" +koAllele
             );
         }
 
-        note = note.replaceAll("~~CASSETTE~~", clone.getCassette()); 
+        note = note.replaceAll("~~CASSETTE~~", in.getCassette()); 
         note = note.replaceAll("~~LOCUS1~~", in.getLocus1());
         note = note.replaceAll("~~LOCUS2~~", in.getLocus2());
         note = note.replaceAll("~~CHROMOSOME~~", marker.getChromosome());
         note = note.replaceAll("~~DELSIZE~~", Integer.toString(delSize));
-        note = note.replaceAll("~~BUILD~~", clone.getGenomeBuild());
+        note = note.replaceAll("~~BUILD~~", in.getBuild());
         if (in.getCassette().matches(PROMOTER_DRIVEN))
         {
-            note = note.replaceAll("~~PROMOTER~~", cfg.getPromoter(clone.getCassette()));
+            note = note.replaceAll("~~PROMOTER~~", cfg.getPromoter(in.getCassette()));
         }
-        clone.setAlleleNote(note);
+        koAllele.setNote(note);
 
         // Return the populated clone object.
         //
-        return clone;
+        return koAllele;
     }
 
 }

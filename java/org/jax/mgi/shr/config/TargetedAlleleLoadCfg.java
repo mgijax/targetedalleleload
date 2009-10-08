@@ -63,22 +63,23 @@ public class TargetedAlleleLoadCfg extends InputDataCfg
      * @return The configuration value
      * @throws ConfigException if the value is not found
      */
-    public String getEsCellLogicalDb() throws ConfigException
+    public Integer getEsCellLogicalDb() throws ConfigException
     {
-        return getConfigString("ESCELL_LOGICAL_DB");
+        return getConfigInteger("ESCELL_LOGICAL_DB");
     }
 
     /**
-     * Get the mutation types string - a string indicating the private logical DB for the project identifiers
-     * @assumes The "PROJECT_LOGICAL_DB" constant is defined in the config file and
-     * that the logical DB specifed there aligns with the database
+     * Get the project logical database id - indicates the private logical DB
+     * for the project identifiers
+     * @assumes The "PROJECT_LOGICAL_DB" constant is defined in the config 
+     * file and that the logical DB specifed there aligns with the database
      * @effects Nothing
      * @return The configuration value
      * @throws ConfigException if the value is not found
      */
-    public String getProjectLogicalDb() throws ConfigException
+    public Integer getProjectLogicalDb() throws ConfigException
     {
-        return getConfigString("PROJECT_LOGICAL_DB");
+        return getConfigInteger("PROJECT_LOGICAL_DB");
     }
 
 
@@ -95,8 +96,21 @@ public class TargetedAlleleLoadCfg extends InputDataCfg
     }
 
     /**
-     * Get the mutation types string - a comma separated list of mutation
-     * types
+     * Get the allele type Integer from the config file
+     * @assumes The "ALLELE_TYPE_*" values are the keys of the VOC_Terms
+     * for the allele types
+     * @effects Nothing
+     * @return The configuration value
+     * @throws ConfigException if the value is not found
+     */
+    public Integer getAlleleType(String type) throws ConfigException
+    {
+        return getConfigInteger("ALLELE_TYPE_"+type);
+    }
+
+    /**
+     * Get the mutation types string from the config file - a comma separated
+     * list of mutation types
      * @assumes The "MUTATION_TYPES" constant is defined in the config file
      * as a comma seperated list of names of mutation types that exist in
      * the MGI VOC_Term table for _vocab_key = 36 (Allele Molecular Mutation)
@@ -109,6 +123,59 @@ public class TargetedAlleleLoadCfg extends InputDataCfg
         return getConfigString("MUTATION_TYPES");
     }
 
+    /**
+     * Get the mutation types string from the config file - a comma separated
+     * list of mutation types
+     * @assumes The "MUTATION_TYPES" constant is defined in the config file
+     * as a comma seperated list of names of mutation types that exist in
+     * the MGI VOC_Term table for _vocab_key = 36 (Allele Molecular Mutation)
+     * an optional "type" is included, with the default type being returned
+     * if the "type" is not specified here
+     * @effects Nothing
+     * @return The configuration value
+     * @throws ConfigException if the value is not found
+     */
+    public String getMutationTypes(String type) throws ConfigException
+    {
+        if (type=="Deletion")
+        {
+            return getConfigString("MUTATION_TYPES_DELETION");
+        }
+        return getConfigString("MUTATION_TYPES");
+    }
+
+
+    /**
+     * Get the database key for a VOC_Term identifying who created the alleles
+     * associated to this derivation
+     * @assumes The "DERIVATION_CREATOR_KEY" constant is defined in the config file
+     * @effects Nothing
+     * @return The configuration value
+     * @throws ConfigException if the value is not found
+     */
+    public String getCreatorKey() throws ConfigException
+    {
+        return getConfigString("DERIVATION_CREATOR_KEY");
+    }
+
+    /**
+     * Get the database key for an ALL_CellLine identifying a parental ES Cell
+     * key for alleles associated to this derivation
+     * @assumes The "DERIVATION_PARENTAL_KEY_[ALL_CellLine.cellLine]" 
+     * constant is defined in the config file.  We use cfg object for this
+     * instead of a direct cell line lookup so we can override values for 
+     * parental es cell name supplied in the input file with standardized 
+     * names in MGD. The cell line name must be stripped of all "funny"
+     * characters (funny meaning non-alphanumeric)
+     * @effects Nothing
+     * @return The configuration value
+     * @throws ConfigException if the value is not found
+     */
+    public Integer getParentalKey(String p) throws ConfigException
+    {
+        String q = "DERIVATION_PARENTAL_KEY_" + p.replaceAll(" ", "").toUpperCase();
+        return getConfigInteger(q);        
+    }
 
     /**
      * Get the provider string

@@ -26,6 +26,11 @@ public class Constants
      * ACC_MGIType key for ES Cell type
      */
     public static final int ESCELL_MGITYPE_KEY = 28;
+    
+    /**
+     * VOC_Term key for ES Cell type "Embryonic Stem Cell"
+     */
+    public static final int ESCELL_TYPE_KEY = 3982968;
 
     /*
      * MGI_NoteType key for note type (Molecular)
@@ -51,6 +56,11 @@ public class Constants
      * VOC_Term key for Allele status (Approved)
      */
     public static final int ALLELE_STATUS = 847114;
+    
+    /*
+     * VOC_Term key for transmission (Cell Line)
+     */
+    public static final int TRANSMISSION_KEY = 3982953;
 
 
     /*

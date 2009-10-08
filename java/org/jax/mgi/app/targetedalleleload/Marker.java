@@ -14,14 +14,14 @@ public class Marker
     private String accid = null;
     private String chromosome = null;
     private String symbol = null;
-    private int key = 0;
+    private Integer key = null;
 
     /**
      * constructor
      * @param accid the accession id of the marker
      * @param key the databse key of object
      */
-    public Marker(String accid, String symbol, String chromosome, int key)
+    public Marker(String accid, String symbol, String chromosome, Integer key)
     {
         this.accid = accid;
         this.chromosome = chromosome;
@@ -60,7 +60,7 @@ public class Marker
      * get the database key of the marker
      * @return the database key
      */
-    public int getKey()
+    public Integer getKey()
     {
         return this.key;
     }
@@ -87,7 +87,7 @@ public class Marker
      */
     public int hashCode()
     {
-        return (new Integer(this.getKey())).hashCode();
+        return (this.getKey()).hashCode();
     }
 
     /**

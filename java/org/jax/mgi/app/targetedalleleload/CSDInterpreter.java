@@ -21,10 +21,6 @@ import org.jax.mgi.shr.config.ConfigException;
  *   <UL>
  *   <LI> Interprets a CSD Allele record into it's various parts
  *   </UL>
- * @returns
- *   <UL>
- *   <LI> CSDAlleleInput object
- *   </UL>
  * @company The Jackson Laboratory
  * @author jmason
  * @version 1.0
@@ -36,6 +32,7 @@ public class CSDInterpreter implements RecordDataInterpreter
     // The minimum length of a valid input record (including NL character).
     //
     private static final int MIN_REC_LENGTH = 50;
+    private static final String DELIM = ",";
 
     private DLALogger logger = null;
     
@@ -83,7 +80,7 @@ public class CSDInterpreter implements RecordDataInterpreter
 
         // Get fields from the input record
         // The file is TAB delimited
-        String[] fields = rec.split("\t");
+        String[] fields = rec.split(DELIM);
         
         // Strip off any trailing whitespace from each field
         for (int i=0; i< fields.length; i++)
@@ -97,23 +94,40 @@ public class CSDInterpreter implements RecordDataInterpreter
         // 1 - Genome Build
         // 2 - Cassette
         // 3 - Project (CSD, EUCOMM, NorCOMM)
-        // 3 - Project ID
-        // 4 - Mutant ES cell line ID
-        // 5 - Parent ES cell line name
-        // 6 - Mutation type
-        // 7 - Insertion point 1
-        // 8 - Insertion point 2
+        // 4 - Project ID
+        // 5 - Mutant ES cell line ID
+        // 6 - Parent ES cell line name
+        // 7 - Sanger allele name
+        // 8 - Mutation type
+        // 9 - Insertion point 1
+        // 10 - Insertion point 2
 
         inputData.setGeneId(fields[0]);
         inputData.setBuild(fields[1]);
         inputData.setCassette(fields[2]);
-        //project is 3
+
+        // field 3 defines which pipeline created the MCL
+        // This being the CSD interpreter, we already know because we
+        // filter out all the other lines in the isValid check.
+
         inputData.setProjectId(fields[4]);
         inputData.setESCellName(fields[5]);
         inputData.setParentESCellName(fields[6]);
-        inputData.setMutationType(fields[7]);
-        inputData.setLocus1(fields[8]);
-        inputData.setLocus2(fields[9]);
+        inputData.setMutationType(fields[8]);
+        String[] locus1parts = fields[9].split("-");
+        inputData.setLocus1(locus1parts[0]);
+        
+        if (fields[10].compareTo("-") == 0)
+        {
+            // Deletion allele doesn't have second coord pair, use the second
+            // part of the first coord pair
+            inputData.setLocus2(locus1parts[1]);
+        }
+        else
+        {
+            String[] locus2parts = fields[10].split("-");
+            inputData.setLocus2(locus2parts[0]);            
+        }
 
         // Return the populated inputData object.
         //
@@ -135,29 +149,31 @@ public class CSDInterpreter implements RecordDataInterpreter
         // comment and should be ignored.
         // The first line is a header starting with the string "CloneID"
         // and should be ignored.
-        String[] parts = rec.split("\t");
+        String[] parts = rec.split(DELIM);
         
         if (rec.substring(0,1).equals("#"))
         {
             // Ignore comment lines which start with a "#" character
             return false;
         }
-        else if (!parts[3].matches("CSD"))
+        else if (!parts[3].matches("KOMP"))
         {
-            // unknown mutation type
-            String msg = "SKIPPING THIS RECORD: ";
-            msg += "Not this project\n";
-            msg += rec;
-            logger.logcInfo(msg,false);
+            // Wrong project
             return false;
         }
-        else if (!parts[7].matches("Conditional|Targeted non-conditional|Deletion"))
+        else if (parts[5].matches("^DEPD.*"))
+        {
+            // Wrong project
+            return false;
+        }
+        else if (!parts[8].matches("Conditional|Targeted non-conditional|Deletion"))
         {
             // unknown mutation type
             String msg = "SKIPPING THIS RECORD: ";
-            msg += "Unknown mutation type\n";
+            msg += "Mutation type is: "+parts[8];
+            msg += "which is an unknown mutation type\n";
             msg += rec;
-            logger.logcInfo(msg,false);
+            logger.logdInfo(msg,false);
             return false;
         }
         else

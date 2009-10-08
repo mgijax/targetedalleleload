@@ -21,6 +21,9 @@ import org.jax.mgi.shr.exception.MGIException;
 
 interface KnockoutAlleleInput
 {
+    String getGeneId();
     String getProjectId();
-    String getESCellName();
+    String getCassette();
+    String getMutantCellLine();
+    String getParentCellLine();
 }
