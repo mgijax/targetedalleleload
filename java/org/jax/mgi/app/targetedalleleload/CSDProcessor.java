@@ -56,6 +56,7 @@ public class CSDProcessor extends KnockoutAlleleProcessor
     private AlleleLookupByProjectId alleleLookpuByProjectId = null;
     private ProjectLookupByMarker projectByMarkerLookup = null;
     private AlleleLookupByMarker alleleLookupByMarker = null;
+    private StrainLookupByEsCell strainLookupByEsCell = null;
     
     
     
@@ -87,6 +88,7 @@ public class CSDProcessor extends KnockoutAlleleProcessor
         alleleLookupByMarker = new AlleleLookupByMarker(projectLogicalDB);
         markerLookup = new MarkerLookupByMGIID();
 		vocabLookup = new VocabKeyLookup(Constants.ALLELE_VOCABULARY);
+		strainLookupByEsCell = new StrainLookupByEsCell();
     }
 
     public void addToProjectCache(String projectId, HashMap alleleMap)
@@ -124,7 +126,7 @@ public class CSDProcessor extends KnockoutAlleleProcessor
 
         // Get the external dependencies referenced in this row
         Marker marker = markerLookup.lookup(in.getGeneId());
-        Integer strainKey = cfg.getParentalKey(in.getParentCellLine());
+        Integer strainKey = strainLookupByEsCell.lookup(in.getParentCellLine());
 
         koAllele.setMarkerKey(marker.getKey());
         koAllele.setProjectId(in.getProjectId());
