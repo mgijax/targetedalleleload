@@ -132,9 +132,10 @@ public class RegeneronProcessor extends KnockoutAlleleProcessor
         // PROVIDER
         int seq = 1; // Default to the first project
         HashSet allProj = projectLookupByMarker.lookup(marker.getSymbol());
-        if (allProj != null) {
+        if (allProj != null && !allProj.contains(in.getProjectId())) {
             // There is already a project (or projects) associated to this
-            // marker.  Increment the count for this allele
+            // marker, and it is not tHIS project. Increment the count 
+            // for this new allele symbol
             seq = (allProj.size()) + 1;
         }
 

@@ -13,6 +13,7 @@ import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
 import org.jax.mgi.shr.ioutils.RecordDataInterpreter;
 import org.jax.mgi.dbs.mgd.lookup.VocabKeyLookup;
 import org.jax.mgi.dbs.mgd.lookup.StrainKeyLookup;
+import org.jax.mgi.dbs.mgd.lookup.ParentStrainLookupByParentKey;
 
 import org.jax.mgi.shr.ioutils.RecordFormatException;
 import org.jax.mgi.shr.config.ConfigException;
@@ -56,7 +57,8 @@ public class CSDProcessor extends KnockoutAlleleProcessor
     private AlleleLookupByProjectId alleleLookpuByProjectId = null;
     private ProjectLookupByMarker projectByMarkerLookup = null;
     private AlleleLookupByMarker alleleLookupByMarker = null;
-    private StrainLookupByEsCell strainLookupByEsCell = null;
+    private ParentStrainLookupByParentKey parentStrainLookupByParentKey = null;
+    private StrainKeyLookup strainKeyLookup = null;
     
     
     
@@ -88,7 +90,8 @@ public class CSDProcessor extends KnockoutAlleleProcessor
         alleleLookupByMarker = new AlleleLookupByMarker(projectLogicalDB);
         markerLookup = new MarkerLookupByMGIID();
 		vocabLookup = new VocabKeyLookup(Constants.ALLELE_VOCABULARY);
-		strainLookupByEsCell = new StrainLookupByEsCell();
+		parentStrainLookupByParentKey = new ParentStrainLookupByParentKey();
+		strainKeyLookup = new StrainKeyLookup();
     }
 
     public void addToProjectCache(String projectId, HashMap alleleMap)
@@ -126,7 +129,7 @@ public class CSDProcessor extends KnockoutAlleleProcessor
 
         // Get the external dependencies referenced in this row
         Marker marker = markerLookup.lookup(in.getGeneId());
-        Integer strainKey = strainLookupByEsCell.lookup(in.getParentCellLine());
+        Integer strainKey = strainKeyLookup.lookup(parentStrainLookupByParentKey.lookup(cfg.getParentalKey(in.getParentCellLine())));
 
         koAllele.setMarkerKey(marker.getKey());
         koAllele.setProjectId(in.getProjectId());

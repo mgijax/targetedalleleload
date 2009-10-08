@@ -83,9 +83,10 @@ public class CSDInterpreter implements RecordDataInterpreter
         String[] fields = rec.split(DELIM);
         
         // Strip off any trailing whitespace from each field
+        // Also remove the double quotes.
         for (int i=0; i< fields.length; i++)
         {
-            fields[i] = fields[i].trim();
+            fields[i] = fields[i].trim().replaceAll("\"", "");
         }
 
         // Set the attributes of the inputData object using the fields parsed
@@ -156,17 +157,17 @@ public class CSDInterpreter implements RecordDataInterpreter
             // Ignore comment lines which start with a "#" character
             return false;
         }
-        else if (!parts[3].matches("KOMP"))
+        else if (!parts[3].replaceAll("\"", "").matches("KOMP"))
         {
             // Wrong project
             return false;
         }
-        else if (parts[5].matches("^DEPD.*"))
+        else if (parts[5].replaceAll("\"", "").matches("^DEPD.*"))
         {
             // Wrong project
             return false;
         }
-        else if (!parts[8].matches("Conditional|Targeted non-conditional|Deletion"))
+        else if (!parts[8].replaceAll("\"", "").matches("Conditional|Targeted non-conditional|Deletion"))
         {
             // unknown mutation type
             String msg = "SKIPPING THIS RECORD: ";

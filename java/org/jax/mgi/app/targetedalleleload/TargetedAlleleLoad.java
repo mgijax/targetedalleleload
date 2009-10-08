@@ -348,30 +348,17 @@ extends DLALoader
                 koMutantCellLineLookup.addToCache(in.getMutantCellLine(), mcl);
 
                 // Create the MutantCellLine Accession object
-                // note the missing AccID parameter which indicates this is an MGI ID
+                // note the missing AccID parameter which indicates this is 
+                // an MGI ID
                 AccessionId mclAccId = new AccessionId(
                     in.getMutantCellLine(),         // MCL name
-                    cfg.getEsCellLogicalDb(),    // Logical DB
-                    mclDAO.getKey().getKey(),    // MCL object key
+                    cfg.getEsCellLogicalDb(),       // Logical DB
+                    mclDAO.getKey().getKey(),       // MCL object key
                     new Integer(Constants.ESCELL_MGITYPE_KEY),   // MGI type
                     Boolean.FALSE,  // Private?
                     Boolean.TRUE    // Preferred?
                     );
                 mclAccId.insert(loadStream);
-
-                
-                //           o // Determine if the appropriate allele exists, if so, attach the new MCL to it
-                //                 + Construct an allele from this input record (don't save it yet)
-                //                 + Lookup all existing alleles associated to this project ID
-                //                 + for each allele
-                //                       # Should this input record be associated with this allele?
-                //                             * (This check is done by comparing allele "types" and "strain similarity" sets)
-                //                                   o A strain is similar to another strain if a curator defines that it is (in general, the rule is that strains are similar if they are subclones of the same parental strain) 
-                //                             * yes (types match and strains are "similar")
-                //                                         + Create the accession entry for the project ID
-                //                                         + continue to the next input record 
-                //                             * no
-                //                                   o Continue to the next allele 
                 
                 // lookup existing alleles for this project
                 String projectId = in.getProjectId();
