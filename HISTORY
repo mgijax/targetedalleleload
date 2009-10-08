@@ -1,3 +1,13 @@
+TAG: targetedalleleload-4-3-0-2
+DATE: October 08, 2009
+STAFF: jmason
+CHANGES:
+    - Since we switched to iterating be cell line (instead of allele), 
+      updating the note was adding a new note for each cell line. 
+      This update makes it so only add one note per allele gets added.
+    - Prime the allele lookup by project id with the project logical DB
+      not the es cell logical db
+
 TAG: targetedalleleload-4-3-0-1
 DATE: October 08, 2009
 STAFF: jmason
