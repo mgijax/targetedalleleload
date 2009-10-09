@@ -194,7 +194,7 @@ extends DLALoader
             }
 
 
-            // Construct the allele based off the input record
+            // Construct the allele from the input record
             KnockoutAllele constructed = null;
             
             try
@@ -203,24 +203,27 @@ extends DLALoader
             }
             catch (KeyNotFoundException e)
             {
-                String m = "1 Allele creation error, check:\n"+in.getMutantCellLine();
+                String m = "Allele creation error, check: ";
+                m += in.getMutantCellLine() + " ";
                 m += e.getMessage();
-                super.logger.logcInfo(m, false);
+                super.logger.logdInfo(m, false);
                 continue;
             }
             catch (ConfigException e)
             {
-                String m = "Configuration error, skipping record:\n"+in.getMutantCellLine();
+                String m = "Configuration error, skipping record: ";
+                m += in.getMutantCellLine() + " ";
                 m += e.getMessage();
-                super.logger.logcInfo(m, false);
+                super.logger.logdInfo(m, false);
                 continue;
             }
             
 
             if (constructed == null)
             {
-                String m = "2 Allele creation error, check:\n"+in.getMutantCellLine();
-                super.logger.logcInfo(m, false);
+                String m = "Allele creation error, check: ";
+                m += in.getMutantCellLine() + " ";
+                super.logger.logdInfo(m, false);
                 continue;                    
             }
 

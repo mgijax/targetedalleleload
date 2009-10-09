@@ -63,8 +63,8 @@ public class CSDProcessor extends KnockoutAlleleProcessor
     
     
 
-    private static final String PROMOTER_DRIVEN = "L1L2_Bact_P|L1L2_PGK_P";
-    private static final String PROMOTER_LESS = "L1L2_gt0|L1L2_gt1|L1L2_gt2|L1L2_gtK|L1L2_st0|L1L2_st1|L1L2_st2";
+    private String PROMOTER_DRIVEN = "L1L2_Bact_P|L1L2_PGK_P|L1L2_Pgk_PM";
+    private String PROMOTER_LESS = "L1L2_gt0|L1L2_gt1|L1L2_gt2|L1L2_gtK|L1L2_st0|L1L2_st1|L1L2_st2";
 
     /**
      * Constructs a KnockoutAllele processor object.
@@ -81,6 +81,9 @@ public class CSDProcessor extends KnockoutAlleleProcessor
     DBException,CacheException,TranslationException
     {
         cfg = new TargetedAlleleLoadCfg();
+        
+        PROMOTER_DRIVEN = cfg.getPromoterDrivenCassettes();
+        PROMOTER_LESS = cfg.getPromoterLessCassettes();
         
         Integer escLogicalDB = cfg.getEsCellLogicalDb();
         Integer projectLogicalDB = cfg.getProjectLogicalDb();
@@ -279,6 +282,12 @@ public class CSDProcessor extends KnockoutAlleleProcessor
             {
                 note = cfg.getNoteTemplateDeletionPromoterless();
             }
+            else
+            {
+                throw new MGIException(
+                    "SKIPPING THIS RECORD: missing cassette type in CFG file\n"+koAllele
+                );
+            }
             
             // Calculate the deletion size
             if (in.getLocus1().compareTo("0") != 0 && 
@@ -307,6 +316,12 @@ public class CSDProcessor extends KnockoutAlleleProcessor
             {
                 note = cfg.getNoteTemplateCondPromoterless();
             }
+            else
+            {
+                throw new MGIException(
+                    "SKIPPING THIS RECORD: missing cassette type in CFG file\n"+koAllele
+                );
+            }
         }
         else if (in.getMutationType().compareTo("Targeted non-conditional") == 0)
         {
@@ -320,11 +335,24 @@ public class CSDProcessor extends KnockoutAlleleProcessor
             {
                 note = cfg.getNoteTemplateNonCondPromoterless();
             }
+            else
+            {
+                throw new MGIException(
+                    "SKIPPING THIS RECORD: missing cassette type in CFG file\n"+koAllele
+                );
+            }
         }
         else
         {
             throw new MGIException(
                 "SKIPPING THIS RECORD: Unknown mutation type\n"+in.getMutationType() + "|" +koAllele
+            );
+        }
+
+        if (note == "")
+        {
+            throw new MGIException(
+                "SKIPPING THIS RECORD: missing note\n"+koAllele
             );
         }
 

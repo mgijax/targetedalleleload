@@ -87,8 +87,8 @@ extends FullCachedLookup
      * add a new map to the cache
      * @assumes nothing
      * @effects the value identified by 'cellLine' will be added or replaced 
-     * @param symbol the marker symbol
-     * @param alleles set of all allele symbols
+     * @param cellLine the cellLine name
+     * @param koAllele the knockout allele 
      * @throws DBException thrown if there is an error with the database
      * @throws CacheException thrown if there is an error with the cache
      */

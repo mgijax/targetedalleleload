@@ -31,7 +31,7 @@ LOG_VAL=${LOGDIR}/csd_tal.val.log
 ALLELE_PROVIDER='Wellcome Trust Sanger Institute'
 
 #
-# JNumber reference for Regeneron Alleles
+# JNumber reference for CSD Alleles
 #
 JNUMBER='J:148605'
 
@@ -41,6 +41,13 @@ JNUMBER='J:148605'
 # ~~SEQUENCE~~ is replaced with the (number of Existing Alleles)+1
 #
 SYMBOL_TEMPLATE='~~SYMBOL~~<tm~~SEQUENCE~~(KOMP)Wtsi>'
+
+#
+# These strings identify which cassettes are promoter driven
+# They are cassette names separated by pipe "|" characters
+#
+PROMOTERLESS_CASSETTES="L1L2_Bact_P|L1L2_PGK_P|L1L2_Pgk_PM"
+PROMOTERDRIVEN_CASSETTES="L1L2_gt0|L1L2_gt1|L1L2_gt2|L1L2_gtK|L1L2_st0|L1L2_st1|L1L2_st2"
 
 #
 # New Alleles are created using the following template as the Allele name.  

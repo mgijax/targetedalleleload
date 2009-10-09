@@ -225,6 +225,28 @@ public class TargetedAlleleLoadCfg extends InputDataCfg
         return getConfigString("NOTE_TEMPLATE_DELETION_PROMOTERLESS");
     }
 
+    /**
+     * Get the string identifying promoter driven cassettes
+     * @assumes The appropriate constant is defined in the config file
+     * @effects Nothing
+     * @return The configuration value, default is empty string
+     * @throws ConfigException
+     */
+    public String getPromoterDrivenCassettes() throws ConfigException
+    {
+        return getConfigString("PROMOTERDRIVEN_CASSETTES");
+    }
+    /**
+     * Get the string identifying promoter driven cassettes
+     * @assumes The appropriate constant is defined in the config file
+     * @effects Nothing
+     * @return The configuration value, default is empty string
+     * @throws ConfigException
+     */
+    public String getPromoterLessCassettes() throws ConfigException
+    {
+        return getConfigString("PROMOTERLESS_CASSETTES");
+    }
 
 
     /**
