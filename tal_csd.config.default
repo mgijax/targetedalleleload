@@ -79,6 +79,13 @@ MUTATION_TYPES='Insertion'
 MUTATION_TYPES_DELETION='Insertion, Intragenic deletion'
 
 #
+# New alleles are created with the following allele types
+#
+ALLELE_TYPE_CONDITIONAL='847118'
+ALLELE_TYPE_NONCONDITIONAL='847119'
+ALLELE_TYPE_DELETION='847116'
+
+#
 # New ES Cells are created with in the following logical database
 #
 ESCELL_LOGICAL_DB='108'
