@@ -284,7 +284,7 @@ public class CSDProcessor extends KnockoutAlleleProcessor
             }
             else
             {
-                throw new MGIException(
+                throw new ConfigException(
                     "SKIPPING THIS RECORD: missing cassette type in CFG file\n"+koAllele
                 );
             }
@@ -318,7 +318,7 @@ public class CSDProcessor extends KnockoutAlleleProcessor
             }
             else
             {
-                throw new MGIException(
+                throw new ConfigException(
                     "SKIPPING THIS RECORD: missing cassette type in CFG file\n"+koAllele
                 );
             }
@@ -337,7 +337,7 @@ public class CSDProcessor extends KnockoutAlleleProcessor
             }
             else
             {
-                throw new MGIException(
+                throw new ConfigException(
                     "SKIPPING THIS RECORD: missing cassette type in CFG file\n"+koAllele
                 );
             }

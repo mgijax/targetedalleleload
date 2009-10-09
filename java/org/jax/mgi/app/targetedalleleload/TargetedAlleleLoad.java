@@ -204,7 +204,7 @@ extends DLALoader
             catch (KeyNotFoundException e)
             {
                 String m = "Allele creation error, check: ";
-                m += in.getMutantCellLine() + " ";
+                m += in.getMutantCellLine() + "\n";
                 m += e.getMessage();
                 super.logger.logdInfo(m, false);
                 continue;
@@ -212,17 +212,25 @@ extends DLALoader
             catch (ConfigException e)
             {
                 String m = "Configuration error, skipping record: ";
-                m += in.getMutantCellLine() + " ";
+                m += in.getMutantCellLine() + "\n";
                 m += e.getMessage();
                 super.logger.logdInfo(m, false);
                 continue;
+            }
+            catch (MGIException e)
+            {
+                String m = "General error, skipping record: ";
+                m += in.getMutantCellLine() + "\n";
+                m += e.getMessage();
+                super.logger.logdInfo(m, false);
+                continue;                
             }
             
 
             if (constructed == null)
             {
                 String m = "Allele creation error, check: ";
-                m += in.getMutantCellLine() + " ";
+                m += in.getMutantCellLine();
                 super.logger.logdInfo(m, false);
                 continue;                    
             }
