@@ -36,7 +36,6 @@ import org.jax.mgi.shr.ioutils.RecordFormatException;
 import org.jax.mgi.shr.ioutils.IOUException;
 
 import org.jax.mgi.shr.cache.KeyNotFoundException;
-import org.jax.mgi.shr.config.ConfigException;
 
 import org.jax.mgi.dbs.SchemaConstants;
 import org.jax.mgi.shr.dbutils.SQLDataManager;
@@ -204,14 +203,6 @@ extends DLALoader
             catch (KeyNotFoundException e)
             {
                 String m = "Allele creation error, check: ";
-                m += in.getMutantCellLine() + "\n";
-                m += e.getMessage();
-                super.logger.logdInfo(m, false);
-                continue;
-            }
-            catch (ConfigException e)
-            {
-                String m = "Configuration error, skipping record: ";
                 m += in.getMutantCellLine() + "\n";
                 m += e.getMessage();
                 super.logger.logdInfo(m, false);
