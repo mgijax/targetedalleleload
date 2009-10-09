@@ -23,7 +23,7 @@ import org.jax.mgi.shr.cache.CacheException;
 import org.jax.mgi.dbs.mgd.lookup.TranslationException;
 import org.jax.mgi.shr.cache.KeyNotFoundException;
 import org.jax.mgi.shr.exception.MGIException;
-
+import org.jax.mgi.shr.config.ConfigException;
 
 /**
  * @is An object that knows how to create KOMP Clone objects from 

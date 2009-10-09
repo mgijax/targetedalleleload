@@ -36,7 +36,7 @@ import org.jax.mgi.shr.ioutils.RecordFormatException;
 import org.jax.mgi.shr.ioutils.IOUException;
 
 import org.jax.mgi.shr.cache.KeyNotFoundException;
-
+import org.jax.mgi.shr.config.ConfigException;
 
 import org.jax.mgi.dbs.SchemaConstants;
 import org.jax.mgi.shr.dbutils.SQLDataManager;
