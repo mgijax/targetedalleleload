@@ -79,7 +79,7 @@ public class CSDInterpreter implements RecordDataInterpreter
         }
 
         // Get fields from the input record
-        // The file is TAB delimited
+        // The file is DELIM delimited
         String[] fields = rec.split(DELIM);
         
         // Strip off any trailing whitespace from each field

@@ -84,10 +84,9 @@ public class CSDProcessor extends KnockoutAlleleProcessor
         PROMOTER_DRIVEN = cfg.getPromoterDrivenCassettes();
         PROMOTER_LESS = cfg.getPromoterLessCassettes();
         
-        Integer escLogicalDB = cfg.getEsCellLogicalDb();
         Integer projectLogicalDB = cfg.getProjectLogicalDb();
 
-        alleleLookpuByProjectId = new AlleleLookupByProjectId(escLogicalDB);
+        alleleLookpuByProjectId = new AlleleLookupByProjectId(projectLogicalDB);
         projectByMarkerLookup = new ProjectLookupByMarker(projectLogicalDB);
         alleleLookupByMarker = new AlleleLookupByMarker(projectLogicalDB);
         markerLookup = new MarkerLookupByMGIID();
