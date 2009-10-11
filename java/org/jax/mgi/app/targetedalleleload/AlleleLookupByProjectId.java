@@ -189,8 +189,18 @@ public class AlleleLookupByProjectId extends FullCachedLookup
             projectId = row.getString("projectid");
             symbol = row.getString("symbol");
             key = row.getInt("allelekey");
-            parentCellLine = row.getString("parentCellLine");
             mutantCellLine = row.getString("mutantCellLine");
+
+            // do the same transform to the es cell line name that 
+            // is done to the input record es cell line name 
+            // See CSDAlleleInput.setParentESCellName
+            parentCellLine = row.getString("parentCellLine").toUpperCase()
+            .replaceAll("\\s+", "")
+            .replaceAll("\\(", "")
+            .replaceAll("\\)", "")
+            .replaceAll("/", "")
+            .replaceAll("\\?", "")
+            .replaceAll("\\.","");
         }
     }
 }
