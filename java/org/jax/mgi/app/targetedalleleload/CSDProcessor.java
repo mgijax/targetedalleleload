@@ -362,7 +362,7 @@ public class CSDProcessor extends KnockoutAlleleProcessor
         note = note.replaceAll("~~BUILD~~", in.getBuild());
         if (in.getCassette().matches(PROMOTER_DRIVEN))
         {
-            note = note.replaceAll("~~PROMOTER~~", cfg.getPromoter(in.getCassette()));
+            note = note.replaceAll("~~PROMOTER~~", cfg.getPromoter(in.getCassette().toUpperCase()));
         }
         koAllele.setNote(note);
 
