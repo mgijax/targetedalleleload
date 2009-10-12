@@ -10,6 +10,12 @@ import org.jax.mgi.shr.ioutils.RecordFormatException;
 import org.jax.mgi.shr.exception.MGIException;
 import org.jax.mgi.shr.config.ConfigException;
 
+// Support for CSV splitting
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * @is An object that knows how to Interpret
  * the CSD allele file 
@@ -34,6 +40,9 @@ public class CSDInterpreter implements RecordDataInterpreter
     private static final int MIN_REC_LENGTH = 50;
     private static final String DELIM = ",";
 
+    public static final String CSV_PATTERN = "\"([^\"]+?)\",?|([^,]+),?|,";
+    private static Pattern csvRE;
+
     private DLALogger logger = null;
     
     /**
@@ -43,6 +52,7 @@ public class CSDInterpreter implements RecordDataInterpreter
      */
     public CSDInterpreter ()
     {
+        csvRE = Pattern.compile(CSV_PATTERN);
         try
         {
             logger = DLALogger.getInstance();
@@ -51,6 +61,30 @@ public class CSDInterpreter implements RecordDataInterpreter
         {
             logger.logdInfo(e.getMessage(), true);
         }
+    }
+
+    /** Parse one line.
+     * @return List of Strings, minus their double quotes
+     */
+    public List parse(String line) {
+        List list = new ArrayList();
+        Matcher m = csvRE.matcher(line);
+        // For each field
+        while (m.find()) {
+            String match = m.group();
+            if (match == null)
+                break;
+            if (match.endsWith(",")) {  // trim trailing ,
+                match = match.substring(0, match.length() - 1);
+            }
+            if (match.startsWith("\"")) { // assume also ends with
+                match = match.substring(1, match.length() - 1);
+            }
+            if (match.length() == 0)
+                match = null;
+            list.add(match);
+        }
+        return list;
     }
 
     /**
@@ -80,7 +114,9 @@ public class CSDInterpreter implements RecordDataInterpreter
 
         // Get fields from the input record
         // The file is DELIM delimited
-        String[] fields = rec.split(DELIM);
+        //String[] fields = rec.split(DELIM);
+        List list = parse(rec);
+        String[] fields = (String[]) list.toArray(new String[0]);
         
         // Strip off any trailing whitespace from each field
         // Also remove the double quotes.
@@ -150,7 +186,9 @@ public class CSDInterpreter implements RecordDataInterpreter
         // comment and should be ignored.
         // The first line is a header starting with the string "CloneID"
         // and should be ignored.
-        String[] parts = rec.split(DELIM);
+        //String[] parts = rec.split(DELIM);
+        List list = parse(rec);
+        String[] parts = (String[]) list.toArray(new String[0]);
         
         if (rec.substring(0,1).equals("#"))
         {
@@ -160,6 +198,11 @@ public class CSDInterpreter implements RecordDataInterpreter
         else if (!parts[3].replaceAll("\"", "").matches("KOMP"))
         {
             // Wrong project
+            return false;
+        }
+        else if (parts[6].matches(","))
+        {
+            // strangely formatted ES Cell (parental)
             return false;
         }
         else if (parts[5].replaceAll("\"", "").matches("^DEPD.*"))

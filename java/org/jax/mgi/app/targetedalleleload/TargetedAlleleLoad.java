@@ -239,14 +239,12 @@ extends DLALoader
             {
                 // Mutant ES Cell found in database, check the alleles
 
-                super.logger.logdInfo("QC Checking: " + esCell.getCellLine(), true);
-
                 // QC check the allele the MCL is attached to
                 KnockoutAllele existing = alleleLookupByCellLine.lookup(currentCellLine);
 
                 // Compare the notes to see if anything changed.
-                String existingNote = existing.getNote().replaceAll("\\n", "");
-                String constructedNote = constructed.getNote().replaceAll("\\n", "");
+                String existingNote = existing.getNote().replaceAll("\\n", "").replaceAll(" ", "");
+                String constructedNote = constructed.getNote().replaceAll("\\n", "").replaceAll(" ", "");
 
                 Integer existingGeneKey = existing.getMarkerKey();
                 Integer constructedGeneKey = constructed.getMarkerKey();

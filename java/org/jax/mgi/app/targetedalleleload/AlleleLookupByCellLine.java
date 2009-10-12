@@ -153,7 +153,7 @@ extends FullCachedLookup
                "and n._MGIType_key = 11 " +
                "and n._NoteType_key = 1021 " +
                "and n._Note_key *= nc._Note_key " +
-               "order by alleleKey, alleleNoteSeq " ;
+               "order by alleleKey, cellLine, alleleNoteSeq " ;
     }
 
     /**
