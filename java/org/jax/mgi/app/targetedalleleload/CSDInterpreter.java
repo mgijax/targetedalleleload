@@ -200,14 +200,19 @@ public class CSDInterpreter implements RecordDataInterpreter
             // Wrong project
             return false;
         }
-        else if (parts[6].matches(","))
-        {
-            // strangely formatted ES Cell (parental)
-            return false;
-        }
         else if (parts[5].replaceAll("\"", "").matches("^DEPD.*"))
         {
             // Wrong project
+            return false;
+        }
+        else if (parts[6].indexOf(",") > 0)
+        {
+            // strangely formatted ES Cell (parental)
+            String msg = "SKIPPING THIS RECORD: ";
+            msg += "Parental cell line is: "+parts[6];
+            msg += "\n";
+            msg += rec;
+            logger.logdInfo(msg,false);
             return false;
         }
         else if (!parts[8].replaceAll("\"", "").matches("Conditional|Targeted non-conditional|Deletion"))
