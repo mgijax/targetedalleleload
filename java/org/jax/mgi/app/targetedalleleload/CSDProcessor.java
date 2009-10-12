@@ -59,11 +59,11 @@ public class CSDProcessor extends KnockoutAlleleProcessor
     private ParentStrainLookupByParentKey parentStrainLookupByParentKey = null;
     private StrainKeyLookup strainKeyLookup = null;
     
-    
-    
+    private String PROMOTER_DRIVEN = "";
+    private String PROMOTER_LESS = "";
 
-    private String PROMOTER_DRIVEN = "L1L2_Bact_P|L1L2_PGK_P|L1L2_Pgk_PM";
-    private String PROMOTER_LESS = "L1L2_gt0|L1L2_gt1|L1L2_gt2|L1L2_gtK|L1L2_st0|L1L2_st1|L1L2_st2";
+    private Pattern alleleSequencePattern = null;
+    private Matcher regexMatcher = null;
 
     /**
      * Constructs a KnockoutAllele processor object.
@@ -93,6 +93,8 @@ public class CSDProcessor extends KnockoutAlleleProcessor
 		vocabLookup = new VocabKeyLookup(Constants.ALLELE_VOCABULARY);
 		parentStrainLookupByParentKey = new ParentStrainLookupByParentKey();
 		strainKeyLookup = new StrainKeyLookup();
+		
+		alleleSequencePattern = Pattern.compile(".*tm(\\d){1,2}[ae]{0,1}.*");
     }
 
     public void addToProjectCache(String projectId, HashMap alleleMap)
@@ -166,13 +168,12 @@ public class CSDProcessor extends KnockoutAlleleProcessor
             while (alleleSetIt.hasNext())
             {
                 String allSymbol = (String)alleleSetIt.next();
-                Pattern allPattern = Pattern.compile(".*tm(\\d){1,2}[ae]{0,1}.*");
-                Matcher allMatcher = allPattern.matcher(allSymbol);
-                if (allMatcher.find())
+                regexMatcher = alleleSequencePattern.matcher(allSymbol);
+                if (regexMatcher.find())
                 {
-                    if (Integer.parseInt(allMatcher.group(1)) >= seq)
+                    if (Integer.parseInt(regexMatcher.group(1)) >= seq)
                     {
-                        seq = Integer.parseInt(allMatcher.group(1))+1;
+                        seq = Integer.parseInt(regexMatcher.group(1))+1;
                     }
                 }
 
@@ -196,7 +197,6 @@ public class CSDProcessor extends KnockoutAlleleProcessor
         // Okay... now that we have a sensible default... see if we can
         // find an actual allele that exists already with the correct
         // attributes 
-
         HashMap alleles = alleleLookpuByProjectId.lookup(in.getProjectId());
         HashMap matchingAllele = null;
 
@@ -210,16 +210,6 @@ public class CSDProcessor extends KnockoutAlleleProcessor
             {
                 Map.Entry entry = (Map.Entry) it.next();
                 HashMap allele = (HashMap)entry.getValue();
-                String allMutType = "Deletion";
-                
-                if (((String)allele.get("symbol")).matches(".*tm\\d{1,2}a.*"))
-                {
-                    allMutType = "Conditional";
-                }
-                else if (((String)allele.get("symbol")).matches(".*tm\\d{1,2}e.*"))
-                {
-                    allMutType = "Targeted non-conditional";
-                }
 
                 // Compare parental cell lines
                 Integer fromFile = cfg.getParentalKey(in.getParentCellLine());
@@ -227,17 +217,13 @@ public class CSDProcessor extends KnockoutAlleleProcessor
                 if (fromData.compareTo(fromFile) == 0)
                 {
                     // MATCHES! reset the sequence to match the current allele
-                    Pattern pattern = Pattern.compile(".*<tm(\\d{1,2})[ae]{0,1}\\(.*");
-                    Matcher matcher = pattern.matcher(((String)allele.get("symbol")));
-                    if (matcher.find())
+                    String allSymbol = (String)allele.get("symbol");
+                    regexMatcher = alleleSequencePattern.matcher(allSymbol);
+                    if (regexMatcher.find())
                     {
-                        finalSequence = matcher.group(1) + let;
+                        finalSequence = regexMatcher.group(1) + let;
+                        alleleFound = Boolean.TRUE;
                     }
-                    else
-                    {
-                        continue;
-                    }
-                    alleleFound = Boolean.TRUE;
                 }
             }
         }
