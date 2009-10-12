@@ -240,12 +240,6 @@ public class CSDProcessor extends KnockoutAlleleProcessor
                     alleleFound = Boolean.TRUE;
                 }
             }
-
-            if (alleleFound != Boolean.TRUE)
-            {
-                Integer newAllele = new Integer(alleles.size() + 1);
-                finalSequence = newAllele.toString() + let;
-            }
         }
         
 
