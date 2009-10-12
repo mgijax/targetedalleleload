@@ -1,3 +1,9 @@
+TAG: targetedalleleload-4-3-0-6
+DATE: October 09, 2009
+STAFF: jmason
+CHANGES:
+    - skip records with multiple parent cell lines
+
 TAG: targetedalleleload-4-3-0-5
 DATE: October 09, 2009
 STAFF: jmason
