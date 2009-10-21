@@ -1,3 +1,11 @@
+TAG: targetedalleleload-4-3-0-8
+DATE: 10/21/2009
+STAFF: sc
+CHANGES: changes to load ALL_Marker_Assoc
+1) Constants.java - added qualifier and status key from Allele Marker
+   Association vocab
+2) KnockoutAllele - added creation of ALL_Marker_AssocDAO
+
 TAG: targetedalleleload-4-3-0-7
 DATE: October 09, 2009
 STAFF: jmason

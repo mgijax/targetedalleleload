@@ -20,6 +20,8 @@ import org.jax.mgi.shr.dbutils.DBException;
 
 import org.jax.mgi.dbs.mgd.dao.ALL_AlleleState;
 import org.jax.mgi.dbs.mgd.dao.ALL_AlleleDAO;
+import org.jax.mgi.dbs.mgd.dao.ALL_Marker_AssocState;
+import org.jax.mgi.dbs.mgd.dao.ALL_Marker_AssocDAO;
 import org.jax.mgi.dbs.mgd.dao.ALL_Allele_MutationState;
 import org.jax.mgi.dbs.mgd.dao.ALL_Allele_MutationDAO;
 import org.jax.mgi.dbs.mgd.dao.MGI_NoteState;
@@ -88,6 +90,8 @@ public class KnockoutAllele implements Comparable
     private Boolean isWildType = new Boolean(false);
     private Boolean isExtinct = new Boolean(false);
     private Boolean isMixed = new Boolean(false);
+    private Integer mkrAssocQualKey = new Integer(Constants.MKR_ASSOC_QUAL_NS_KEY);
+    private Integer mkrAssocStatusKey = new Integer(Constants.MKR_ASSOC_STAT_CURATED_KEY);
 
 
 
@@ -350,6 +354,15 @@ public class KnockoutAllele implements Comparable
         // Set this object key to the newly created allele key from the DB
         key = new Integer(aDAO.getKey().getKey().intValue());
 
+        // Create the marker associations
+        ALL_Marker_AssocState amaState = new ALL_Marker_AssocState();
+        amaState.setAlleleKey(key);
+        amaState.setMarkerKey(markerKey);
+        amaState.setQualifierKey(mkrAssocQualKey);
+        amaState.setStatusKey(mkrAssocStatusKey);
+
+        ALL_Marker_AssocDAO amaDAO = new ALL_Marker_AssocDAO(amaState);
+         stream.insert(amaDAO);
         // Create the mutation type references in the database
         for (Iterator i = mutationTypes.iterator(); i.hasNext();)
         {

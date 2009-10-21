@@ -68,4 +68,14 @@ public class Constants
      */
     public static final int[] REFERENCE_ASSOC = {1011, 1012};
 
+    /*
+     * VOC_Term key for Marker-Allele Association Qualifier "Not Specified"
+     */
+    public static final int MKR_ASSOC_QUAL_NS_KEY = 4268547;
+
+    /*
+     * VOC_Term key for Marker-Allele Association Status "Curated"
+     */
+    public static final int MKR_ASSOC_STAT_CURATED_KEY = 4268545;
+
 }
