@@ -141,6 +141,7 @@ public class CSDProcessor extends KnockoutAlleleProcessor
 
         // CSD Specific Mutation types
         Vector mutationTypeKeys = new Vector();
+	#System.out.println("Gene ID: " + in.getGeneId() + " Mutation Type: " + in.getMutationType() + "Configured Mutation Types: " + cfg.getMutationTypes(in.getMutationType()));
         String[] types = cfg.getMutationTypes(in.getMutationType()).split(",");
         for (int i=0;i<types.length;i++)
         {

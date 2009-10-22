@@ -1,3 +1,11 @@
+TAG: targetedalleleload-4-3-0-9
+DATE: 10/22/2009
+STAFF: sc
+CHANGES:
+1) tal_csd.config.default - added correct setting for CASSETTE_L1L2_PGK_PM
+2) TargetedAlleleLoadCfg updated test for String "Deletion" to use equals method
+   not "==" in getMutationTypes(String type)
+
 TAG: targetedalleleload-4-3-0-8
 DATE: 10/21/2009
 STAFF: sc

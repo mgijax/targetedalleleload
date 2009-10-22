@@ -137,7 +137,7 @@ public class TargetedAlleleLoadCfg extends InputDataCfg
      */
     public String getMutationTypes(String type) throws ConfigException
     {
-        if (type=="Deletion")
+        if (type.equals("Deletion"))
         {
             return getConfigString("MUTATION_TYPES_DELETION");
         }
