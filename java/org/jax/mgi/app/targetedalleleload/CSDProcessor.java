@@ -65,6 +65,8 @@ public class CSDProcessor extends KnockoutAlleleProcessor
     private Pattern alleleSequencePattern = null;
     private Matcher regexMatcher = null;
 
+
+
     /**
      * Constructs a KnockoutAllele processor object.
      * @assumes Nothing
@@ -180,23 +182,101 @@ public class CSDProcessor extends KnockoutAlleleProcessor
             }
         }
 
-        // The sequence letter
-        // Blank (the default) is for deletion alleles
+        // Default the allele sequence letter, the allele note, the deletion
+        // size (only used for deletion alleles) and cache the mutation type
         String let = "";
+        String note = "";
+        int delSize = 0;
         String mutType = in.getMutationType();
-        if (mutType.compareTo("Conditional") == 0)
+
+        // Determine the "type" of the allele based on the entry in 
+        // the configuration file and set the rest of the mutation type
+        // specific values
+        if (mutType.equals("Conditional"))
         {
             let = "a";
+            koAllele.setTypeKey(cfg.getAlleleType("CONDITIONAL"));
+            qcStatistics.record("SUMMARY", "Number of conditional allele input record(s)");
+
+            // Setup the conditional note template
+            if (in.getCassette().matches(PROMOTER_DRIVEN)) {
+                note = cfg.getNoteTemplateCondPromoter();
+            } else if (in.getCassette().matches(PROMOTER_LESS)) {
+                note = cfg.getNoteTemplateCondPromoterless();
+            } else {
+                qcStatistics.record("ERROR", "Number of records missing cassette in CFG file");
+                throw new MGIException(
+                    "Missing cassette type in CFG file: "+in.getCassette()
+                );
+            }
         }
-        else if (mutType.compareTo("Targeted non-conditional") == 0)
+        else if (mutType.equals("Targeted non-conditional"))
         {
             let = "e";
+            koAllele.setTypeKey(cfg.getAlleleType("NONCONDITIONAL"));
+            qcStatistics.record("SUMMARY", "Number of targeted non-conditional allele input record(s)");
+
+            // Setup the targeted nonconditional note template
+            if (in.getCassette().matches(PROMOTER_DRIVEN)) {
+                note = cfg.getNoteTemplateNonCondPromoter();
+            } else if (in.getCassette().matches(PROMOTER_LESS)) {
+                note = cfg.getNoteTemplateNonCondPromoterless();
+            } else {
+                qcStatistics.record("ERROR", "Number of records missing cassette in CFG file");
+                throw new MGIException(
+                    "Missing cassette type in CFG file: "+in.getCassette()
+                );
+            }
         }
+        else if (mutType.equals("Deletion"))
+        {
+            let = ""; // Empty string for Deletion alleles
+            koAllele.setTypeKey(cfg.getAlleleType("DELETION"));
+            qcStatistics.record("SUMMARY", "Number of deletion allele input record(s)");
+            
+            // Setup the deletion note template
+            if (in.getCassette().matches(PROMOTER_DRIVEN)) {
+                note = cfg.getNoteTemplateDeletionPromoter();
+            } else if (in.getCassette().matches(PROMOTER_LESS)) {
+                note = cfg.getNoteTemplateDeletionPromoterless();
+            } else {
+                qcStatistics.record("ERROR", "Number of records missing cassette in CFG file");
+                throw new MGIException(
+                    "Missing cassette type in CFG file: "+in.getCassette()
+                );
+            }
+            
+            // Calculate the deletion size
+            if (in.getLocus1().compareTo("0") != 0 && 
+                in.getLocus2().compareTo("0") != 0 )
+            {
+                int delStart = Integer.parseInt(in.getLocus1());
+                int delEnd = Integer.parseInt(in.getLocus2());
+                delSize = Math.abs(delEnd - delStart);
+            }
+            else
+            {
+                qcStatistics.record("ERROR", "Number of records missing coordinates");
+                throw new MGIException(
+                    "Missing coordinates\n"+koAllele
+                );
+            }
+        }
+        else
+        {
+            qcStatistics.record("ERROR", "Number of records with unknown mutation type");
+            throw new MGIException(
+                "Unknown mutation type\n" + mutType + " | " +koAllele
+            );
+        }
+
         String finalSequence = new Integer(seq).toString() + let;
 
-        // Okay... now that we have a sensible default... see if we can
-        // find an actual allele that exists already with the correct
-        // attributes 
+        // Now that we have a sensible default for the allele 
+        // sequence and letter ... see if we can find an actual 
+        // allele that exists already with matching Parental Cell Line
+        // and Project ID (this encompasses the vector since projects are
+        // granular to the targeting vector)
         HashMap alleles = alleleLookpuByProjectId.lookup(in.getProjectId());
         HashMap matchingAllele = null;
 
@@ -214,17 +294,23 @@ public class CSDProcessor extends KnockoutAlleleProcessor
                 // Compare parental cell lines
                 Integer fromFile = cfg.getParentalKey(in.getParentCellLine());
                 Integer fromData = cfg.getParentalKey((String)allele.get("parentCellLine"));
-                if (fromData.compareTo(fromFile) == 0)
+                if (fromData.equals(fromFile))
                 {
-                    // MATCHES! reset the sequence to match the current allele
+                    // MATCHES! reset the sequence to match the current allele and
+                    // short circuit the loop since we found the correct allele
                     String allSymbol = (String)allele.get("symbol");
                     regexMatcher = alleleSequencePattern.matcher(allSymbol);
                     if (regexMatcher.find())
                     {
                         finalSequence = regexMatcher.group(1) + let;
                         alleleFound = Boolean.TRUE;
+                        qcStatistics.record("SUMMARY", "Number of records that match an existing allele");
                     }
                 }
+            }
+            if (alleleFound != Boolean.TRUE)
+            {
+                qcStatistics.record("SUMMARY", "Number of records that will create a new allele");                
             }
         }
         
@@ -245,92 +331,11 @@ public class CSDProcessor extends KnockoutAlleleProcessor
         koAllele.setJNumber(jNumber);
 
 
-        String note = "";
-        int delSize = 0;
-
-        if (in.getMutationType().compareTo("Deletion") == 0)
-        {
-            koAllele.setTypeKey(cfg.getAlleleType("DELETION"));
-            
-            if (in.getCassette().matches(PROMOTER_DRIVEN))
-            {
-                note = cfg.getNoteTemplateDeletionPromoter();
-            }
-            else if (in.getCassette().matches(PROMOTER_LESS))
-            {
-                note = cfg.getNoteTemplateDeletionPromoterless();
-            }
-            else
-            {
-                throw new MGIException(
-                    "SKIPPING THIS RECORD: missing cassette type in CFG file: "+in.getCassette()
-                );
-            }
-            
-            // Calculate the deletion size
-            if (in.getLocus1().compareTo("0") != 0 && 
-                in.getLocus2().compareTo("0") != 0 )
-            {
-                int delStart = Integer.parseInt(in.getLocus1());
-                int delEnd = Integer.parseInt(in.getLocus2());
-                delSize = Math.abs(delEnd - delStart);
-            }
-            else
-            {
-                throw new MGIException(
-                    "SKIPPING THIS RECORD: missing coordinate\n"+koAllele
-                );
-            }
-        }
-        else if (in.getMutationType().compareTo("Conditional") == 0)
-        {
-            koAllele.setTypeKey(cfg.getAlleleType("CONDITIONAL"));
-
-            if (in.getCassette().matches(PROMOTER_DRIVEN))
-            {
-                note = cfg.getNoteTemplateCondPromoter();
-            }
-            else if (in.getCassette().matches(PROMOTER_LESS))
-            {
-                note = cfg.getNoteTemplateCondPromoterless();
-            }
-            else
-            {
-                throw new MGIException(
-                    "SKIPPING THIS RECORD: missing cassette type in CFG file: "+in.getCassette()
-                );
-            }
-        }
-        else if (in.getMutationType().compareTo("Targeted non-conditional") == 0)
-        {
-            koAllele.setTypeKey(cfg.getAlleleType("NONCONDITIONAL"));
-
-            if (in.getCassette().matches(PROMOTER_DRIVEN))
-            {
-                note = cfg.getNoteTemplateNonCondPromoter();
-            }
-            else if (in.getCassette().matches(PROMOTER_LESS))
-            {
-                note = cfg.getNoteTemplateNonCondPromoterless();
-            }
-            else
-            {
-                throw new MGIException(
-                    "SKIPPING THIS RECORD: missing cassette type in CFG file: "+in.getCassette()
-                );
-            }
-        }
-        else
-        {
-            throw new MGIException(
-                "SKIPPING THIS RECORD: Unknown mutation type\n"+in.getMutationType() + "|" +koAllele
-            );
-        }
-
         if (note == "")
         {
+            qcStatistics.record("ERROR", "Number of records that can't generate a molecular note");
             throw new MGIException(
-                "SKIPPING THIS RECORD: missing note\n"+koAllele
+                "Missing note\n"+koAllele
             );
         }
 

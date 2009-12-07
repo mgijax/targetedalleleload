@@ -25,7 +25,7 @@ import org.jax.mgi.shr.exception.MGIException;
  * @author jmason
  */
 
-public class RegeneronInterpreter implements RecordDataInterpreter
+public class RegeneronInterpreter extends KnockoutAlleleInterpreter
 {
 
     // The minimum length of a valid input record (including NL character).
@@ -64,6 +64,7 @@ public class RegeneronInterpreter implements RecordDataInterpreter
     {
 
         RegeneronAlleleInput inputData = new RegeneronAlleleInput();
+        qcStatistics.record("SUMMARY", "Number of input records");
 
         // Throw an exception if the input record does not meet the minimum
         // length required to extract the fields.
@@ -72,6 +73,7 @@ public class RegeneronInterpreter implements RecordDataInterpreter
         {
             RecordFormatException e = new RecordFormatException();
             e.bindRecord(rec);
+            qcStatistics.record("WARNING", "Poorly formated input record(s)");
             throw e;
         }
 
@@ -142,10 +144,7 @@ public class RegeneronInterpreter implements RecordDataInterpreter
         {
             // The gene symbol has a comma in it!  Probably a case of
             // one allele knocked out multiple markers.
-            String msg = "SKIPPING THIS RECORD: ";
-            msg += "Probable 'one allele knocked out multiple markers' record\n";
-            msg += rec;
-            logger.logcInfo(msg,false);
+            qcStatistics.record("WARNING", "One allele, multiple markers record(s) skipped");
             return false;
         }
         else
@@ -153,11 +152,11 @@ public class RegeneronInterpreter implements RecordDataInterpreter
             String[] fields = rec.split("\t");
             if (fields[6].equals("0") || fields[7].equals("0"))
             {
-                String msg = "SKIPPING THIS RECORD: ";
-                msg += "Deletion start/end is not reported\n";
-                msg += rec;
-                logger.logcInfo(msg,false);
-                return false;
+                // These alleles will have a different note template, but it
+                // might be helpful to know how many of them there are in the
+                // input file.
+                qcStatistics.record("WARNING", "Deletion start/end not reported");
+                return true;
             }
             return true;
         }

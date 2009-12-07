@@ -28,7 +28,7 @@ abstract class KnockoutAlleleFactory
     return null;
     }
     
-    public abstract RecordDataInterpreter getInterpreter();
+    public abstract KnockoutAlleleInterpreter getInterpreter();
     public abstract KnockoutAlleleProcessor getProcessor()
     throws MGIException;
 

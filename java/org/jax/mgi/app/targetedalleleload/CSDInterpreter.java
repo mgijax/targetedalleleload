@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
  * @version 1.0
  */
 
-public class CSDInterpreter implements RecordDataInterpreter
+public class CSDInterpreter extends KnockoutAlleleInterpreter
 {
 
     // The minimum length of a valid input record (including NL character).
@@ -44,7 +44,9 @@ public class CSDInterpreter implements RecordDataInterpreter
     private static Pattern csvRE;
 
     private DLALogger logger = null;
-    
+
+
+
     /**
      * Constructs a CSD specific interpreter object
      * @assumes Nothing
@@ -101,6 +103,8 @@ public class CSDInterpreter implements RecordDataInterpreter
     {
 
         CSDAlleleInput inputData = new CSDAlleleInput();
+        qcStatistics.record("SUMMARY", "Number of input records");
+        
 
         // Throw an exception if the input record does not meet the minimum
         // length required to extract the fields.
@@ -109,6 +113,7 @@ public class CSDInterpreter implements RecordDataInterpreter
         {
             RecordFormatException e = new RecordFormatException();
             e.bindRecord(rec);
+            qcStatistics.record("WARNING", "Poorly formated input record(s)");
             throw e;
         }
 
@@ -198,35 +203,40 @@ public class CSDInterpreter implements RecordDataInterpreter
         else if (!parts[3].replaceAll("\"", "").matches("KOMP"))
         {
             // Wrong project
+            qcStatistics.record("SUMMARY", "Non KOMP-CSD input record(s) skipped");
             return false;
         }
         else if (parts[5].replaceAll("\"", "").matches("^DEPD.*"))
         {
             // Wrong project
+            qcStatistics.record("SUMMARY", "Non KOMP-CSD input record(s) skipped");
             return false;
         }
         else if (parts[6].indexOf(",") > 0)
         {
             // strangely formatted ES Cell (parental)
-            String msg = "SKIPPING THIS RECORD: ";
-            msg += "Parental cell line is: "+parts[6];
-            msg += "\n";
-            msg += rec;
-            logger.logdInfo(msg,false);
+            // String msg = "SKIPPING THIS RECORD: ";
+            // msg += "Parental cell line is: "+parts[6];
+            // msg += "\n";
+            // msg += rec;
+            // logger.logdInfo(msg,false);
+            qcStatistics.record("WARNING", "Input record(s) with unknown parental cell line skipped");
             return false;
         }
         else if (!parts[8].replaceAll("\"", "").matches("Conditional|Targeted non-conditional|Deletion"))
         {
             // unknown mutation type
-            String msg = "SKIPPING THIS RECORD: ";
-            msg += "Mutation type is: "+parts[8];
-            msg += "which is an unknown mutation type\n";
-            msg += rec;
-            logger.logdInfo(msg,false);
+            // String msg = "SKIPPING THIS RECORD: ";
+            // msg += "Mutation type is: "+parts[8];
+            // msg += "which is an unknown mutation type\n";
+            // msg += rec;
+            // logger.logdInfo(msg,false);
+            qcStatistics.record("WARNING", "Input record(s) with unknown mutation type skipped");
             return false;
         }
         else
         {
+            qcStatistics.record("SUMMARY", "Successfully interpreted KOMP-CSD input record(s)");
             return true;
         }
     }

@@ -73,19 +73,7 @@ public class RegeneronProcessor extends KnockoutAlleleProcessor
 		strainKeyLookup = new StrainKeyLookup();
     }
 
-    public void addToProjectCache(String projectId, HashMap alleleMap)
-    throws DBException, CacheException
-    {
-        //stub
-        return;
-    }
 
-    public void addToMarkerCache(String symbol, HashSet alleles)
-    throws DBException, CacheException
-    {
-        //stub
-        return;
-    }
     /**
      * Set all the attributes of the clone object by parsing the given
      * input record and providing Regeneron Specific constant values.
@@ -154,6 +142,15 @@ public class RegeneronProcessor extends KnockoutAlleleProcessor
         koAllele.setJNumber(jNumber);
 
         String note = cfg.getNoteTemplate();
+        
+        // If coordinates are missing, fill out the incomplete note template
+        if (in.getDelSize().toString().equals("0") ||
+            in.getDelStart().toString().equals("0") ||
+            in.getDelEnd().toString().equals("0"))
+        {
+            note = cfg.getNoteTemplateMissingCoords();
+        }
+
         note = note.replaceAll("~~CASSETTE~~", in.getCassette().toString()); 
         note = note.replaceAll("~~SIZE~~", in.getDelSize().toString());
         note = note.replaceAll("~~START~~", in.getDelStart().toString());

@@ -34,6 +34,12 @@ public class AlleleLookupByMarker extends FullCachedLookup
 
     private Integer logicalDb;
 
+    // provide a static cache so that all instances share one cache
+    private static HashMap cache = new HashMap();
+
+    // indicator of whether or not the cache has been initialized
+    private static boolean hasBeenInitialized = false;
+
     /**
      * constructor
      * @throws ConfigException thrown if there is an error accessing the
@@ -46,7 +52,16 @@ public class AlleleLookupByMarker extends FullCachedLookup
     throws ConfigException, DBException, CacheException
     {
         super(SQLDataManagerFactory.getShared(SchemaConstants.MGD));
+
         this.logicalDb = logicalDb;
+
+        // since cache is static make sure you do not reinit
+        if (!hasBeenInitialized)
+        {
+            initCache(cache);
+            hasBeenInitialized = true;
+        }
+        
     }
 
     /**

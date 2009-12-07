@@ -11,7 +11,7 @@ import org.jax.mgi.dbs.mgd.lookup.TranslationException;
 public class CSDFactory extends KnockoutAlleleFactory
 {
 
-    public RecordDataInterpreter getInterpreter()
+    public KnockoutAlleleInterpreter getInterpreter()
     {
         return new CSDInterpreter();
     }

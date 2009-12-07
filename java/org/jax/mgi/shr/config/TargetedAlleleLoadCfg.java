@@ -56,6 +56,17 @@ public class TargetedAlleleLoadCfg extends InputDataCfg
     }
 
     /**
+     * Is the load allowed to overwrite the molecular notes?
+     * @assumes The "OVERWRITE_NOTE" constant is defined in the config file and
+     * @effects Nothing
+     * @return The configuration value
+     * @throws ConfigException if the value is not found
+     */
+    public boolean getOverwriteNote() throws ConfigException
+    {
+        return getConfigBoolean("OVERWRITE_NOTE").booleanValue();
+    }
+    /**
      * Get the mutation types string - a string indicating the project's logical db for cell lines
      * @assumes The "ESCELL_LOGICAL_DB" constant is defined in the config file and
      * that the logical DB specifed there aligns with the database
@@ -199,6 +210,10 @@ public class TargetedAlleleLoadCfg extends InputDataCfg
     public String getNoteTemplate() throws ConfigException
     {
         return getConfigString("NOTE_TEMPLATE");
+    }
+    public String getNoteTemplateMissingCoords() throws ConfigException
+    {
+        return getConfigString("MISSINGCOORDS_NOTE_TEMPLATE");
     }
     public String getNoteTemplateCondPromoter() throws ConfigException
     {

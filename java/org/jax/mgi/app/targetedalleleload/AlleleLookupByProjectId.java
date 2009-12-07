@@ -84,13 +84,25 @@ public class AlleleLookupByProjectId extends FullCachedLookup
      */
     public String getFullInitQuery()
     {
-        return "SELECT acc.accID 'projectid', acv._allele_key 'allelekey', " +
-        "acv.symbol 'symbol', acv.cellLine 'mutantCellLine', " +
-        "parentCellLine_key, parentCellLine " +
-        "FROM ACC_Accession acc,  ALL_Allele_CellLine_View acv " +
-        "WHERE acc._logicaldb_key = " + this.logicalDb.toString() + " " +
-        "AND acc._object_key = acv._Allele_key " +
-        "ORDER BY projectid";
+        return "SELECT acc.accID 'projectid', " +
+            "a._Allele_key 'allelekey', " +
+            "c.cellLine 'mutantCellLine', " +
+            "aa.symbol 'symbol', " +
+            "p._CellLine_key 'parentCellLine_key', " +
+            "p.cellLine 'parentCellLine' " +
+            "FROM ACC_Accession acc, " +
+            "ALL_Allele_CellLine a, " +
+            "ALL_CellLine c, " +
+            "ALL_Allele aa, " +
+            "ALL_CellLine p, " +
+            "ALL_CellLine_Derivation d " +
+            "WHERE acc._logicaldb_key = "+ logicalDb +" " +
+            "AND acc._object_key = a._Allele_key " +
+            "AND a._MutantCellLine_key = c._CellLine_key " +
+            "AND a._Allele_key = aa._Allele_key " +
+            "AND d._ParentCellLine_key = p._CellLine_key " +
+            "AND c._Derivation_key = d._Derivation_key " +
+            "ORDER BY projectid " ;
     }
 
     /**
