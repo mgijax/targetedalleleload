@@ -117,7 +117,7 @@ fi
 #
 #  Perform pre-load tasks.
 #
-preload
+preload ${OUTPUTDIR}
 
 #
 #  Run the load application.

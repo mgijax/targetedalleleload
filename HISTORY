@@ -1,3 +1,23 @@
+TAG: targetedalleleload-4-3-0-11
+DATE: 12/07/2009
+STAFF: jmason
+CHANGES:
+1) tal_*.config.default - added config parameters required for overriding notes
+2) added a quality control statistics tracking object and improved reporting of
+   aggregate errors to the diagnositc, curator, and load email report
+3) incorporated the QC tracking to the reports by refactoring inheritance so
+   all the processors and interpretors have access to the QC object
+4) adjusted regeneron interpreter so it now reports on records without 
+   coordinates but allows them to be loaded.  New note template added 
+   for these
+5) differentiates if an allele-marker association changed versus an 
+   allele type changed (used to be bunched together)
+6) associate CSD alleles to the parental STRAIN key not the 
+   parental ES CELL key
+7) refactor the alleleLookupByMarker and AlleleLookupByProjectId lookups 
+   to use a static cache instead of having them reinstantiated and 
+   maintained in multiple places
+
 TAG: targetedalleleload-4-3-0-10
 TAG: targetedalleleload-4-3-0-9
 DATE: 10/22/2009
