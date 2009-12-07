@@ -65,15 +65,6 @@ APP_QCRPT=${QCRPTS}/targetedalleleload/targetedalleleloadRpt.csh
 export DLA_LOADER DLA_START DLA_LOAD_STREAM 
 export APP_QCRPT
 
-# Full path the the logs, reports, and archive directories
-FILEDIR=/data/loads/targetedallele/targetedalleleload
-LOGDIR=${FILEDIR}/logs
-RPTDIR=${FILEDIR}/reports
-ARCHIVEDIR=${FILEDIR}/archive
-OUTPUTDIR=${FILEDIR}/output
-
-export FILEDIR LOGDIR RPTDIR ARCHIVEDIR OUTPUTDIR
-
 # Send debug messages to the diagnostic log
 LOG_DEBUG=false
 DBDEBUG=false
@@ -84,26 +75,6 @@ LOG_FACTORY=org.jax.mgi.shr.dla.log.DLALoggerFactory
 
 export LOG_PROC LOG_DIAG LOG_CUR LOG_VAL LOG_DEBUG 
 export CACHE_DEBUG LOG_FACTORY
-
-###########################################################################
-#
-#  BCP MANAGER SETTINGS BY DATABASE
-#
-###########################################################################
-
-#  Settings used to create a BCP manager for the MGD database
-MGD_BCP_PATH=${OUTPUTDIR}
-MGD_BCP_PREVENT_EXECUTE=false
-MGD_BCP_TRUNCATE_LOG=true
-MGD_BCP_DROP_INDEXES=false
-MGD_BCP_RECORD_STAMPING=false
-MGD_BCP_AUTO_FLUSH=true
-MGD_BCP_OK_TO_OVERWRITE=true
-
-export MGD_BCP_PATH MGD_BCP_PREVENT_EXECUTE MGD_BCP_TRUNCATE_LOG
-export MGD_BCP_DROP_INDEXES MGD_BCP_RECORD_STAMPING MGD_BCP_AUTO_FLUSH
-export MGD_BCP_OK_TO_OVERWRITE
-
 
 ###########################################################################
 #

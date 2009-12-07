@@ -8,6 +8,38 @@
 ###########################################################################
 
 
+
+# Full path the the logs, reports, and archive directories
+FILEDIR=/data/loads/targetedallele/regeneron_load
+LOGDIR=${FILEDIR}/logs
+RPTDIR=${FILEDIR}/reports
+ARCHIVEDIR=${FILEDIR}/archive
+OUTPUTDIR=${FILEDIR}/output
+
+export FILEDIR LOGDIR RPTDIR ARCHIVEDIR OUTPUTDIR
+
+###########################################################################
+#
+#  BCP MANAGER SETTINGS BY DATABASE
+#
+###########################################################################
+
+#  Settings used to create a BCP manager for the MGD database
+MGD_BCP_PATH=${OUTPUTDIR}
+MGD_BCP_PREVENT_EXECUTE=false
+MGD_BCP_TRUNCATE_LOG=true
+MGD_BCP_DROP_INDEXES=false
+MGD_BCP_RECORD_STAMPING=false
+MGD_BCP_AUTO_FLUSH=true
+MGD_BCP_OK_TO_OVERWRITE=true
+
+export MGD_BCP_PATH MGD_BCP_PREVENT_EXECUTE MGD_BCP_TRUNCATE_LOG
+export MGD_BCP_DROP_INDEXES MGD_BCP_RECORD_STAMPING MGD_BCP_AUTO_FLUSH
+export MGD_BCP_OK_TO_OVERWRITE
+
+
+
+
 #  Java applications
 INTERPRETER=org.jax.mgi.app.targetedalleleload.RegeneronInterpreter
 
@@ -31,6 +63,11 @@ ALLELE_PROVIDER='Velocigene'
 # JNumber reference for Regeneron Alleles
 #
 JNUMBER='J:136110'
+
+#
+# Should the load be allowed to overwrite curator entered notes?
+#
+OVERWRITE_NOTE='false'
 
 #
 # New Alleles are created using the folloing template as the Allele Symbol.  
@@ -57,6 +94,7 @@ NAME_TEMPLATE='targeted mutation ~~SEQUENCE~~, Velocigene'
 # ~~JNUMBER~~ is replaced with the JNUMBER specified in this file
 #
 NOTE_TEMPLATE='The insertion of Velocigene cassette ~~CASSETTE~~ created a deletion of size ~~SIZE~~bp starting at position ~~START~~ and ending at position ~~END~~ of Chromosome ~~CHROMOSOME~~ (Genome Build ~~BUILD~~).'
+MISSINGCOORDS_NOTE_TEMPLATE='The insertion of Velocigene cassette ~~CASSETTE~~ created a deletion in the gene on Chromosome ~~CHROMOSOME~~ (Genome Build ~~BUILD~~).'
 
 #
 # New alleles are created with the following mutation types
