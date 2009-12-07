@@ -99,18 +99,6 @@ public class CSDProcessor extends KnockoutAlleleProcessor
 		alleleSequencePattern = Pattern.compile(".*tm(\\d){1,2}[ae]{0,1}.*");
     }
 
-    public void addToProjectCache(String projectId, HashMap alleleMap)
-    throws DBException, CacheException
-    {
-        alleleLookpuByProjectId.addToCache(projectId, alleleMap);
-    }
-
-    public void addToMarkerCache(String symbol, HashSet alleles)
-    throws DBException, CacheException
-    {
-        alleleLookupByMarker.addToCache(symbol, alleles);
-    }
-
     /**
      * Set all the attributes of the clone object by parsing the given
      * input record and providing Regeneron Specific constant values.
