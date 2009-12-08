@@ -94,7 +94,8 @@ NAME_TEMPLATE='targeted mutation ~~SEQUENCE~~, Velocigene'
 # ~~JNUMBER~~ is replaced with the JNUMBER specified in this file
 #
 NOTE_TEMPLATE='The insertion of Velocigene cassette ~~CASSETTE~~ created a deletion of size ~~SIZE~~bp starting at position ~~START~~ and ending at position ~~END~~ of Chromosome ~~CHROMOSOME~~ (Genome Build ~~BUILD~~).'
-MISSINGCOORDS_NOTE_TEMPLATE='The insertion of Velocigene cassette ~~CASSETTE~~ created a deletion in the gene on Chromosome ~~CHROMOSOME~~ (Genome Build ~~BUILD~~).'
+#MISSINGCOORDS_NOTE_TEMPLATE='The insertion of Velocigene cassette ~~CASSETTE~~ created a deletion in the gene on Chromosome ~~CHROMOSOME~~ (Genome Build ~~BUILD~~).'
+MISSINGCOORDS_NOTE_TEMPLATE='The insertion of Velocigene cassette ~~CASSETTE~~ deleted the coding region of this gene located on Chromosome ~~CHROMOSOME~~.'
 
 #
 # New alleles are created with the following mutation types
