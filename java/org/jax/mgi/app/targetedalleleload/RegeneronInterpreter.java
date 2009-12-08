@@ -102,8 +102,20 @@ public class RegeneronInterpreter extends KnockoutAlleleInterpreter
         inputData.setProjectId(fields[3].trim());
         inputData.setGeneSymbol(fields[4].trim());
         inputData.setGeneMgiId(fields[5].trim());
-        inputData.setDelStart(new Integer(fields[6].trim()));
-        inputData.setDelEnd(new Integer(fields[7].trim()));
+        
+        Integer delStart = new Integer(fields[6].trim());
+        Integer delEnd = new Integer(fields[7].trim());
+
+        if (delStart.compareTo(delEnd) > 0)
+        {
+            Integer delTmp = delStart;
+            delStart = delEnd;
+            delEnd = delTmp;
+        }
+
+        inputData.setDelStart(delStart);
+        inputData.setDelEnd(delEnd);
+
         inputData.setDelSize(new Integer(fields[8].trim()));
         inputData.setBuild(fields[9].trim());
         inputData.setCassette(fields[10].trim());
