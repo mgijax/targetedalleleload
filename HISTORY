@@ -1,3 +1,10 @@
+TAG: targetedalleleload-4-3-0-12
+DATE: 12/08/2009
+STAFF: jmason
+CHANGES:
+1) tal_regeneron.config.default - changed missing note template
+2) Always use smallest coordinate as the start of the deletion
+
 TAG: targetedalleleload-4-3-0-11
 DATE: 12/07/2009
 STAFF: jmason
