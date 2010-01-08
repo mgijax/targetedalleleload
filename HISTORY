@@ -1,3 +1,9 @@
+TAG: targetedalleleload-4-3-2-1
+DATE: 1/08/2010
+STAFF: jmason
+CHANGES:
+1) Change regeneron allele sequence determination in RegeneronProcessor
+
 TAG: targetedalleleload-4-3-0-13
 DATE: 12/09/2009
 STAFF: jmason
