@@ -296,10 +296,6 @@ public class CSDProcessor extends KnockoutAlleleProcessor
                     }
                 }
             }
-            if (alleleFound != Boolean.TRUE)
-            {
-                qcStatistics.record("SUMMARY", "Number of records that will create a new allele");                
-            }
         }
         
 

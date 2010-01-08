@@ -3,8 +3,11 @@ package org.jax.mgi.app.targetedalleleload;
 import java.lang.Integer;
 import java.util.Vector;
 import java.util.Iterator;
-import java.util.HashSet;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.*;
 
 import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
 import org.jax.mgi.shr.ioutils.RecordDataInterpreter;
@@ -19,6 +22,7 @@ import org.jax.mgi.shr.cache.CacheException;
 import org.jax.mgi.dbs.mgd.lookup.TranslationException;
 import org.jax.mgi.shr.cache.KeyNotFoundException;
 import org.jax.mgi.shr.exception.MGIException;
+
 
 
 /**
@@ -50,7 +54,13 @@ public class RegeneronProcessor extends KnockoutAlleleProcessor
     private StrainKeyLookup strainKeyLookup = null;
     private VocabKeyLookup vocabLookup = null;
     private ProjectLookupByMarker projectLookupByMarker = null;
+    private AlleleLookupByMarker alleleLookupByMarker = null;
+    private AlleleLookupByProjectId alleleLookpuByProjectId = null;
     
+    private Pattern alleleSequencePattern = null;
+    private Matcher regexMatcher = null;
+
+
 
     /**
      * Constructs a KnockoutAllele processor object.
@@ -67,10 +77,15 @@ public class RegeneronProcessor extends KnockoutAlleleProcessor
     DBException,CacheException,TranslationException
     {
         cfg = new TargetedAlleleLoadCfg();
-        projectLookupByMarker = new ProjectLookupByMarker(cfg.getProjectLogicalDb());
+        
+        Integer projectLogicalDB = cfg.getProjectLogicalDb();
+        
+        projectLookupByMarker = new ProjectLookupByMarker(projectLogicalDB);
+        alleleLookpuByProjectId = new AlleleLookupByProjectId(projectLogicalDB);
         markerLookup = new MarkerLookupByMGIID();
 		vocabLookup = new VocabKeyLookup(Constants.ALLELE_VOCABULARY);
 		strainKeyLookup = new StrainKeyLookup();
+		alleleSequencePattern = Pattern.compile(".*tm(\\d){1,2}.*");
     }
 
 
@@ -125,6 +140,34 @@ public class RegeneronProcessor extends KnockoutAlleleProcessor
             // marker, and it is not tHIS project. Increment the count 
             // for this new allele symbol
             seq = (allProj.size()) + 1;
+        }
+        
+        HashMap alleles = alleleLookpuByProjectId.lookup(in.getProjectId());
+        HashMap matchingAllele = null;
+
+        if (alleles != null && alleles.size() > 0)
+        {
+            Boolean alleleFound = Boolean.FALSE;
+            Set entries = alleles.entrySet();
+            Iterator it = entries.iterator();
+
+            while (it.hasNext() && alleleFound != Boolean.TRUE)
+            {
+                Map.Entry entry = (Map.Entry) it.next();
+                HashMap allele = (HashMap)entry.getValue();
+
+                // The first allele with a matching project ID because there 
+                // should only be one project ID per allele for Regeneron
+                // alleles
+                String allSymbol = (String)allele.get("symbol");
+                regexMatcher = alleleSequencePattern.matcher(allSymbol);
+                if (regexMatcher.find())
+                {
+                    seq = Integer.parseInt(regexMatcher.group(1));
+                    alleleFound = Boolean.TRUE;
+                    qcStatistics.record("SUMMARY", "Number of records that match an existing allele");
+                }
+            }
         }
 
         // Set the koAllele's constructed values

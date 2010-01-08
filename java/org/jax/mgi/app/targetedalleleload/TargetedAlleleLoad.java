@@ -27,7 +27,6 @@ import org.jax.mgi.shr.exception.MGIException;
 import org.jax.mgi.shr.dla.loader.DLALoaderException;
 import org.jax.mgi.shr.cache.KeyNotFoundException;
 
-import org.jax.mgi.dbs.SchemaConstants;
 import org.jax.mgi.shr.dbutils.SQLDataManager;
 import org.jax.mgi.shr.dbutils.SQLDataManagerFactory;
 
@@ -179,6 +178,7 @@ extends DLALoader
         // Keep track of which alleles we've updated the notes for
         // so we only update it once
         HashSet alleleNoteUpdated = new HashSet();
+        HashSet alleleProjectIdUpdated = new HashSet();
 
         // For each input record
         while(iter.hasNext())
@@ -210,6 +210,12 @@ extends DLALoader
                 m += in.getMutantCellLine() + "\n";
                 m += e.getMessage();
                 super.logger.logdInfo(m, false);
+                m = "An error occured while processing the input record for: ";
+                m += in.getMutantCellLine() + "\n";
+                m += "The provider might be using a secondary MGI ID (";
+                m += in.getGeneId();
+                m += ")\n";
+                super.logger.logcInfo(m, false);
                 continue;
             }
             catch (MGIException e)
@@ -231,6 +237,39 @@ extends DLALoader
             }
 
 
+            // Find the derivation key for this ES Cell
+            String cassette = in.getCassette();
+            String dCompoundKey = vectorLookup.lookup(cassette) + "|";
+
+            dCompoundKey += cfg.getCreatorKey() + "|";
+
+            try
+            {
+                String parent = in.getParentCellLine();
+                dCompoundKey += cfg.getParentalKey(parent);
+            }
+            catch (ConfigException e)
+            {
+                String s = in.getParentCellLine();
+                s += " Does not exist in CFG file! Skipping record";
+                super.logger.logdInfo(s, true);
+                qcStatistics.record("ERROR", "Number of derivations not found");
+                continue;
+            }
+
+            Integer derivationKey = derivationLookup.lookup(dCompoundKey);
+            
+            if (derivationKey == null)
+            {
+                String s = "Skipping record. Cannot find derivation for:";
+                s += "\n Vector: " + cassette;
+                s += "\n Creator Key: " + cfg.getCreatorKey();
+                s += "\n Parental: " + in.getParentCellLine();
+                s += "\n";
+                super.logger.logdInfo(s, true);
+                qcStatistics.record("ERROR", "Number of derivations not found");
+                continue;
+            }
 
 
 
@@ -263,14 +302,73 @@ extends DLALoader
                 {
                     String noteMsg = "\nMARKER CHANGED (not updating)\n";
                     noteMsg += "Mutant Cell line: " + in.getMutantCellLine();
-                    noteMsg += "\nCurrent: " + existing.getSymbol();
-                    noteMsg += " New: " + constructed.getSymbol();
+                    noteMsg += "\nOld: " + existing.getSymbol();
+                    noteMsg += "\nNew: " + constructed.getSymbol();
+                    noteMsg += "\n";
                     super.logger.logcInfo(noteMsg, false);
-                    qcStatistics.record("SUMMARY", "Number of alleles that changed marker, skipped");
+                    super.logger.logdInfo(noteMsg, false);
+                    qcStatistics.record("SUMMARY", "Number of cell lines that changed marker, skipped");
 
                     // This mutant cell line has had a major change, don't bother QC
                     // checking the rest of the values
                     continue;
+                }
+                // Check the es cell project ID versus the allele project ID
+                else if (!existing.getProjectId().equals(constructed.getProjectId()))
+                {
+                    Integer existingDerivationKey = esCell.getDerivationKey();
+
+                    if (!alleleProjectIdUpdated.contains(existing.getSymbol()))
+                    {
+                        // Cache the allele so we know we already updated
+                        // it
+                        alleleProjectIdUpdated.add(existing.getSymbol());
+
+                        if (existingDerivationKey.equals(derivationKey))
+                        {
+                            // If the es cell has the same derivation, but the 
+                            // project ID changed, it means that this ES Cell
+                            // "jumped" between projects, we can update the 
+                            // project ID for this allele
+                            String query = "DELETE FROM ACC_Accession";
+                            query += " WHERE _Object_key = "+ existing.getKey();
+                            query += " AND _LogicalDB_key = "+ cfg.getProjectLogicalDb();
+                            query += " AND accID = '"+ existing.getProjectId()+"'";
+                            sqlDBMgr.executeUpdate(query);
+
+                            // Create the new Allele Project ID
+                            AccessionId projectAccId = new AccessionId(
+                                in.getProjectId(),              // New project ID
+                                cfg.getProjectLogicalDb(),      // Logical DB
+                                existing.getKey(),     // Allele object key
+                                new Integer(Constants.ALLELE_MGI_TYPE),   // Allele type
+                                Boolean.TRUE,   // Private?
+                                Boolean.TRUE    // Preferred?
+                                );
+                            projectAccId.insert(loadStream);
+
+                            String noteMsg = "\nPROJECT ID UPDATED\n";
+                            noteMsg += "Mutant Cell line: " + in.getMutantCellLine();
+                            noteMsg += "\nOld: " + existing.getProjectId();
+                            noteMsg += "\nNew: " + constructed.getProjectId();
+                            noteMsg += "\n";
+                            super.logger.logcInfo(noteMsg, false);
+                            qcStatistics.record("SUMMARY", "Number of alleles that changed projects, updated");
+                        }
+                        else
+                        {
+                            String noteMsg = "\nPROJECT ID CHANGED (not updating)\n";
+                            noteMsg += "The derivation for this ES cell has changed since it was loaded.  ";
+                            noteMsg += "Either the parental cell line or the vector changed.  ";
+                            noteMsg += "This situation should be manually verified.";
+                            noteMsg += "Mutant Cell line: " + in.getMutantCellLine();
+                            noteMsg += "\nOld: " + existing.getProjectId();
+                            noteMsg += "\nNew: " + constructed.getProjectId();
+                            noteMsg += "\n";
+                            super.logger.logcInfo(noteMsg, false);
+                            qcStatistics.record("SUMMARY", "Number of alleles that changed projects, skipped");                                                
+                        }
+                    }
                 }
                 // If the marker hasn't changed, then check if the symbol
                 // changed at all... if it did, that means the type changed
@@ -279,10 +377,11 @@ extends DLALoader
                 {
                     String noteMsg = "\nTYPE CHANGED (not updating)\n";
                     noteMsg += "Mutant Cell line: " + in.getMutantCellLine();
-                    noteMsg += "\nCurrent: " + existing.getSymbol();
-                    noteMsg += " New: " + constructed.getSymbol();
+                    noteMsg += "\nOld: " + existing.getSymbol();
+                    noteMsg += "\nNew: " + constructed.getSymbol();
+                    noteMsg += "\n";
                     super.logger.logcInfo(noteMsg, false);
-                    qcStatistics.record("SUMMARY", "Number of alleles that changed type, skipped");
+                    qcStatistics.record("SUMMARY", "Number of cell lines that changed type, skipped");
 
                     // This mutant cell line has had a major change, don't bother QC
                     // checking the rest of the values
@@ -308,6 +407,12 @@ extends DLALoader
                         cfg.getOverwriteNote() || 
                         (jobStreamKey.compareTo(noteModifiedBy) == 0))
                     {
+                        noteMsg += "Allele : ";
+                        noteMsg += existing.getSymbol() + "\n";
+                        noteMsg += "\nCurrent/New note:\n";
+                        noteMsg += existing.getNote() + "\n";
+                        noteMsg += constructed.getNote() + "\n";
+
                         // If a note exists
                         // Delete the existing note
                         if (existing.getNoteKey() != null)
@@ -317,19 +422,16 @@ extends DLALoader
                             query += existing.getNoteKey();
 
                             sqlDBMgr.executeUpdate(query);
+
+                            // Attach the new note to the existing allele
+                            String newNote = constructed.getNote();
+                            existing.updateNote(loadStream, newNote);
+                            qcStatistics.record("SUMMARY", "Number of alleles that had molecular notes updated");
                         }
-
-                        noteMsg += "Allele : ";
-                        noteMsg += existing.getSymbol() + "\n";
-                        noteMsg += "\nCurrent/New note:\n";
-                        noteMsg += existing.getNote() + "\n";
-                        noteMsg += constructed.getNote() + "\n";
-
-                        // Set the new note in the existing allele,
-                        // and save the allele
-                        String newNote = constructed.getNote();
-                        existing.updateNote(loadStream, newNote);
-                        qcStatistics.record("SUMMARY", "Number of alleles that had molecular notes updated");
+                        else
+                        {
+                            noteMsg += "!!! Could not find existing note key NOT UPDATING\n";
+                        }
                     }
                     else
                     {
@@ -362,40 +464,6 @@ extends DLALoader
             {
                 // Mutant ES Cell NOT found in database
 
-                // Find the derivation key so we can hook the derivation up
-                // to the Mutant Cell Line
-                String cassette = in.getCassette();
-                String dCompoundKey = vectorLookup.lookup(cassette) + "|";
-
-                dCompoundKey += cfg.getCreatorKey() + "|";
-
-                try
-                {
-                    String parent = in.getParentCellLine();
-                    dCompoundKey += cfg.getParentalKey(parent);
-                }
-                catch (ConfigException e)
-                {
-                    String s = in.getParentCellLine();
-                    s += " Does not exist in CFG file! Skipping record";
-                    super.logger.logdInfo(s, true);
-                    qcStatistics.record("ERROR", "Number of derivations not found");
-                    continue;
-                }
-
-                Integer derivationKey = derivationLookup.lookup(dCompoundKey);
-                
-                if (derivationKey == null)
-                {
-                    String s = "Skipping record. Cannot find derivation for:";
-                    s += "\n Vector: " + cassette;
-                    s += "\n Creator Key: " + cfg.getCreatorKey();
-                    s += "\n Parental: " + in.getParentCellLine();
-                    s += "\n";
-                    super.logger.logdInfo(s, true);
-                    qcStatistics.record("ERROR", "Number of derivations not found");
-                    continue;
-                }
 
 
                 // Create the mutant cell line
