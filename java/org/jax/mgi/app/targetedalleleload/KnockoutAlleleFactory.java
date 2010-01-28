@@ -13,16 +13,24 @@ abstract class KnockoutAlleleFactory
         // Get the configuration object
         TargetedAlleleLoadCfg cfg = new TargetedAlleleLoadCfg();
         
-        String provider = cfg.getProvider();
-        if (provider.equals("Velocigene")) 
+        String jNumber = cfg.getJNumber();
+        
+        // The reference number uniquely identifies which project
+        // produced the alleles and cell lines we are about to load
+        if (jNumber.equals("J:136110")) 
         {
             // Regeneron
             return new RegeneronFactory();
         }
-        else if (provider.equals("Wellcome Trust Sanger Institute"))
+        else if (jNumber.equals("J:148605"))
         {
             // CSD
             return new CSDFactory();
+        }
+        else if (jNumber.equals("J:155845"))
+        {
+            // EUCOMM
+            return new EUCOMMFactory();
         }
 
     return null;

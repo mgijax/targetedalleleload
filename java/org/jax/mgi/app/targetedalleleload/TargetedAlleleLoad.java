@@ -2,7 +2,10 @@ package org.jax.mgi.app.targetedalleleload;
 
 import java.io.File;
 import java.lang.Integer;
+import java.util.Set;
 import java.util.HashSet;
+import java.util.TreeSet;
+import java.util.Map;
 import java.util.HashMap;
 import java.util.TreeMap;
 import java.util.Iterator;
@@ -39,7 +42,7 @@ import org.jax.mgi.dbs.mgd.dao.ALL_CellLineDAO;
 import org.jax.mgi.dbs.mgd.dao.ALL_Allele_CellLineState;
 import org.jax.mgi.dbs.mgd.dao.ALL_Allele_CellLineDAO;
 
-
+import org.jax.mgi.shr.ioutils.OutputDataFile;
 
 /**
  * @is a DLALoader for loading KOMP produced Alleles into the database
@@ -72,7 +75,7 @@ extends DLALoader
     // Lookups
     private KOMutantCellLineLookup koMutantCellLineLookup = null;
     private KnockoutAlleleLookup koAlleleLookup = null;
-    private AlleleLookupByProjectId alleleLookpuByProjectId = null;
+    private AlleleLookupByProjectId alleleLookupByProjectId = null;
     private AlleleLookupByMarker alleleLookupByMarker = null;
     private DerivationLookupByVectorCreatorParent derivationLookup = null;
     private VectorLookup vectorLookup = null;
@@ -80,6 +83,10 @@ extends DLALoader
     private ParentStrainLookupByParentKey parentStrainLookupByParentKey = null;
     private StrainKeyLookup strainKeyLookup = null;
     
+    private Set alleleProjectIdUpdated = null;
+    private Set databaseProjectIds = null;
+    private Set databaseCellLines = null;
+
     private AlleleLookupByCellLine alleleLookupByCellLine = null;
     
     protected QualityControlStatistics qcStatistics = new QualityControlStatistics();
@@ -97,21 +104,32 @@ extends DLALoader
         sqlDBMgr = SQLDataManagerFactory.getShared(SchemaConstants.MGD);
 
         Integer escLogicalDB = cfg.getEsCellLogicalDb();
+        koMutantCellLineLookup = new KOMutantCellLineLookup(escLogicalDB);
+
         Integer projectLogicalDB = cfg.getProjectLogicalDb();
 
-        alleleLookpuByProjectId = new AlleleLookupByProjectId(projectLogicalDB);
-        alleleLookupByMarker = new AlleleLookupByMarker(projectLogicalDB);
-        koMutantCellLineLookup = new KOMutantCellLineLookup(escLogicalDB);
-        koAlleleLookup = new KnockoutAlleleLookup();
-        derivationLookup = new DerivationLookupByVectorCreatorParent();
-        vectorLookup = new VectorLookup();
+        // These lookups implement a Singleton pattern because 
+        // they're shared across objects so updates in one object
+        // should be reflected in the other objects
+        koAlleleLookup = KnockoutAlleleLookup.getInstance();
+        alleleLookupByProjectId = AlleleLookupByProjectId.getInstance(projectLogicalDB);
+        alleleLookupByMarker = AlleleLookupByMarker.getInstance(projectLogicalDB);
+
         alleleLookupByCellLine = new AlleleLookupByCellLine();
-        markerLookup = new MarkerLookupByMGIID();
+        alleleLookupByCellLine.initCache();
+
         parentStrainLookupByParentKey = new ParentStrainLookupByParentKey();
         strainKeyLookup = new StrainKeyLookup();
+        derivationLookup = new DerivationLookupByVectorCreatorParent();
+        vectorLookup = new VectorLookup();
+        markerLookup = new MarkerLookupByMGIID();
 
         alleleFactory = KnockoutAlleleFactory.getFactory();
         Timestamp currentTime = new Timestamp(new Date().getTime());
+
+        alleleProjectIdUpdated = new TreeSet();
+        databaseProjectIds = new HashSet(alleleLookupByProjectId.getKeySet());
+        databaseCellLines = new HashSet(alleleLookupByCellLine.getKeySet());
 
     }
 
@@ -123,9 +141,9 @@ extends DLALoader
     protected void initialize()
     throws MGIException
     {
-        super.logger.logInfo("Reading input files");
+        logger.logInfo("Reading input files");
 
-        sqlDBMgr.setLogger(super.logger);
+        sqlDBMgr.setLogger(logger);
         logger.logdDebug("TargetedAlleleLoader sqlDBMgr.server " + 
             sqlDBMgr.getServer());
         logger.logdDebug("TargetedAlleleLoader sqlDBMgr.database " + 
@@ -177,8 +195,8 @@ extends DLALoader
     {
         // Keep track of which alleles we've updated the notes for
         // so we only update it once
+        HashSet alreadyProcessed = new HashSet();
         HashSet alleleNoteUpdated = new HashSet();
-        HashSet alleleProjectIdUpdated = new HashSet();
 
         // For each input record
         while(iter.hasNext())
@@ -192,10 +210,27 @@ extends DLALoader
             }
             catch (MGIException e)
             {
-                super.logger.logdInfo(e.toString(), true);
+                logger.logdInfo(e.toString(), true);
+                qcStatistics.record("WARNING", "Number of input records that were unable to be processed");
                 continue;
             }
 
+            if (alreadyProcessed.contains(in.getMutantCellLine()))
+            {
+                String m = "Multiple input records for: ";
+                m += in.getMutantCellLine() + "\n";
+                logger.logdInfo(m, false);
+                qcStatistics.record("WARNING", "Number of duplicate cell line records in input file");
+                continue;
+            }
+            else
+            {
+                alreadyProcessed.add(in.getMutantCellLine());
+            }
+
+            // Keep track of the projects and mutant cell lines we've already seen
+            databaseProjectIds.remove(in.getProjectId().toLowerCase());
+            databaseCellLines.remove(in.getMutantCellLine().toLowerCase());
 
             // Construct the allele from the input record
             KnockoutAllele constructed = null;
@@ -206,33 +241,40 @@ extends DLALoader
             }
             catch (KeyNotFoundException e)
             {
+                qcStatistics.record("ERROR", "Number of alleles that were not able to be constructed");
+                
                 String m = "Allele creation error, check: ";
                 m += in.getMutantCellLine() + "\n";
                 m += e.getMessage();
-                super.logger.logdInfo(m, false);
+                logger.logdInfo(m, false);
                 m = "An error occured while processing the input record for: ";
                 m += in.getMutantCellLine() + "\n";
                 m += "The provider might be using a secondary MGI ID (";
                 m += in.getGeneId();
                 m += ")\n";
-                super.logger.logcInfo(m, false);
+                logger.logcInfo(m, false);
                 continue;
             }
             catch (MGIException e)
             {
+                qcStatistics.record("ERROR", "Number of alleles that were not able to be constructed");
+
                 String m = "General error, skipping record: ";
                 m += in.getMutantCellLine() + "\n";
+                m += in + "\n";
                 m += e.getMessage();
-                super.logger.logdInfo(m, false);
+                logger.logdInfo(m, false);
                 continue;                
             }
             
 
             if (constructed == null)
             {
+                qcStatistics.record("ERROR", "Number of alleles that were not able to be constructed");
+
                 String m = "Allele creation error, check: ";
                 m += in.getMutantCellLine();
-                super.logger.logdInfo(m, false);
+                logger.logdInfo(m, false);
                 continue;                    
             }
 
@@ -241,7 +283,7 @@ extends DLALoader
             String cassette = in.getCassette();
             String dCompoundKey = vectorLookup.lookup(cassette) + "|";
 
-            dCompoundKey += cfg.getCreatorKey() + "|";
+            dCompoundKey += cfg.getCreatorKey(in.getProvider(), in.getMutantCellLine()) + "|";
 
             try
             {
@@ -252,7 +294,7 @@ extends DLALoader
             {
                 String s = in.getParentCellLine();
                 s += " Does not exist in CFG file! Skipping record";
-                super.logger.logdInfo(s, true);
+                logger.logdInfo(s, true);
                 qcStatistics.record("ERROR", "Number of derivations not found");
                 continue;
             }
@@ -263,10 +305,10 @@ extends DLALoader
             {
                 String s = "Skipping record. Cannot find derivation for:";
                 s += "\n Vector: " + cassette;
-                s += "\n Creator Key: " + cfg.getCreatorKey();
+                s += "\n Creator Key: " + cfg.getCreatorKey(in.getProvider(), in.getMutantCellLine());
                 s += "\n Parental: " + in.getParentCellLine();
                 s += "\n";
-                super.logger.logdInfo(s, true);
+                logger.logdInfo(s, true);
                 qcStatistics.record("ERROR", "Number of derivations not found");
                 continue;
             }
@@ -284,6 +326,15 @@ extends DLALoader
 
                 // QC check the allele the MCL is attached to
                 KnockoutAllele existing = alleleLookupByCellLine.lookup(currentCellLine);
+                if (existing == null)
+                {
+                    qcStatistics.record("ERROR", "Number of cellines that cannot find associated allele");
+                    String s = "Skipping record. Cannot find allele for:";
+                    s += "\n ES cell line: " + currentCellLine;
+                    s += "\n";
+                    logger.logdInfo(s, true);
+                    continue;
+                }
 
                 // Compare the notes to see if anything changed.
                 String existingNote = existing.getNote();
@@ -305,93 +356,152 @@ extends DLALoader
                     noteMsg += "\nOld: " + existing.getSymbol();
                     noteMsg += "\nNew: " + constructed.getSymbol();
                     noteMsg += "\n";
-                    super.logger.logcInfo(noteMsg, false);
-                    super.logger.logdInfo(noteMsg, false);
+                    logger.logcInfo(noteMsg, false);
+                    logger.logdInfo(noteMsg, false);
                     qcStatistics.record("SUMMARY", "Number of cell lines that changed marker, skipped");
 
                     // This mutant cell line has had a major change, don't bother QC
                     // checking the rest of the values
                     continue;
                 }
+
                 // Check the es cell project ID versus the allele project ID
-                else if (!existing.getProjectId().equals(constructed.getProjectId()))
+                // If the project changed, likely the allele type needs to
+                // change as well. That condition is hanled below
+                if (!existing.getProjectId().equals(constructed.getProjectId()))
                 {
-                    Integer existingDerivationKey = esCell.getDerivationKey();
-
-                    if (!alleleProjectIdUpdated.contains(existing.getSymbol()))
-                    {
-                        // Cache the allele so we know we already updated
-                        // it
-                        alleleProjectIdUpdated.add(existing.getSymbol());
-
-                        if (existingDerivationKey.equals(derivationKey))
-                        {
-                            // If the es cell has the same derivation, but the 
-                            // project ID changed, it means that this ES Cell
-                            // "jumped" between projects, we can update the 
-                            // project ID for this allele
-                            String query = "DELETE FROM ACC_Accession";
-                            query += " WHERE _Object_key = "+ existing.getKey();
-                            query += " AND _LogicalDB_key = "+ cfg.getProjectLogicalDb();
-                            query += " AND accID = '"+ existing.getProjectId()+"'";
-                            sqlDBMgr.executeUpdate(query);
-
-                            // Create the new Allele Project ID
-                            AccessionId projectAccId = new AccessionId(
-                                in.getProjectId(),              // New project ID
-                                cfg.getProjectLogicalDb(),      // Logical DB
-                                existing.getKey(),     // Allele object key
-                                new Integer(Constants.ALLELE_MGI_TYPE),   // Allele type
-                                Boolean.TRUE,   // Private?
-                                Boolean.TRUE    // Preferred?
-                                );
-                            projectAccId.insert(loadStream);
-
-                            String noteMsg = "\nPROJECT ID UPDATED\n";
-                            noteMsg += "Mutant Cell line: " + in.getMutantCellLine();
-                            noteMsg += "\nOld: " + existing.getProjectId();
-                            noteMsg += "\nNew: " + constructed.getProjectId();
-                            noteMsg += "\n";
-                            super.logger.logcInfo(noteMsg, false);
-                            qcStatistics.record("SUMMARY", "Number of alleles that changed projects, updated");
-                        }
-                        else
-                        {
-                            String noteMsg = "\nPROJECT ID CHANGED (not updating)\n";
-                            noteMsg += "The derivation for this ES cell has changed since it was loaded.  ";
-                            noteMsg += "Either the parental cell line or the vector changed.  ";
-                            noteMsg += "This situation should be manually verified.";
-                            noteMsg += "Mutant Cell line: " + in.getMutantCellLine();
-                            noteMsg += "\nOld: " + existing.getProjectId();
-                            noteMsg += "\nNew: " + constructed.getProjectId();
-                            noteMsg += "\n";
-                            super.logger.logcInfo(noteMsg, false);
-                            qcStatistics.record("SUMMARY", "Number of alleles that changed projects, skipped");                                                
-                        }
-                    }
+                    // Record that this mutant cell line had a project ID change
+                    String m = "";
+                    //MCL ID, the allele it's currently associated with, the existing project ID, and the new project ID
+                    m += existing.getSymbol() + "\t";
+                    m += existing.getProjectId() + "\t";
+                    m += constructed.getProjectId() + "\t";
+                    m += in.getMutantCellLine();
+                    
+                    alleleProjectIdUpdated.add(m);
+                    continue;
                 }
+
+
+
+
+//
+//                // Check the es cell project ID versus the allele project ID
+//                // If the project changed, likely the allele type needs to
+//                // change as well. That condition is hanled below
+//                if (!existing.getProjectId().equals(constructed.getProjectId()))
+//                {
+//                    Integer existingDerivationKey = esCell.getDerivationKey();
+//
+//                    if (!alleleProjectIdUpdated.contains(existing.getSymbol()))
+//                    {
+//                        // Cache the allele so we know we already updated
+//                        // it
+//                        alleleProjectIdUpdated.add(existing.getSymbol());
+//
+//                        if (existingDerivationKey.equals(derivationKey))
+//                        {
+//                            // If the es cell has the same derivation, but the 
+//                            // project ID changed, it means that this ES Cell
+//                            // "jumped" between projects, we can update the 
+//                            // project ID for this allele
+//                            String query = "DELETE FROM ACC_Accession";
+//                            query += " WHERE _Object_key = "+ existing.getKey();
+//                            query += " AND _LogicalDB_key = "+ cfg.getProjectLogicalDb();
+//                            query += " AND accID = '"+ existing.getProjectId()+"'";
+//                            sqlDBMgr.executeUpdate(query);
+//
+//                            // Create the new Allele Project ID
+//                            AccessionId projectAccId = new AccessionId(
+//                                in.getProjectId(),              // New project ID
+//                                cfg.getProjectLogicalDb(),      // Logical DB
+//                                existing.getKey(),     // Allele object key
+//                                new Integer(Constants.ALLELE_MGI_TYPE),   // Allele type
+//                                Boolean.TRUE,   // Private?
+//                                Boolean.TRUE    // Preferred?
+//                                );
+//                            projectAccId.insert(loadStream);
+//
+//                            String noteMsg = "\nPROJECT ID UPDATED\n";
+//                            noteMsg += "Mutant Cell line: " + in.getMutantCellLine();
+//                            noteMsg += "\nOld: " + existing.getProjectId();
+//                            noteMsg += "\nNew: " + constructed.getProjectId();
+//                            noteMsg += "\n";
+//                            super.logger.logcInfo(noteMsg, false);
+//                            qcStatistics.record("SUMMARY", "Number of alleles that changed projects, updated");
+//                        }
+//                        else
+//                        {
+//                            String noteMsg = "\nPROJECT ID CHANGED (not updating)\n";
+//                            noteMsg += "The derivation for this ES cell has changed since it was loaded. ";
+//                            noteMsg += "Either the parental cell line or the vector changed. ";
+//                            noteMsg += "This situation should be manually corrected.";
+//                            noteMsg += "Mutant Cell line: " + in.getMutantCellLine();
+//                            noteMsg += "\nOld: " + existing.getProjectId();
+//                            noteMsg += "\nNew: " + constructed.getProjectId();
+//                            noteMsg += "\n";
+//                            super.logger.logcInfo(noteMsg, false);
+//                            qcStatistics.record("SUMMARY", "Number of alleles that changed projects, skipped");                                                
+//                            continue;
+//                        }
+//                    }
+//                }
+
                 // If the marker hasn't changed, then check if the symbol
                 // changed at all... if it did, that means the type changed
+                // This check should never catch Regeneron alleles because
+                // they are all of the same type
                 // (from xx<tm1a(KOMP)Wtsi> to xx<tm1e(KOMP)Wtsi> or etc.)
-                else if (!existing.getSymbol().equals(constructed.getSymbol()))
+                if (!existing.getSymbol().equals(constructed.getSymbol()))
                 {
-                    String noteMsg = "\nTYPE CHANGED (not updating)\n";
+                    String noteMsg = "\nTYPE CHANGED\n";
                     noteMsg += "Mutant Cell line: " + in.getMutantCellLine();
-                    noteMsg += "\nOld: " + existing.getSymbol();
-                    noteMsg += "\nNew: " + constructed.getSymbol();
+                    noteMsg += "\nOld allele: " + existing.getSymbol();
+                    noteMsg += "\nNew allele: " + constructed.getSymbol();
                     noteMsg += "\n";
-                    super.logger.logcInfo(noteMsg, false);
-                    qcStatistics.record("SUMMARY", "Number of cell lines that changed type, skipped");
+                    logger.logcInfo(noteMsg, false);
+                    qcStatistics.record("SUMMARY", "Number of cell lines that changed type");
+
+                    // Change the allele this MCL is currently attached to
+                    String query = "DELETE FROM ALL_Allele_Cellline";
+                    query += " WHERE _Allele_key = "+ existing.getKey();
+                    query += " AND _MutantCellLine_key = "+ esCell.getMCLKey();
+                    sqlDBMgr.executeUpdate(query);
+
+                    // lookup existing alleles for this project
+                    String projectId = in.getProjectId();
+                    HashMap alleles = alleleLookupByProjectId.lookup(projectId);
+
+                    if(alleles != null)
+                    {
+                        // Try to get the allele identified by the constructed symbol
+                        HashMap allele = (HashMap)alleles.get(constructed.getSymbol());
+
+                        // If we found the allele, we can attach the MCL to it
+                        if (allele != null)
+                        {
+                            // Found an allele with this same symbol
+                            Integer alleleKey = (Integer)allele.get("key");
+                            associateCellLineToAllele(alleleKey, esCell.getMCLKey());
+                            continue;
+                        }
+                    }
+
+                    // The MCL Didn't match any alleles, create an allele and
+                    // attach the MCL to it.
+                    createAllele(constructed, in, alleles);
+                    associateCellLineToAllele(constructed.getKey(), esCell.getMCLKey());
 
                     // This mutant cell line has had a major change, don't bother QC
                     // checking the rest of the values
                     continue;
                 }
+
                 // Only check the note content if the allele type and marker 
                 // hasn't changed.  If the type changed, then by definition 
                 // the note changed because different types use different 
                 // note tempates
-                else if (!existingNote.equals(constructedNote) && 
+                if (!existingNote.equals(constructedNote) && 
                     !alleleNoteUpdated.contains(existing.getSymbol()))
                 {
                     alleleNoteUpdated.add(existing.getSymbol());
@@ -407,9 +517,9 @@ extends DLALoader
                         cfg.getOverwriteNote() || 
                         (jobStreamKey.compareTo(noteModifiedBy) == 0))
                     {
-                        noteMsg += "Allele : ";
-                        noteMsg += existing.getSymbol() + "\n";
-                        noteMsg += "\nCurrent/New note:\n";
+                        noteMsg += "Allele: " + existing.getSymbol() + "\n";
+                        noteMsg += "Mutant Cell line: " + currentCellLine;
+                        noteMsg += "\n\nCurrent/New note:\n";
                         noteMsg += existing.getNote() + "\n";
                         noteMsg += constructed.getNote() + "\n";
 
@@ -435,28 +545,19 @@ extends DLALoader
                     }
                     else
                     {
-                        noteMsg += "Allele : ";
-                        noteMsg += existing.getSymbol() + " (not updating)\n";
-                        noteMsg += "Jobstream: " + jobStreamKey;
+                        noteMsg += "Allele: " + existing.getSymbol();
+                        noteMsg += " (not updating)\n";
+                        noteMsg += "Mutant Cell line: " + currentCellLine;
+                        noteMsg += "\nJobstream: " + jobStreamKey;
                         noteMsg += "\nModifiedBy: " + noteModifiedBy;
                         noteMsg += "\nCurrent/New note:\n";
                         noteMsg += existing.getNote() + "\n";
                         noteMsg += constructed.getNote() + "\n";
                         qcStatistics.record("WARNING", "Number of alleles that need to have molecular notes updated by curator");
                     }
-                    super.logger.logcInfo(noteMsg, false);
+                    logger.logcInfo(noteMsg, false);
                 }
 
-                if (existingGeneKey.compareTo(constructedGeneKey) != 0)
-                {
-                    String s = "\nMARKER ASSOCIATION CHANGED\n";
-                    s += "Allele: " + existing.getSymbol() + "\n";
-                    s += "Current marker key: " + existingGeneKey + "\n";
-                    s += "New marker key: " + constructedGeneKey + "\n";
-                    qcStatistics.record("WARNING", "Number of alleles that changed marker");
-                    super.logger.logdInfo(s, false);
-                }
-                
                 // Go on to the next mutant cell line                
                 continue;
             }
@@ -464,55 +565,15 @@ extends DLALoader
             {
                 // Mutant ES Cell NOT found in database
 
-
-
-                // Create the mutant cell line
-                MutantCellLine mcl = new MutantCellLine();
-                mcl.setCellLine(in.getMutantCellLine());
-                mcl.setCellLineTypeKey(new Integer(Constants.ESCELL_TYPE_KEY));
-                mcl.setDerivationKey(derivationKey);
-                mcl.setIsMutant(new Boolean(true));
-
-                // Get the stain key of the parental cell line
-                Integer parentalCellLineKey = cfg.getParentalKey(in.getParentCellLine());
-                String strainName = parentStrainLookupByParentKey.lookup(parentalCellLineKey);
-                Integer strainKey = strainKeyLookup.lookup(strainName);
-                mcl.setStrainKey(strainKey);
-
-                mcl.setCreationDate(currentTime);
-                mcl.setModificationDate(currentTime);
-                mcl.setCreatedByKey(cfg.getJobStreamKey());
-                mcl.setModifiedByKey(cfg.getJobStreamKey());
-                
-                // Insert the MCL into the database to get the _CellLine_key
-                ALL_CellLineDAO mclDAO = new ALL_CellLineDAO(mcl.getState());
-                loadStream.insert(mclDAO);
-                
-                // Add the recently created cell line to the cache
-                koMutantCellLineLookup.addToCache(in.getMutantCellLine(), mcl);
-
-                // Create the MutantCellLine Accession object
-                // note the missing AccID parameter which indicates this is 
-                // an MGI ID
-                AccessionId mclAccId = new AccessionId(
-                    in.getMutantCellLine(),         // MCL name
-                    cfg.getEsCellLogicalDb(),       // Logical DB
-                    mclDAO.getKey().getKey(),       // MCL object key
-                    new Integer(Constants.ESCELL_MGITYPE_KEY),   // MGI type
-                    Boolean.FALSE,  // Private?
-                    Boolean.TRUE    // Preferred?
-                    );
-                mclAccId.insert(loadStream);
-
-                qcStatistics.record("SUMMARY", "Number of mutant cell lines created");
+                Integer mclKey = createMutantCellLine(in, derivationKey);
 
                 // lookup existing alleles for this project
                 String projectId = in.getProjectId();
-                HashMap alleles = alleleLookpuByProjectId.lookup(projectId);
+                HashMap alleles = alleleLookupByProjectId.lookup(projectId);
 
-                if(alleles != null && alleles.size() > 0)
+                if(alleles != null)
                 {
-                    // Get the allele identified by the constructed symbol
+                    // Try to get the allele identified by the constructed symbol
                     HashMap allele = (HashMap)alleles.get(constructed.getSymbol());
 
                     // If we found the allele, we can attach the MCL to it
@@ -520,93 +581,142 @@ extends DLALoader
                     {
                         // Found an allele with this same symbol
                         Integer alleleKey = (Integer)allele.get("key");
-                        KnockoutAllele existing = koAlleleLookup.lookup(alleleKey);
+                        //KnockoutAllele existing = koAlleleLookup.lookup(alleleKey);
 
-                        if (existing == null)
-                        {
-                            super.logger.logdInfo("Found the allele key but not the allele:"+alleleKey, false);
-                            continue;
-                        }
+                        //if (existing == null)
+                        //{
+                        //    super.logger.logdInfo("Found the allele key but not the allele:"+alleleKey, false);
+                        //    String m = "Cellline "+in.getMutantCellLine();
+                        //    m+= " has been created but not associated to an allele!!";
+                        //    m+= " This needs to be fixed!", false);
+                        //    super.logger.logcInfo(m, false);
+                        //    qcStatistics.record("ERROR", "Celllines created but not attached to allele");
+                        //    continue;
+                        //}
                     
-                        // Found!!  Do stuff requred for just THIS MCL
-
-                        //Create the allele to cell line association
-                        ALL_Allele_CellLineState aclState = new ALL_Allele_CellLineState();
-                        aclState.setMutantCellLineKey(mclDAO.getKey().getKey());
-                        aclState.setAlleleKey(alleleKey);
-                        ALL_Allele_CellLineDAO aclDAO = new ALL_Allele_CellLineDAO(aclState);
-                        loadStream.insert(aclDAO);
-                        
-                        // add the MCL to the allele and replace the allele 
-                        // in the alleles map for this project
-                        Vector mcls = new Vector();
-                        mcls.add(in.getMutantCellLine());
-                        allele.put("mutantCellLines", mcls);
-                        alleles.put(constructed.getSymbol(), allele);
-
-                        alleleLookpuByProjectId.addToCache(in.getProjectId(), alleles);
-                        
+                        associateCellLineToAllele(alleleKey, mclKey);
                         continue;
                     }
                 }
 
-                // Default action is to creat the allele 
-
                 // The MCL Didn't match any alleles, create an allele and
                 // attach the MCL to it.
-                
-                constructed.insert(loadStream);
-                
-                //Create the allele to cell line association
-                ALL_Allele_CellLineState aclState = new ALL_Allele_CellLineState();
-                aclState.setMutantCellLineKey(mclDAO.getKey().getKey());
-                aclState.setAlleleKey(constructed.getKey());
-                ALL_Allele_CellLineDAO aclDAO = new ALL_Allele_CellLineDAO(aclState);
-                loadStream.insert(aclDAO);
-                
-
-                // Create the allele with all the data from this row
-                HashMap allele = new HashMap();
-                allele.put("projectid", in.getProjectId());
-                allele.put("key", constructed.getKey());
-                allele.put("symbol", constructed.getSymbol());
-                Vector mcls = new Vector();
-                mcls.add(in.getMutantCellLine());
-                allele.put("mutantCellLines", mcls);
-                allele.put("parentCellLine", in.getParentCellLine());
-
-                if (alleles == null)
-                {
-                    alleles = new HashMap();
-                }
-
-                // add the new allele to the map
-                alleles.put(constructed.getSymbol(), allele);
-
-                alleleLookpuByProjectId.addToCache(in.getProjectId(), alleles);
-                
-                // Finally, add the newly created allele to the cache
-                koAlleleLookup.addToCache(constructed.getKey(), constructed);
-
-                Marker mrk = markerLookup.lookup(in.getGeneId());
-                String markerSymbol = mrk.getSymbol();
-
-                HashSet alleleSet = null;
-                alleleSet = alleleLookupByMarker.lookup(markerSymbol);
-                if (alleleSet == null)
-                {
-                    alleleSet = new HashSet();
-                }
-                alleleSet.add(constructed.getSymbol());
-                alleleLookupByMarker.addToCache(markerSymbol, alleleSet);
-
-                qcStatistics.record("SUMMARY", "Number of alleles created");
-
+                createAllele(constructed, in, alleles);
+                associateCellLineToAllele(constructed.getKey(), mclKey);
             }
-
         }
         
         return;
+    }
+
+    protected Integer createMutantCellLine(KnockoutAlleleInput in, Integer derivationKey)
+    throws MGIException
+    {
+        // Create the mutant cell line
+        MutantCellLine mcl = new MutantCellLine();
+        mcl.setCellLine(in.getMutantCellLine());
+        mcl.setCellLineTypeKey(new Integer(Constants.ESCELL_TYPE_KEY));
+        mcl.setDerivationKey(derivationKey);
+        mcl.setIsMutant(new Boolean(true));
+
+        // Get the stain key of the parental cell line
+        Integer parentalCellLineKey = cfg.getParentalKey(in.getParentCellLine());
+        String strainName = parentStrainLookupByParentKey.lookup(parentalCellLineKey);
+        Integer strainKey = strainKeyLookup.lookup(strainName);
+        mcl.setStrainKey(strainKey);
+
+        mcl.setCreationDate(currentTime);
+        mcl.setModificationDate(currentTime);
+        mcl.setCreatedByKey(cfg.getJobStreamKey());
+        mcl.setModifiedByKey(cfg.getJobStreamKey());
+        
+        // Insert the MCL into the database to get the _CellLine_key
+        ALL_CellLineDAO mclDAO = new ALL_CellLineDAO(mcl.getState());
+        loadStream.insert(mclDAO);
+        
+        // Add the recently created cell line to the cache
+        koMutantCellLineLookup.addToCache(in.getMutantCellLine(), mcl);
+
+        // Create the MutantCellLine Accession object
+        // note the missing AccID parameter which indicates this is 
+        // an MGI ID
+        AccessionId mclAccId = new AccessionId(
+            in.getMutantCellLine(),         // MCL name
+            cfg.getEsCellLogicalDb(),       // Logical DB
+            mclDAO.getKey().getKey(),       // MCL object key
+            new Integer(Constants.ESCELL_MGITYPE_KEY),   // MGI type
+            Boolean.FALSE,  // Private?
+            Boolean.TRUE    // Preferred?
+            );
+        mclAccId.insert(loadStream);
+
+        qcStatistics.record("SUMMARY", "Number of mutant cell lines created");
+
+        return mclDAO.getKey().getKey();
+    }
+
+    /**
+     * Must close the BCP file stream and commit the new maximum MGI \
+     * number back to the database
+     * @assumes nothing
+     * @effects Updates the database row in ACC_AccessionMax for MGI IDs
+     * @throws MGIException if something goes wrong
+     */
+    protected void associateCellLineToAllele(Integer alleleKey, Integer celllineKey)
+    throws MGIException
+    {
+        // Create the allele to cell line association
+        ALL_Allele_CellLineState aclState = new ALL_Allele_CellLineState();
+        aclState.setMutantCellLineKey(celllineKey);
+        aclState.setAlleleKey(alleleKey);
+        ALL_Allele_CellLineDAO aclDAO = new ALL_Allele_CellLineDAO(aclState);
+        loadStream.insert(aclDAO);
+    }
+
+    protected KnockoutAllele createAllele(KnockoutAllele constructed, KnockoutAlleleInput in, HashMap alleles)
+    throws MGIException
+    {
+        constructed.insert(loadStream);
+
+        // Create the allele with all the data from this row
+        HashMap allele = new HashMap();
+        allele.put("projectid", in.getProjectId());
+        allele.put("key", constructed.getKey());
+        allele.put("symbol", constructed.getSymbol());
+        Vector mcls = new Vector();
+        mcls.add(in.getMutantCellLine());
+        allele.put("mutantCellLines", mcls);
+        allele.put("parentCellLine", in.getParentCellLine());
+        allele.put("parentCellLineKey", cfg.getParentalKey(in.getParentCellLine()));
+
+        if (alleles == null)
+        {
+            alleles = new HashMap();
+        }
+
+        // add the new allele to the map
+        alleles.put(constructed.getSymbol(), allele);
+
+        alleleLookupByProjectId.addToCache(in.getProjectId(), alleles);
+        
+        // Finally, add the newly created allele to the cache
+        koAlleleLookup.addToCache(constructed.getKey(), constructed);
+
+        Marker mrk = markerLookup.lookup(in.getGeneId());
+        String markerSymbol = mrk.getSymbol();
+
+        HashSet alleleSet = null;
+        alleleSet = alleleLookupByMarker.lookup(markerSymbol);
+        if (alleleSet == null)
+        {
+            alleleSet = new HashSet();
+        }
+        alleleSet.add(constructed.getKey());
+        alleleLookupByMarker.addToCache(markerSymbol, alleleSet);
+
+        qcStatistics.record("SUMMARY", "Number of alleles created");
+        
+        return constructed;
     }
 
     /**
@@ -680,11 +790,106 @@ extends DLALoader
             }            
         }
 
+        if (databaseCellLines.size() > 0 || databaseProjectIds.size() > 0 || alleleProjectIdUpdated.size() > 0)
+        {
+            logger.logdInfo("Number of project IDs that exist in DB but not in file: " + databaseProjectIds.size(), false);
+            logger.logpInfo("Number of project IDs that exist in DB but not in file: " + databaseProjectIds.size(), false);
+
+            logger.logdInfo("Number of celllines that exist in DB but not in file: " + databaseCellLines.size(), false);
+            logger.logpInfo("Number of celllines that exist in DB but not in file: " + databaseCellLines.size(), false);
+
+            logger.logdInfo("Number of alleles that changed project IDs: " + alleleProjectIdUpdated.size(), false);
+            logger.logpInfo("Number of alleles that changed project IDs: " + alleleProjectIdUpdated.size(), false);
+
+            logger.logdInfo("\nANOMALIES", false);
+            logger.logcInfo("\nANOMALIES", false);
+        }
+
+        if (databaseCellLines.size() > 0)
+        {
+            logger.logdInfo("\nCelllines that exist in the database, but not in the input file: " + databaseCellLines.size(), false);
+            logger.logcInfo("\nCelllines that exist in the database, but not in the input file: " + databaseCellLines.size(), false);
+
+            logger.logdInfo("\nAllele\tExisting Project\tES Cell Line", false);
+            logger.logcInfo("\nAllele\tExisting Project\tES Cell Line", false);
+
+            iterator = databaseCellLines.iterator();
+            Set s = new TreeSet();
+            while (iterator.hasNext())
+            {   
+                String label = (String)iterator.next();
+                KnockoutAllele a = alleleLookupByCellLine.lookup(label);
+                s.add(a.getSymbol() + "\t" + a.getProjectId() + "\t" + label.toUpperCase());
+            }
+
+            iterator = s.iterator();
+            while (iterator.hasNext())
+            {
+                String lbl = (String)iterator.next();
+                logger.logdInfo(lbl, false);
+                logger.logcInfo(lbl, false);
+            }            
+        }
+
+        if (databaseProjectIds.size() > 0)
+        {
+            logger.logdInfo("\nProject IDs that exist in MGI, but not in the input file: "+databaseProjectIds.size(), false);
+            logger.logcInfo("\nProject IDs that exist in MGI, but not in the input file: "+databaseProjectIds.size(), false);
+
+            logger.logdInfo("\nAllele\tExisting Project", false);
+            logger.logcInfo("\nAllele\tExisting Project", false);
+
+            iterator = databaseProjectIds.iterator();
+            Set s = new TreeSet();
+            while (iterator.hasNext())
+            {   
+                String label = (String)iterator.next();
+                HashMap hmA = alleleLookupByProjectId.lookup(label);
+                if (hmA != null)
+                {   
+                    Set entries = hmA.entrySet();
+                    Iterator aIt = entries.iterator();
+                    while (aIt.hasNext())
+                    {   
+                        Map.Entry entry = (Map.Entry) aIt.next();
+                        HashMap tmpAllele = (HashMap) entry.getValue();
+                        s.add((String) tmpAllele.get("symbol") + "\t" + label);
+                    }
+                }
+            }
+
+            iterator = s.iterator();
+            while (iterator.hasNext())
+            {   
+                String lbl = (String)iterator.next();
+                logger.logdInfo(lbl, false);
+                logger.logcInfo(lbl, false);
+            }
+        }
+
+        if (alleleProjectIdUpdated.size() > 0)
+        {
+            logger.logdInfo("\nAlleles that have had project ID changes: "+alleleProjectIdUpdated.size(), false);
+            logger.logcInfo("\nAlleles that have had project ID changes: "+alleleProjectIdUpdated.size(), false);
+
+            logger.logdInfo("\nAllele\tExisting Project\tNew Project\tMCL", false);
+            logger.logcInfo("\nAllele\tExisting Project\tNew Project\tMCL", false);
+
+            iterator = alleleProjectIdUpdated.iterator();
+            while (iterator.hasNext())
+            {
+                String label = (String)iterator.next();
+                logger.logdInfo(label, false);
+                logger.logcInfo(label, false);
+            }            
+        }
+
+
         // Emptry line to the log files
         logger.logdInfo("\n", false);
-        logger.logpInfo("\n", false);
+        logger.logcInfo("\n", false);
 
-        super.logger.logInfo("Process Finishing");
+        logger.logInfo("Process Finishing");
         return;
     }
 

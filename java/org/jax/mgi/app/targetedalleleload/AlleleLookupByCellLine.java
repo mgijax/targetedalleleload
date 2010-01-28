@@ -2,6 +2,7 @@ package org.jax.mgi.app.targetedalleleload;
 
 import java.util.Vector;
 import java.util.Iterator;
+import java.util.Set;
 
 import org.jax.mgi.shr.cache.KeyValue;
 import org.jax.mgi.shr.cache.FullCachedLookup;
@@ -84,6 +85,17 @@ extends FullCachedLookup
 
 
     /**
+     * returns the set of keys from the cache
+     * @assumes nothing
+     * @effects nothing
+     */
+    public Set getKeySet()
+    {
+        return cache.keySet();
+    }
+
+
+    /**
      * add a new map to the cache
      * @assumes nothing
      * @effects the value identified by 'cellLine' will be added or replaced 
@@ -147,7 +159,7 @@ extends FullCachedLookup
                "and acc2.preferred=1 " +
                "and acc2.private=1 " +
                "and acc2._Object_key = a._Allele_key " +
-               "and acc2._LogicalDB_key in (125,126) " +
+               "and acc2._LogicalDB_key in (125,126,138) " +
                "and acc2._MGIType_key=11 " +
                "and n._Object_key =* a._Allele_key " +
                "and n._MGIType_key = 11 " +

@@ -34,10 +34,10 @@ public class KOMutantCellLineLookup
 extends FullCachedLookup
 {
     // provide a static cache so that all instances share one cache
-    private static HashMap cache = new HashMap();
+//    private static HashMap cache = new HashMap();
 
     // indicator of whether or not the cache has been initialized
-    private static boolean hasBeenInitialized = false;
+//    private static boolean hasBeenInitialized = false;
 
     // Which provider of cells is restricted by the logicalDB
     private Integer cellLineLogicalDB = null;
@@ -57,10 +57,10 @@ extends FullCachedLookup
         this.cellLineLogicalDB = cellLineLogicalDB;
 
         // since cache is static make sure you do not reinit
-        if (!hasBeenInitialized) {
+//        if (!hasBeenInitialized) {
             initCache(cache);
-        }
-        hasBeenInitialized = true;
+//        }
+//        hasBeenInitialized = true;
 
     }
 
@@ -105,7 +105,7 @@ extends FullCachedLookup
             "AND c._CellLine_Type_key = v._Term_key " +
             "AND c._Strain_key = s._Strain_key " +
             "AND c._Derivation_key != null " +
-            "AND a._LogicalDB_Key = " + cellLineLogicalDB.toString());
+            "AND a._LogicalDB_Key = " + cellLineLogicalDB);
     }
   
     /**
@@ -165,7 +165,7 @@ extends FullCachedLookup
                 mcl.setModificationDate(row.getTimestamp(13));
                 mcl.setCreatedByKey(row.getInt(14));
                 mcl.setModifiedByKey(row.getInt(15));
-                return new KeyValue(accID, mcl);
+                return new KeyValue(row.getString("cellLine").toLowerCase(), mcl);
             }
         }
         return new Interpreter();

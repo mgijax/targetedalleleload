@@ -1,7 +1,7 @@
 package org.jax.mgi.app.targetedalleleload;
 
 /**
- * @is An object that represents a CSD Knockout Allele Input record.
+ * @is An object that represents a EUCOMM Knockout Allele Input record.
  * @has
  *   <UL>
  *   <LI> Configuration parameters that are needed to populate a
@@ -16,9 +16,10 @@ package org.jax.mgi.app.targetedalleleload;
  * @author jmason
  */
 
-public class CSDAlleleInput implements KnockoutAlleleInput
+public class EUCOMMAlleleInput implements KnockoutAlleleInput
 {
-    private final String PROVIDER = "CSD";
+    private final String PROVIDER = "EUCOMM";
+
     /////////////////
     //  Variables  //
     /////////////////
@@ -50,7 +51,7 @@ public class CSDAlleleInput implements KnockoutAlleleInput
      * @assumes Nothing
      * @effects Set the class variables.
      */
-    public CSDAlleleInput()
+    public EUCOMMAlleleInput()
     {}
 
     // Getters
@@ -64,6 +65,10 @@ public class CSDAlleleInput implements KnockoutAlleleInput
 	public String getBuild() {return build;}
 	public String getCassette() {return cassette;}
 	public String getMutationType() {return mutationType;}
+	
+	public String toString() {
+	    return esCellName+" "+projectId+" "+geneId+" "+parentESCellName+" "+locus1+" "+locus2;
+	}
 
     // Setters
 	public void setESCellName(String esCellName)
@@ -78,7 +83,7 @@ public class CSDAlleleInput implements KnockoutAlleleInput
 
 	public void setParentESCellName(String parentESCellName)
 	{
-	    // The CSD parental cell names come in from CSD with all sorts
+	    // The EUCOMM parental cell names come in from EUCOMM with all sorts
 	    // of strange characters.  Strip them off before storing the 
 	    // Parent ES Cell line name so we can do comparisions easier
 		this.parentESCellName = parentESCellName.toUpperCase()

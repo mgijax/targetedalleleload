@@ -54,7 +54,6 @@ public class RegeneronProcessor extends KnockoutAlleleProcessor
     private StrainKeyLookup strainKeyLookup = null;
     private VocabKeyLookup vocabLookup = null;
     private ProjectLookupByMarker projectLookupByMarker = null;
-    private AlleleLookupByMarker alleleLookupByMarker = null;
     private AlleleLookupByProjectId alleleLookpuByProjectId = null;
     
     private Pattern alleleSequencePattern = null;
@@ -81,7 +80,8 @@ public class RegeneronProcessor extends KnockoutAlleleProcessor
         Integer projectLogicalDB = cfg.getProjectLogicalDb();
         
         projectLookupByMarker = new ProjectLookupByMarker(projectLogicalDB);
-        alleleLookpuByProjectId = new AlleleLookupByProjectId(projectLogicalDB);
+        //alleleLookpuByProjectId = new AlleleLookupByProjectId(projectLogicalDB);
+        alleleLookpuByProjectId = AlleleLookupByProjectId.getInstance(projectLogicalDB);
         markerLookup = new MarkerLookupByMGIID();
 		vocabLookup = new VocabKeyLookup(Constants.ALLELE_VOCABULARY);
 		strainKeyLookup = new StrainKeyLookup();

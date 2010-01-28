@@ -117,7 +117,8 @@ fi
 #
 #  Perform pre-load tasks.
 #
-preload ${OUTPUTDIR}
+#preload ${OUTPUTDIR}
+preload
 
 #
 #  Run the load application.
@@ -138,6 +139,12 @@ fi
 echo "targetedalleleLoad application completed successfully" >> ${LOG_PROC}
 
 postload
+
+echo "Run the targetedalleleLoad QC report" >> ${LOG_PROC}
+
+${PYTHON} ./bin/QCreport.py
+
+echo "QC report for targetedalleleLoad completed successfully" >> ${LOG_PROC}
 
 exit 0
 

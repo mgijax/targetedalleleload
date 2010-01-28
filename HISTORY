@@ -1,3 +1,10 @@
+TAG: targetedalleleload-4-3-2-2
+DATE: 1/28/2010
+STAFF: jmason
+CHANGES:
+1) Change CSD processor to update alleles
+2) Include EUCOMM processor and interpreter
+
 TAG: targetedalleleload-4-3-2-1
 DATE: 1/08/2010
 STAFF: jmason

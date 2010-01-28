@@ -26,14 +26,14 @@ import org.jax.mgi.shr.exception.MGIException;
 
 /**
  * @is An object that knows how to create KOMP Clone objects from 
- * the CSD allele file 
+ * the EUCOMM allele file 
  * @has
  *   <UL>
  *   <LI> KOMP Clone object.
  *   </UL>
  * @does
  *   <UL>
- *   <LI> Parses a CSD Allele file record into a KOMP Clone object
+ *   <LI> Parses a EUCOMM Allele file record into a KOMP Clone object
  *   <LI>
  *   </UL>
  * @company The Jackson Laboratory
@@ -41,7 +41,7 @@ import org.jax.mgi.shr.exception.MGIException;
  * @version 1.0
  */
 
-public class CSDProcessor extends KnockoutAlleleProcessor
+public class EUCOMMProcessor extends KnockoutAlleleProcessor
 {
     /////////////////
     //  Variables  //
@@ -79,7 +79,7 @@ public class CSDProcessor extends KnockoutAlleleProcessor
      * @throws CacheException 
      * @throws TranslationException 
      */
-    public CSDProcessor ()
+    public EUCOMMProcessor ()
     throws ConfigException,DLALoggingException,
     DBException,CacheException,TranslationException
     {
@@ -122,7 +122,7 @@ public class CSDProcessor extends KnockoutAlleleProcessor
     throws RecordFormatException,ConfigException,KeyNotFoundException,
     DBException,CacheException,TranslationException,MGIException
     {
-        CSDAlleleInput in = (CSDAlleleInput)inputData;
+        EUCOMMAlleleInput in = (EUCOMMAlleleInput)inputData;
 
         KnockoutAllele koAllele = new KnockoutAllele();
 
@@ -135,7 +135,7 @@ public class CSDProcessor extends KnockoutAlleleProcessor
         koAllele.setProjectLogicalDb(cfg.getProjectLogicalDb());
         koAllele.setStrainKey(strainKey);
 
-        // CSD Specific Mutation types
+        // EUCOMM Specific Mutation types
         Vector mutationTypeKeys = new Vector();
         String[] types = cfg.getMutationTypes(in.getMutationType()).split(",");
         for (int i=0;i<types.length;i++)
@@ -253,12 +253,6 @@ public class CSDProcessor extends KnockoutAlleleProcessor
             {
                 Integer nextKey = (Integer) alleleSetIt.next();
                 KnockoutAllele existingKoAllele = koAlleleLookup.lookup(nextKey);
-                if (existingKoAllele == null)
-                {
-                    throw new MGIException(
-                        "Unable to create allele for \n"+in.getMutantCellLine()
-                    );
-                }
                 String allSymbol = existingKoAllele.getSymbol();
 
                 // Get the hashmap version of the allele
@@ -300,8 +294,24 @@ public class CSDProcessor extends KnockoutAlleleProcessor
                     }
                 }
 
-                // Ok, bump up the sequence if this allele is larger than the largest
-                // seen so far
+                // String thisAlleleType = "";
+                // // Get type of allele being checked
+                // regexMatcher = alleleTypePattern.matcher(allSymbol);
+                // if (regexMatcher.find())
+                // {
+                //     thisAlleleType = regexMatcher.group(1);
+                // }
+                // 
+                // // If the allele being compared is not of the correct
+                // // "type", then don't use it to increment the sequence
+                // // only alleles of the same type should bump the default
+                // // seqence
+                // if (!thisAlleleType.equals(let))
+                // {
+                //     continue;
+                // }
+
+                // Ok, same type, reset the sequence if it's larger and the project matches
                 regexMatcher = alleleSequencePattern.matcher(allSymbol);
                 if (regexMatcher.find())
                 {
@@ -314,15 +324,67 @@ public class CSDProcessor extends KnockoutAlleleProcessor
             }
         }
 
+
         String finalSequence = new Integer(seq).toString() + let;
 
+        // // Now that we have a sensible default for the allele 
+        // // sequence and letter ... see if we can find an actual 
+        // // allele that exists with matching Parental Cell Line
+        // // and Project ID (this encompasses the vector since projects are
+        // // granular to the targeting vector)
+        // HashMap alleles = alleleLookupByProjectId.lookup(in.getProjectId());
+        // HashMap matchingAllele = null;
+        // 
+        // if (alleles != null && alleles.size() > 0)
+        // {
+        //     Boolean alleleFound = Boolean.FALSE;
+        //     Set entries = alleles.entrySet();
+        //     Iterator it = entries.iterator();
+        // 
+        //     while (it.hasNext() && alleleFound != Boolean.TRUE)
+        //     {
+        //         Map.Entry entry = (Map.Entry) it.next();
+        //         HashMap allele = (HashMap)entry.getValue();
+        // 
+        //         String allSymbol = (String)allele.get("symbol");
+        //         String thisAlleleType = "";
+        // 
+        //         //Compare type
+        //         regexMatcher = alleleTypePattern.matcher(allSymbol);
+        //         if (regexMatcher.find())
+        //         {
+        //             thisAlleleType = regexMatcher.group(1);
+        //         }
+        // 
+        //         // Compare parental cell lines
+        //         Integer fromFile = cfg.getParentalKey(in.getParentCellLine());
+        //         Integer fromData = (Integer)allele.get("parentCellLineKey");
+        // 
+        //         // If Project and parental match use the seq 
+        //         // If Project, parental and type match use seq and let
+        //         if (fromData.equals(fromFile))
+        //         {
+        //             // MATCHES! reset the sequence to match the current allele and
+        //             // short circuit the loop since we found the correct allele
+        //             
+        //             regexMatcher = alleleSequencePattern.matcher(allSymbol);
+        //             if (regexMatcher.find())
+        //             {
+        //                 finalSequence = regexMatcher.group(1) + let;
+        //                 alleleFound = Boolean.TRUE;
+        //             }
+        //         }
+        //     }
+        // }
+        // 
+
         // Set the clone's constructed values
-        String alleleName = cfg.getNameTemplate();
+        String alleleName = cfg.getNameTemplate(in.getMutantCellLine());
         alleleName = alleleName.replaceAll("~~SYMBOL~~", marker.getSymbol()); 
         alleleName = alleleName.replaceAll("~~SEQUENCE~~", finalSequence); 
         koAllele.setName(alleleName);
 
-        String alleleSymbol = cfg.getSymbolTemplate();
+        String alleleSymbol = cfg.getSymbolTemplate(in.getMutantCellLine());
         alleleSymbol = alleleSymbol.replaceAll("~~SYMBOL~~", marker.getSymbol()); 
         alleleSymbol = alleleSymbol.replaceAll("~~SEQUENCE~~", finalSequence); 
         koAllele.setSymbol(alleleSymbol);

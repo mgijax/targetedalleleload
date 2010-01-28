@@ -111,6 +111,7 @@ ESCELL_LOGICAL_DB='109'
 # The projects for regeneron are stored using the following logical db
 #
 PROJECT_LOGICAL_DB='125'
+export PROJECT_LOGICAL_DB
 
 #
 # The derivation for these types of alleles is determined by the unique

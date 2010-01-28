@@ -40,6 +40,19 @@ public class KnockoutAlleleLookup
 extends FullCachedLookup
 {
 
+    private static KnockoutAlleleLookup _instance;
+
+    public static KnockoutAlleleLookup getInstance()
+    throws ConfigException, DBException, CacheException
+    {
+        if (_instance==null) {
+            _instance = new KnockoutAlleleLookup();
+        }
+        return _instance;
+    }
+
+
+
     private TargetedAlleleLoadCfg cfg = null;
     private MarkerLookupByMGIID markerLookup = null;
 
@@ -78,7 +91,7 @@ extends FullCachedLookup
     public KnockoutAllele lookup(Integer alleleKey)
     throws DBException, CacheException
     {
-        return (KnockoutAllele)super.lookupNullsOk(alleleKey);
+        return (KnockoutAllele)lookupNullsOk(alleleKey);
     }
 
 
@@ -96,7 +109,7 @@ extends FullCachedLookup
     throws DBException, CacheException
     {
         // Replace the current value if it exists
-        super.cache.put(alleleKey, koAllele);
+        cache.put(alleleKey, koAllele);
     }
 
 
@@ -117,7 +130,7 @@ extends FullCachedLookup
             System.out.println("Config Exception retrieving JNUMBER");
         }
 
-        return "SELECT alleleKey=a._Allele_key, alleleName=a.name, " +
+        return "SELECT distinct alleleKey=a._Allele_key, alleleName=a.name, " +
                "alleleSymbol=a.symbol, alleleType=a._Allele_Type_key, " +
                "geneSymbol=mrk.symbol, chr=mrk.chromosome, " +
                "geneKey=mrk._Marker_key, geneMgiid=acc.accID, " +
@@ -146,7 +159,7 @@ extends FullCachedLookup
                "and acc2.preferred=1 " +
                "and acc2.private=1 " +
                "and acc2._Object_key = a._Allele_key " +
-               "and acc2._LogicalDB_key in (125,126) " +
+               "and acc2._LogicalDB_key in (125,126,138) " +
                "and acc2._MGIType_key=11 " +
                "and n._Object_key = a._Allele_key " +
                "and n._MGIType_key = 11 " +
@@ -173,7 +186,7 @@ extends FullCachedLookup
             public Object interpretKey(RowReference row)
             throws DBException
             {
-                return row.getString("projectId");
+                return row.getString("alleleKey");
             }
 
             public Object interpretRows(Vector v)
@@ -222,7 +235,7 @@ extends FullCachedLookup
                     rd = (RowData)it.next();
 
                     // Concat all the notechunks together in the allele note
-                    completeNote += rd.alleleNote;
+                    completeNote += rd.alleleNote.trim();
                 }
                 
                 koAllele.setNote(completeNote.trim());
@@ -261,6 +274,17 @@ extends FullCachedLookup
         protected String jNumber;
         protected String geneMgiid;
 
+        public String toString()
+        {
+            return "alleleKey:"+alleleKey + "\nprojectId:" +projectId + "\nalleleType:"+alleleType + "\njnum:"+jNumber + 
+            "\ngenemgi:"+geneMgiid + 
+            "\nalleleName:" +alleleName + 
+            "\nalleleSymbol:" +alleleSymbol + 
+            "\nalleleNote:" +alleleNote + 
+            "\nalleleNoteKey:" +alleleNoteKey + 
+            "\nalleleNoteCreatedBy:" +alleleNoteCreatedBy + 
+            "\nalleleNoteModifiedBy:" +alleleNoteModifiedBy;
+        }
         public RowData (RowReference row) throws DBException
         {
             alleleKey = row.getInt("alleleKey");

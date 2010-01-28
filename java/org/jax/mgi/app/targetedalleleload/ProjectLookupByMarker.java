@@ -85,7 +85,7 @@ extends FullCachedLookup
      */
     public String getFullInitQuery()
     {
-        return "SELECT m.symbol 'symbol', a1.accID 'projectid' " +
+        return "SELECT distinct m.symbol 'symbol', a1.accID 'projectid' " +
             "FROM acc_accession a1, all_allele allele, MRK_marker m " +
             "WHERE a1._logicaldb_key = " + this.logicalDb.toString() + " " + 
             "AND a1._object_key = allele._allele_key " +

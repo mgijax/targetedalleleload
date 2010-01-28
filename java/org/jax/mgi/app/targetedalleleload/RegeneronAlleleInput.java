@@ -20,6 +20,7 @@ import org.jax.mgi.shr.exception.MGIException;
 
 public class RegeneronAlleleInput implements KnockoutAlleleInput
 {
+    private final String PROVIDER = "Regeneron";
     /////////////////
     //  Variables  //
     /////////////////
@@ -59,60 +60,18 @@ public class RegeneronAlleleInput implements KnockoutAlleleInput
     {
     }
 
-	public String getMutantCellLine()
-	{
-		return esCellName;
-	}
-
-	public String getParentCellLine()
-	{
-		return parentalESCellName;
-	}
-
-	public String getStrainName()
-	{
-		return strainName;
-	}
-
-	public String getProjectId()
-	{
-		return projectId;
-	}
-
-	public String getGeneSymbol()
-	{
-		return geneSymbol;
-	}
-
-	public String getGeneId()
-	{
-		return geneMgiId;
-	}
-
-	public Integer getDelStart()
-	{
-		return delStart;
-	}
-
-	public Integer getDelEnd()
-	{
-		return delEnd;
-	}
-
-	public Integer getDelSize()
-	{
-		return delSize;
-	}
-
-	public String getBuild()
-	{
-		return build;
-	}
-
-	public String getCassette()
-	{
-		return cassette;
-	}
+	public String getProvider() { return PROVIDER; }
+    public String getMutantCellLine() { return esCellName; }
+    public String getParentCellLine() { return parentalESCellName; }
+    public String getStrainName() { return strainName; }
+    public String getProjectId() { return projectId; }
+    public String getGeneSymbol() { return geneSymbol; }
+    public String getGeneId() { return geneMgiId; }
+    public Integer getDelStart() { return delStart; }
+    public Integer getDelEnd() { return delEnd; } 
+	public Integer getDelSize() { return delSize; }
+    public String getBuild() { return build; }
+    public String getCassette() { return cassette; }
 
 	public void setESCellName(String esCellName)
 	{

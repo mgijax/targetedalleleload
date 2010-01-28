@@ -18,21 +18,21 @@ import java.util.regex.Pattern;
 
 /**
  * @is An object that knows how to Interpret
- * the CSD allele file 
+ * the EUCOMM allele file 
  * @has
  *   <UL>
  *   <LI> logger
  *   </UL>
  * @does
  *   <UL>
- *   <LI> Interprets a CSD Allele record into it's various parts
+ *   <LI> Interprets a EUCOMM Allele record into it's various parts
  *   </UL>
  * @company The Jackson Laboratory
  * @author jmason
  * @version 1.0
  */
 
-public class CSDInterpreter extends KnockoutAlleleInterpreter
+public class EUCOMMInterpreter extends KnockoutAlleleInterpreter
 {
 
     // The minimum length of a valid input record (including NL character).
@@ -48,11 +48,11 @@ public class CSDInterpreter extends KnockoutAlleleInterpreter
 
 
     /**
-     * Constructs a CSD specific interpreter object
+     * Constructs a EUCOMM specific interpreter object
      * @assumes Nothing
      * @effects Nothing
      */
-    public CSDInterpreter ()
+    public EUCOMMInterpreter ()
     {
         csvRE = Pattern.compile(CSV_PATTERN);
         try
@@ -102,7 +102,7 @@ public class CSDInterpreter extends KnockoutAlleleInterpreter
     throws MGIException
     {
 
-        CSDAlleleInput inputData = new CSDAlleleInput();
+        EUCOMMAlleleInput inputData = new EUCOMMAlleleInput();
         qcStatistics.record("SUMMARY", "Number of input records");
         
 
@@ -149,7 +149,7 @@ public class CSDInterpreter extends KnockoutAlleleInterpreter
         inputData.setCassette(fields[2]);
 
         // field 3 defines which pipeline created the MCL
-        // This being the CSD interpreter, we already know because we
+        // This being the EUCOMM interpreter, we already know because we
         // filter out all the other lines in the isValid check.
 
         inputData.setProjectId(fields[4]);
@@ -200,22 +200,16 @@ public class CSDInterpreter extends KnockoutAlleleInterpreter
             // Ignore comment lines which start with a "#" character
             return false;
         }
-        else if (!parts[3].replaceAll("\"", "").matches("KOMP"))
+        else if (!parts[3].replaceAll("\"", "").matches("EUCOMM"))
         {
             // Wrong project
-            qcStatistics.record("SUMMARY", "Non KOMP-CSD input record(s) skipped");
-            return false;
-        }
-        else if (parts[5].replaceAll("\"", "").matches("^HEPD.*"))
-        {
-            // Wrong project
-            qcStatistics.record("SUMMARY", "(Helmholtz) Non Sanger KOMP-CSD input record(s) skipped");
+            qcStatistics.record("SUMMARY", "Non EUCOMM input record(s) skipped");
             return false;
         }
         else if (parts[5].replaceAll("\"", "").matches("^DEPD.*"))
         {
             // Wrong project
-            qcStatistics.record("SUMMARY", "(Davis) Non Sanger KOMP-CSD input record(s) skipped");
+            qcStatistics.record("SUMMARY", "Non EUCOMM input record(s) skipped");
             return false;
         }
         else if (parts[6].indexOf(",") > 0)
@@ -242,7 +236,7 @@ public class CSDInterpreter extends KnockoutAlleleInterpreter
         }
         else
         {
-            qcStatistics.record("SUMMARY", "Successfully interpreted KOMP-CSD input record(s)");
+            qcStatistics.record("SUMMARY", "Successfully interpreted EUCOMM input record(s)");
             return true;
         }
     }

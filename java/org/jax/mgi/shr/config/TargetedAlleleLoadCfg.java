@@ -164,8 +164,19 @@ public class TargetedAlleleLoadCfg extends InputDataCfg
      * @return The configuration value
      * @throws ConfigException if the value is not found
      */
-    public String getCreatorKey() throws ConfigException
+    public String getCreatorKey(String creator, String cellline) throws ConfigException
     {
+        if (creator.equals("EUCOMM"))
+        {
+            if (cellline.startsWith("H"))
+            {
+                return getConfigString("DERIVATION_CREATOR_KEY_HMGU");
+            }
+            else if (cellline.startsWith("E"))
+            {
+                return getConfigString("DERIVATION_CREATOR_KEY_WTSI");
+            }
+        }
         return getConfigString("DERIVATION_CREATOR_KEY");
     }
 
@@ -188,18 +199,6 @@ public class TargetedAlleleLoadCfg extends InputDataCfg
         return getConfigInteger(q);        
     }
 
-    /**
-     * Get the provider string
-     * @assumes The "ALLELE_PROVIDER" constant is defined in the config file
-     * @effects Nothing
-     * @return The configuration value
-     * @throws ConfigException if the value is not found
-     */
-    public String getProvider() throws ConfigException
-    {
-        return getConfigString("ALLELE_PROVIDER");
-    }
-    
     /**
      * Get the Allele molecular note template string
      * @assumes The appropriate constant is defined in the config file
@@ -275,6 +274,18 @@ public class TargetedAlleleLoadCfg extends InputDataCfg
     {
         return getConfigString("NAME_TEMPLATE");
     }
+    public String getNameTemplate(String cellline) throws ConfigException
+    {
+        if (cellline.startsWith("H"))
+        {
+            return getConfigString("NAME_TEMPLATE_HMGU");
+        } 
+        else if (cellline.startsWith("E"))
+        {
+            return getConfigString("NAME_TEMPLATE_WTSI");
+        }
+        return getConfigString("NAME_TEMPLATE");
+    }
 
     /**
      * Get the Allele Symbol template string
@@ -287,6 +298,19 @@ public class TargetedAlleleLoadCfg extends InputDataCfg
     {
         return getConfigString("SYMBOL_TEMPLATE");
     }
+    public String getSymbolTemplate(String cellline) throws ConfigException
+    {
+        if (cellline.startsWith("H"))
+        {
+            return getConfigString("SYMBOL_TEMPLATE_HMGU");
+        } 
+        else if (cellline.startsWith("E"))
+        {
+            return getConfigString("SYMBOL_TEMPLATE_WTSI");
+        }
+        return getConfigString("SYMBOL_TEMPLATE");
+    }
+
 
     /**
      * Get the Reference JNUMBER

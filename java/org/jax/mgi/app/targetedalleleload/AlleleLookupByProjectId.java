@@ -1,5 +1,6 @@
 package org.jax.mgi.app.targetedalleleload;
 
+import java.util.Set;
 import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Vector;
@@ -32,6 +33,17 @@ import org.jax.mgi.shr.cache.KeyNotFoundException;
 public class AlleleLookupByProjectId extends FullCachedLookup
 {
 
+    private static AlleleLookupByProjectId _instance;
+
+    public static AlleleLookupByProjectId getInstance(Integer logicalDb)
+    throws ConfigException, DBException, CacheException
+    {
+        if (_instance==null) {
+            _instance = new AlleleLookupByProjectId(logicalDb);
+        }
+        return _instance;
+    } 
+
     private Integer logicalDb;
 
     // provide a static cache so that all instances share one cache
@@ -49,7 +61,7 @@ public class AlleleLookupByProjectId extends FullCachedLookup
      * @throws CacheException thrown if there is an error accessing the
      * cache
      */
-    public AlleleLookupByProjectId(Integer logicalDb)
+    private AlleleLookupByProjectId(Integer logicalDb)
     throws ConfigException, DBException, CacheException
     {
         super(SQLDataManagerFactory.getShared(SchemaConstants.MGD));
@@ -76,7 +88,7 @@ public class AlleleLookupByProjectId extends FullCachedLookup
     public HashMap lookup(String projectID)
     throws DBException, CacheException
     {
-        return (HashMap)super.lookupNullsOk(projectID);
+        return (HashMap)lookupNullsOk(projectID);
     }
 
     /**
@@ -90,7 +102,7 @@ public class AlleleLookupByProjectId extends FullCachedLookup
     public HashMap lookupExisting(String projectID)
     throws DBException, CacheException, KeyNotFoundException
     {
-        return (HashMap)super.lookup(projectID);
+        return (HashMap)lookup(projectID);
     }
 
     /**
@@ -118,7 +130,17 @@ public class AlleleLookupByProjectId extends FullCachedLookup
             "AND a._Allele_key = aa._Allele_key " +
             "AND d._ParentCellLine_key = p._CellLine_key " +
             "AND c._Derivation_key = d._Derivation_key " +
-            "ORDER BY projectid " ;
+            "ORDER BY projectid, parentCellLine " ;
+    }
+
+    /**
+     * returns the set of keys from the cache
+     * @assumes nothing
+     * @effects nothing
+     */ 
+    public Set getKeySet()
+    {
+        return cache.keySet();
     }
 
     /**
@@ -134,7 +156,7 @@ public class AlleleLookupByProjectId extends FullCachedLookup
     throws DBException, CacheException
     {
         // Replace the current value if it exists
-        super.cache.put(projectId.toLowerCase(), alleleMap);
+        cache.put(projectId.toLowerCase(), alleleMap);
     }
 
 
@@ -156,45 +178,57 @@ public class AlleleLookupByProjectId extends FullCachedLookup
             public Object interpretKey(RowReference row)
             throws DBException
             {
-                return row.getString("projectid");
+                String key = row.getString("projectid");
+                key += ",";
+                key += row.getString("symbol");
+                key += ",";
+                key += row.getString("parentCellLine");
+                return key;
             }
 
             public Object interpretRows(Vector v)
             {
                 RowData rd = (RowData)v.get(0);
                 String projectId = rd.projectId;
-                HashMap alleles = new HashMap();
+                String symbol = rd.symbol;
+                HashMap alleles = null;
+                
+                try {
+                    alleles = lookup(projectId);
+                }
+                catch (Exception e)
+                {
+                    System.out.println(e);
+                }
+                
+                
+                if (alleles == null)
+                {
+                    alleles = new HashMap();
+                }
+
+                HashMap allele = new HashMap();
+                
+                // Create the allele with all the data from this row
+                allele.put("projectid", rd.projectId);
+                allele.put("key", rd.key);
+                allele.put("symbol", symbol);
+                allele.put("parentCellLine", rd.parentCellLine);
+                allele.put("parentCellLineKey", rd.parentCellLineKey);
+
+                Vector mcls = new Vector();
+
                 for (Iterator it = v.iterator(); it.hasNext();)
                 {
                     rd = (RowData)it.next();
-                    
-                    // Did we already add this allele to the set?
-                    HashMap currentAllele = (HashMap)alleles.get(rd.symbol);
-                    
-                    if (currentAllele == null)
-                    {
-                        // Create the allele with all the data from this row
-                        HashMap allele = new HashMap();
-                        allele.put("projectid", rd.projectId);
-                        allele.put("key", rd.key);
-                        allele.put("symbol", rd.symbol);
-                        Vector mcls = new Vector();
-                        mcls.add(rd.mutantCellLine);
-                        allele.put("mutantCellLines", mcls);
-                        allele.put("parentCellLine", rd.parentCellLine);
-
-                        // add the new allele to the map
-                        alleles.put(rd.symbol, allele);
-                    } else {
-                        // grab the existing allele, and add the MCL to it
-                        Vector mcls = (Vector)currentAllele.get("mutantCellLines");
-                        mcls.add(rd.mutantCellLine);
-                        currentAllele.put("mutantCellLines", mcls);
-
-                        // replace the new allele, with the new updated one
-                        alleles.put(rd.symbol, currentAllele);
-                    }
+                    mcls.add(rd.mutantCellLine);
                 }
+
+                allele.put("mutantCellLines", mcls);
+
+                // add the new allele to the map
+                alleles.put(symbol, allele);
+
                 return new KeyValue(projectId, alleles);
             }
         }
@@ -212,12 +246,14 @@ public class AlleleLookupByProjectId extends FullCachedLookup
         protected String symbol;
         protected String mutantCellLine;
         protected String parentCellLine;
+        protected Integer parentCellLineKey;
         public RowData (RowReference row) throws DBException
         {
             projectId = row.getString("projectid");
             symbol = row.getString("symbol");
             key = row.getInt("allelekey");
             mutantCellLine = row.getString("mutantCellLine");
+            parentCellLineKey = row.getInt("parentCellLine_key");
 
             // do the same transform to the es cell line name that 
             // is done to the input record es cell line name 

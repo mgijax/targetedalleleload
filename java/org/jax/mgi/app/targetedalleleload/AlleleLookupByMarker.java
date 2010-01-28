@@ -32,6 +32,18 @@ import org.jax.mgi.shr.cache.KeyNotFoundException;
 public class AlleleLookupByMarker extends FullCachedLookup
 {
 
+    private static AlleleLookupByMarker _instance;
+
+    public static AlleleLookupByMarker getInstance(Integer logicalDb)
+    throws ConfigException, DBException, CacheException
+    {
+        if (_instance==null) {
+            _instance = new AlleleLookupByMarker(logicalDb);
+        }
+        return _instance;
+    }
+
+
     private Integer logicalDb;
 
     // provide a static cache so that all instances share one cache
@@ -98,7 +110,7 @@ public class AlleleLookupByMarker extends FullCachedLookup
      */
     public String getFullInitQuery()
     {
-        return "SELECT av.symbol 'alleleSymbol', av.markerSymbol 'markerSymbol' " +
+        return "SELECT av._allele_key 'alleleKey', av.markerSymbol 'markerSymbol' " +
         "FROM ACC_Accession acc,  ALL_Allele_View av " +
         "WHERE acc._logicaldb_key = " + this.logicalDb.toString() + " " +
         "AND acc._object_key = av._Allele_key " +
@@ -152,7 +164,7 @@ public class AlleleLookupByMarker extends FullCachedLookup
                 {
                     rd = (RowData)it.next();
                     
-                    alleles.add(rd.alleleSymbol);
+                    alleles.add(rd.alleleKey);
                 }
                 return new KeyValue(markerSymbol, alleles);
             }
@@ -167,11 +179,11 @@ public class AlleleLookupByMarker extends FullCachedLookup
     class RowData
     {
         protected String markerSymbol;
-        protected String alleleSymbol;
+        protected Integer alleleKey;
         public RowData (RowReference row) throws DBException
         {
             markerSymbol = row.getString("markerSymbol");
-            alleleSymbol = row.getString("alleleSymbol");
+            alleleKey = row.getInt("alleleKey");
         }
     }
 }

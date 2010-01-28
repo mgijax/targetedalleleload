@@ -57,16 +57,10 @@ LOG_VAL=${LOGDIR}/eucomm_tal.val.log
 
 OVERWRITE_NOTE='false'
 
-
-#
-# Allele provider name will be stored in ALL_Allele.provider
-#
-ALLELE_PROVIDER='Wellcome Trust Sanger Institute'
-
 #
 # JNumber reference for EUCOMM Alleles
 #
-JNUMBER=''
+JNUMBER='J:155845'
 
 #
 # Should the load be allowed to overwrite curator entered notes?
@@ -78,7 +72,9 @@ OVERWRITE_NOTE='false'
 # ~~SYMBOL~~ is replaced with the Symbol of the gene
 # ~~SEQUENCE~~ is replaced with the (number of Existing Alleles)+1
 #
-SYMBOL_TEMPLATE='~~SYMBOL~~<tm~~SEQUENCE~~(KOMP)Wtsi>'
+#SYMBOL_TEMPLATE='~~SYMBOL~~<tm~~SEQUENCE~~(EUCOMM)Wtsi>'
+SYMBOL_TEMPLATE_WTSI='~~SYMBOL~~<tm~~SEQUENCE~~(EUCOMM)Wtsi>'
+SYMBOL_TEMPLATE_HMGU='~~SYMBOL~~<tm~~SEQUENCE~~(EUCOMM)Hmgu>'
 
 #
 # These strings identify which cassettes are promoter driven
@@ -92,7 +88,9 @@ PROMOTERLESS_CASSETTES="L1L2_gt0|L1L2_gt1|L1L2_gt2|L1L2_gtK|L1L2_gtk|L1L2_st0|L1
 # ~~SYMBOL~~ is replaced with the Symbol of the gene
 # ~~SEQUENCE~~ is replaced with the (number of Existing Alleles)+1
 #
-NAME_TEMPLATE='targeted mutation ~~SEQUENCE~~, Wellcome Trust Sanger Institute'
+#NAME_TEMPLATE='targeted mutation ~~SEQUENCE~~, Wellcome Trust Sanger Institute'
+NAME_TEMPLATE_WTSI='targeted mutation ~~SEQUENCE~~, Wellcome Trust Sanger Institute'
+NAME_TEMPLATE_HMGU='targeted mutation ~~SEQUENCE~~, Helmholtz Zentrum Muenchen GmbH'
 
 #
 # New Alleles are created using the following template as a molecular note.  
@@ -102,13 +100,13 @@ NAME_TEMPLATE='targeted mutation ~~SEQUENCE~~, Wellcome Trust Sanger Institute'
 # ~~BUILD~~ is replaced with the genome build specified in the file
 #
 
-NOTE_TEMPLATE_CONDITIONAL_PROMOTERDRIVEN='The ~~CASSETTE~~ cassette was inserted at position ~~LOCUS1~~ of Chromosome ~~CHROMOSOME~~ upstream of the critical exon(s) (Build ~~BUILD~~).  The cassette is composed of an FRT site followed by lacZ sequence and a loxP site.  This first loxP site is followed by neomycin under the control of the ~~PROMOTER~~ promoter, a second FRT site and a second loxP site.  A third loxP site is inserted downstream of the targeted exon(s) at position ~~LOCUS2~~.  The critical exon(s) is/are thus flanked by loxP sites.  A "conditional ready" (floxed) allele can be created by flp recombinase expression in mice carrying this allele.  Subsequent cre expression results in a knockout mouse.  If cre expression occurs without flp expression, a reporter knockout mouse will be created.  Further information on targeting strategies used for this and other KOMP alleles can be found at http://www.knockoutmouse.org/aboutkompstrategies.'
+NOTE_TEMPLATE_CONDITIONAL_PROMOTERDRIVEN='The ~~CASSETTE~~ cassette was inserted at position ~~LOCUS1~~ of Chromosome ~~CHROMOSOME~~ upstream of the critical exon(s) (Build ~~BUILD~~).  The cassette is composed of an FRT site followed by lacZ sequence and a loxP site.  This first loxP site is followed by neomycin under the control of the ~~PROMOTER~~ promoter, a second FRT site and a second loxP site.  A third loxP site is inserted downstream of the targeted exon(s) at position ~~LOCUS2~~.  The critical exon(s) is/are thus flanked by loxP sites.  A "conditional ready" (floxed) allele can be created by flp recombinase expression in mice carrying this allele.  Subsequent cre expression results in a knockout mouse.  If cre expression occurs without flp expression, a reporter knockout mouse will be created.  Further information on targeting strategies used for this and other EUCOMM alleles can be found at http://www.knockoutmouse.org/about/targeting-strategies.'
 
-NOTE_TEMPLATE_CONDITIONAL_PROMOTERLESS='The ~~CASSETTE~~ cassette was inserted at position ~~LOCUS1~~ of Chromosome ~~CHROMOSOME~~ upstream of the critical exon(s) (Build ~~BUILD~~).  The cassette is composed of an FRT flanked lacZ/neomycin sequence followed by a loxP site.  An additional loxP site is inserted downstream of the targeted exon(s) at position ~~LOCUS2~~.  The critical exon(s) is/are thus flanked by loxP sites.  A "conditional ready" (floxed) allele can be created by flp recombinase expression in mice carrying this allele.  Subsequent cre expression results in a knockout mouse.  If cre expression occurs without flp expression, a reporter knockout mouse will be created.  Further information on targeting strategies used for this and other KOMP alleles can be found at http://www.knockoutmouse.org/aboutkompstrategies.'
+NOTE_TEMPLATE_CONDITIONAL_PROMOTERLESS='The ~~CASSETTE~~ cassette was inserted at position ~~LOCUS1~~ of Chromosome ~~CHROMOSOME~~ upstream of the critical exon(s) (Build ~~BUILD~~).  The cassette is composed of an FRT flanked lacZ/neomycin sequence followed by a loxP site.  An additional loxP site is inserted downstream of the targeted exon(s) at position ~~LOCUS2~~.  The critical exon(s) is/are thus flanked by loxP sites.  A "conditional ready" (floxed) allele can be created by flp recombinase expression in mice carrying this allele.  Subsequent cre expression results in a knockout mouse.  If cre expression occurs without flp expression, a reporter knockout mouse will be created.  Further information on targeting strategies used for this and other EUCOMM alleles can be found at http://www.knockoutmouse.org/about/targeting-strategies.'
 
-NOTE_TEMPLATE_NONCONDITIONAL_PROMOTERDRIVEN='The ~~CASSETTE~~ cassette was inserted at position ~~LOCUS1~~ of Chromosome ~~CHROMOSOME~~ upstream of the critical exon(s) (Build ~~BUILD~~).  The cassette is composed of an FRT site followed by lacZ sequence and a loxP site.  This first loxP site is followed by neomycin under the control of the ~~PROMOTER~~ promoter, a second FRT site and a second loxP site.  Insertion of this cassette creates a reporter knockout mouse.  Cre expression will remove the neomycin selection cassette.  Further information on targeting strategies used for this and other KOMP alleles can be found at http://www.knockoutmouse.org/aboutkompstrategies.'
+NOTE_TEMPLATE_NONCONDITIONAL_PROMOTERDRIVEN='The ~~CASSETTE~~ cassette was inserted at position ~~LOCUS1~~ of Chromosome ~~CHROMOSOME~~ upstream of the critical exon(s) (Build ~~BUILD~~).  The cassette is composed of an FRT site followed by lacZ sequence and a loxP site.  This first loxP site is followed by neomycin under the control of the ~~PROMOTER~~ promoter, a second FRT site and a second loxP site.  Insertion of this cassette creates a reporter knockout mouse.  Cre expression will remove the neomycin selection cassette.  Further information on targeting strategies used for this and other EUCOMM alleles can be found at http://www.knockoutmouse.org/about/targeting-strategies.'
 
-NOTE_TEMPLATE_NONCONDITIONAL_PROMOTERLESS='The ~~CASSETTE~~ cassette was inserted at position ~~LOCUS1~~ of Chromosome ~~CHROMOSOME~~ upstream of the critical exon(s) (Build ~~BUILD~~).  The cassette is composed of an FRT flanked lacZ/neomycin sequence followed by a loxP site.  Insertion of this cassette creates a reporter knockout mouse.  Cre expression will remove the neomycin selection cassette.  Further information on targeting strategies used for this and other KOMP alleles can be found at http://www.knockoutmouse.org/aboutkompstrategies.'
+NOTE_TEMPLATE_NONCONDITIONAL_PROMOTERLESS='The ~~CASSETTE~~ cassette was inserted at position ~~LOCUS1~~ of Chromosome ~~CHROMOSOME~~ upstream of the critical exon(s) (Build ~~BUILD~~).  The cassette is composed of an FRT flanked lacZ/neomycin sequence followed by a loxP site.  Insertion of this cassette creates a reporter knockout mouse.  Cre expression will remove the neomycin selection cassette.  Further information on targeting strategies used for this and other EUCOMM alleles can be found at http://www.knockoutmouse.org/about/targeting-strategies.'
 
 NOTE_TEMPLATE_DELETION_PROMOTERDRIVEN='The insertion of the ~~CASSETTE~~ cassette created a deletion of size ~~DELSIZE~~ starting at position ~~LOCUS1~~ and ending at position ~~LOCUS2~~ of Chromosome ~~CHROMOSOME~~ (Genome Build ~~BUILD~~).  This deletion results in the removal of functionally critical exon(s).  The cassette is composed of an FRT site followed by lacZ sequence and a loxP site.  This first loxP site is followed by neomycin under the control of the ~~PROMOTER~~ promoter, a second FRT site and a second loxP site.'
 
@@ -135,19 +133,22 @@ ALLELE_TYPE_DELETION='847116'
 #
 # New ES Cells are created with in the following logical database
 #
-ESCELL_LOGICAL_DB='108'
+ESCELL_LOGICAL_DB='137'
 
 #
 # The projects for regeneron are stored using the following logical db
 #
-PROJECT_LOGICAL_DB='126'
+PROJECT_LOGICAL_DB='138'
+export PROJECT_LOGICAL_DB
 
 #
 # The derivation for these types of alleles is determined by the unique
 # combination of Creator, Vector, and Parental Strain.  For EUCOMM there are 54
 # combinations of 6 Parental strains and 9 cassettes
 #
-DERIVATION_CREATOR_KEY='4971616'
+#DERIVATION_CREATOR_KEY='4971616'
+DERIVATION_CREATOR_KEY_WTSI='4971616'
+DERIVATION_CREATOR_KEY_HMGU='5348468'
 
 # Parental Cell Line JM8
 DERIVATION_PARENTAL_KEY_JM8='40220'
@@ -210,8 +211,11 @@ DERIVATION_PARENTAL_KEY_JM8N3A1P10='40225'
 # Parental Cell Line SI6.C21
 DERIVATION_PARENTAL_KEY_SI6C21='558734'
 
-# Parental Cell Line JM8A1.N3
+# Parental Cell Line JM8A3.N1
 DERIVATION_PARENTAL_KEY_JM8A3N1='558772'
 DERIVATION_PARENTAL_KEY_JM8A3N1P10='558772'
 DERIVATION_PARENTAL_KEY_JM8A3N1P11='558772'
+DERIVATION_PARENTAL_KEY_JM8A3N1P12='558772'
+DERIVATION_PARENTAL_KEY_JM8A3N1P13='558772'
+
 
