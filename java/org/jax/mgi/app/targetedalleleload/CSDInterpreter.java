@@ -5,6 +5,7 @@ import org.jax.mgi.shr.dla.log.DLALoggingException;
 
 import org.jax.mgi.shr.ioutils.RecordFormatException;
 import org.jax.mgi.shr.exception.MGIException;
+
 // Support for CSV splitting
 import java.util.ArrayList;
 import java.util.List;
@@ -38,8 +39,6 @@ public class CSDInterpreter extends KnockoutAlleleInterpreter
 
     private DLALogger logger = null;
 
-
-
     /**
      * Constructs a CSD specific interpreter object
      * @assumes Nothing
@@ -58,8 +57,9 @@ public class CSDInterpreter extends KnockoutAlleleInterpreter
         }
     }
 
-    /** Parse one line.
-     * @return List of Strings, minus their double quotes
+    /** Parse one line. Split the line apart on comma and remove the
+     *  double quotes from each piece.
+     * @return List of Strings
      */
     public List parse(String line) {
         List list = new ArrayList();
