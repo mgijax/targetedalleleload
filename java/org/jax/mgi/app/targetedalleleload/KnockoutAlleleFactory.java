@@ -1,8 +1,6 @@
 package org.jax.mgi.app.targetedalleleload;
 
 import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
-
-import org.jax.mgi.shr.ioutils.RecordDataInterpreter;
 import org.jax.mgi.shr.exception.MGIException;
 
 abstract class KnockoutAlleleFactory

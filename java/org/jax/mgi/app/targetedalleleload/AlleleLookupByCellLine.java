@@ -1,30 +1,23 @@
 package org.jax.mgi.app.targetedalleleload;
 
-import java.util.Vector;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.Vector;
 
-import org.jax.mgi.shr.cache.KeyValue;
-import org.jax.mgi.shr.cache.FullCachedLookup;
-import org.jax.mgi.shr.dbutils.SQLDataManager;
-import org.jax.mgi.shr.dbutils.SQLDataManagerFactory;
 import org.jax.mgi.dbs.SchemaConstants;
-import org.jax.mgi.dbs.mgd.LogicalDBConstants;
-import org.jax.mgi.shr.dbutils.RowDataInterpreter;
-import org.jax.mgi.shr.dbutils.MultiRowInterpreter;
-import org.jax.mgi.shr.dbutils.RowReference;
-
-import org.jax.mgi.shr.exception.MGIException;
-import org.jax.mgi.shr.dbutils.DBException;
 import org.jax.mgi.shr.cache.CacheException;
+import org.jax.mgi.shr.cache.FullCachedLookup;
+import org.jax.mgi.shr.cache.KeyValue;
 import org.jax.mgi.shr.config.ConfigException;
-import org.jax.mgi.shr.dla.log.DLALoggingException;
-import org.jax.mgi.shr.cache.KeyNotFoundException;
-
+import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
+import org.jax.mgi.shr.dbutils.DBException;
+import org.jax.mgi.shr.dbutils.MultiRowInterpreter;
+import org.jax.mgi.shr.dbutils.RowDataInterpreter;
+import org.jax.mgi.shr.dbutils.RowReference;
+import org.jax.mgi.shr.dbutils.SQLDataManagerFactory;
 import org.jax.mgi.shr.dla.log.DLALogger;
 import org.jax.mgi.shr.dla.log.DLALoggingException;
-
-import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
+import org.jax.mgi.shr.exception.MGIException;
 
 /**
  *
@@ -206,7 +199,7 @@ extends FullCachedLookup
                 }
                 catch (DLALoggingException e)
                 {
-                    logger.logdInfo(e.getMessage(), true);
+                    //logger.logdInfo(e.getMessage(), true);
                     return null;
                 }
 

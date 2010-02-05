@@ -1,48 +1,33 @@
 package org.jax.mgi.app.targetedalleleload;
 
-import java.io.File;
-import java.lang.Integer;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.TreeSet;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.TreeMap;
-import java.util.Iterator;
 import java.sql.Timestamp;
-import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.Vector;
 
-import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
-import org.jax.mgi.shr.config.InputDataCfg;
-
-import org.jax.mgi.shr.ioutils.InputDataFile;
-import org.jax.mgi.shr.ioutils.RecordDataInterpreter;
-import org.jax.mgi.shr.ioutils.RecordDataIterator;
-import org.jax.mgi.shr.datetime.DateTime;
-import org.jax.mgi.shr.dla.loader.DLALoader;
-
-import org.jax.mgi.dbs.mgd.AccessionLib;
 import org.jax.mgi.dbs.SchemaConstants;
-
-import org.jax.mgi.shr.config.ConfigException;
-import org.jax.mgi.shr.exception.MGIException;
-import org.jax.mgi.shr.dla.loader.DLALoaderException;
-import org.jax.mgi.shr.cache.KeyNotFoundException;
-
-import org.jax.mgi.shr.dbutils.SQLDataManager;
-import org.jax.mgi.shr.dbutils.SQLDataManagerFactory;
-
+import org.jax.mgi.dbs.mgd.AccessionLib;
+import org.jax.mgi.dbs.mgd.dao.ALL_Allele_CellLineDAO;
+import org.jax.mgi.dbs.mgd.dao.ALL_Allele_CellLineState;
+import org.jax.mgi.dbs.mgd.dao.ALL_CellLineDAO;
+import org.jax.mgi.dbs.mgd.loads.Alo.MutantCellLine;
 import org.jax.mgi.dbs.mgd.lookup.ParentStrainLookupByParentKey;
 import org.jax.mgi.dbs.mgd.lookup.StrainKeyLookup;
-
-import org.jax.mgi.dbs.mgd.loads.Alo.MutantCellLine;
-import org.jax.mgi.dbs.mgd.dao.ALL_CellLineDAO;
-
-import org.jax.mgi.dbs.mgd.dao.ALL_Allele_CellLineState;
-import org.jax.mgi.dbs.mgd.dao.ALL_Allele_CellLineDAO;
-
-import org.jax.mgi.shr.ioutils.OutputDataFile;
+import org.jax.mgi.shr.cache.KeyNotFoundException;
+import org.jax.mgi.shr.config.ConfigException;
+import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
+import org.jax.mgi.shr.dbutils.SQLDataManager;
+import org.jax.mgi.shr.dbutils.SQLDataManagerFactory;
+import org.jax.mgi.shr.dla.loader.DLALoader;
+import org.jax.mgi.shr.dla.loader.DLALoaderException;
+import org.jax.mgi.shr.exception.MGIException;
+import org.jax.mgi.shr.ioutils.InputDataFile;
+import org.jax.mgi.shr.ioutils.RecordDataIterator;
 
 /**
  * @is a DLALoader for loading KOMP produced Alleles into the database
@@ -125,8 +110,6 @@ extends DLALoader
         markerLookup = new MarkerLookupByMGIID();
 
         alleleFactory = KnockoutAlleleFactory.getFactory();
-        Timestamp currentTime = new Timestamp(new Date().getTime());
-
         alleleProjectIdUpdated = new TreeSet();
         databaseProjectIds = new HashSet(alleleLookupByProjectId.getKeySet());
         databaseCellLines = new HashSet(alleleLookupByCellLine.getKeySet());
@@ -149,8 +132,6 @@ extends DLALoader
         logger.logdDebug("TargetedAlleleLoader sqlDBMgr.database " + 
             sqlDBMgr.getDatabase());
 
-        String basedir = super.dlaConfig.getReportsDir() + File.separator;
-        
         InputDataFile inputFile = new InputDataFile(cfg);
 
         // Get an appropriate Interpreter for the file

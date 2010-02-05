@@ -10,7 +10,6 @@ import java.util.Set;
 import java.util.regex.*;
 
 import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
-import org.jax.mgi.shr.ioutils.RecordDataInterpreter;
 import org.jax.mgi.dbs.mgd.lookup.VocabKeyLookup;
 import org.jax.mgi.dbs.mgd.lookup.StrainKeyLookup;
 import org.jax.mgi.dbs.mgd.lookup.ParentStrainLookupByParentKey;
@@ -52,7 +51,6 @@ public class CSDProcessor extends KnockoutAlleleProcessor
     private TargetedAlleleLoadCfg cfg = null;
     private MarkerLookupByMGIID markerLookup = null;
     private VocabKeyLookup vocabLookup = null;
-    private DerivationLookupByVectorCreatorParent derivationLookup = null;
     private AlleleLookupByProjectId alleleLookupByProjectId = null;
     private AlleleLookupByMarker alleleLookupByMarker = null;
     private ParentStrainLookupByParentKey parentStrainLookupByParentKey = null;
@@ -64,7 +62,6 @@ public class CSDProcessor extends KnockoutAlleleProcessor
     private String PROMOTER_LESS = "";
 
     private Pattern alleleSequencePattern = null;
-    private Pattern alleleTypePattern = null;
     private Matcher regexMatcher = null;
 
 
@@ -102,7 +99,7 @@ public class CSDProcessor extends KnockoutAlleleProcessor
 
 		
 		alleleSequencePattern = Pattern.compile(".*tm(\\d){1,2}[ae]{0,1}.*");
-		alleleTypePattern = Pattern.compile(".*tm\\d{1,2}([ae]){0,1}.*");
+		Pattern.compile(".*tm\\d{1,2}([ae]){0,1}.*");
     }
 
     /**

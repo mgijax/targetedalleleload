@@ -1,18 +1,12 @@
 package org.jax.mgi.app.targetedalleleload;
 
-import java.lang.Integer;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.TreeMap;
-
-import org.jax.mgi.shr.ioutils.RecordFormatException;
-import org.jax.mgi.shr.config.ConfigException;
-import org.jax.mgi.shr.dla.log.DLALoggingException;
-import org.jax.mgi.shr.dbutils.DBException;
-import org.jax.mgi.shr.cache.CacheException;
 import org.jax.mgi.dbs.mgd.lookup.TranslationException;
+import org.jax.mgi.shr.cache.CacheException;
 import org.jax.mgi.shr.cache.KeyNotFoundException;
+import org.jax.mgi.shr.config.ConfigException;
+import org.jax.mgi.shr.dbutils.DBException;
 import org.jax.mgi.shr.exception.MGIException;
+import org.jax.mgi.shr.ioutils.RecordFormatException;
 
 /**
  * @is An abstract object that knows how to create KOMP Clone objects from 

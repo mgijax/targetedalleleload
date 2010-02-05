@@ -1,28 +1,26 @@
 package org.jax.mgi.app.targetedalleleload;
 
-import java.lang.Integer;
-import java.util.Vector;
-import java.util.Iterator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.*;
+import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
-import org.jax.mgi.shr.ioutils.RecordDataInterpreter;
-import org.jax.mgi.dbs.mgd.lookup.VocabKeyLookup;
-import org.jax.mgi.dbs.mgd.lookup.StrainKeyLookup;
 import org.jax.mgi.dbs.mgd.lookup.ParentStrainLookupByParentKey;
-
-import org.jax.mgi.shr.ioutils.RecordFormatException;
-import org.jax.mgi.shr.config.ConfigException;
-import org.jax.mgi.shr.dla.log.DLALoggingException;
-import org.jax.mgi.shr.dbutils.DBException;
-import org.jax.mgi.shr.cache.CacheException;
+import org.jax.mgi.dbs.mgd.lookup.StrainKeyLookup;
 import org.jax.mgi.dbs.mgd.lookup.TranslationException;
+import org.jax.mgi.dbs.mgd.lookup.VocabKeyLookup;
+import org.jax.mgi.shr.cache.CacheException;
 import org.jax.mgi.shr.cache.KeyNotFoundException;
+import org.jax.mgi.shr.config.ConfigException;
+import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
+import org.jax.mgi.shr.dbutils.DBException;
+import org.jax.mgi.shr.dla.log.DLALoggingException;
 import org.jax.mgi.shr.exception.MGIException;
+import org.jax.mgi.shr.ioutils.RecordFormatException;
 
 /**
  * @is An object that knows how to create KOMP Clone objects from 
@@ -52,7 +50,6 @@ public class EUCOMMProcessor extends KnockoutAlleleProcessor
     private TargetedAlleleLoadCfg cfg = null;
     private MarkerLookupByMGIID markerLookup = null;
     private VocabKeyLookup vocabLookup = null;
-    private DerivationLookupByVectorCreatorParent derivationLookup = null;
     private AlleleLookupByProjectId alleleLookupByProjectId = null;
     private AlleleLookupByMarker alleleLookupByMarker = null;
     private ParentStrainLookupByParentKey parentStrainLookupByParentKey = null;
@@ -64,7 +61,6 @@ public class EUCOMMProcessor extends KnockoutAlleleProcessor
     private String PROMOTER_LESS = "";
 
     private Pattern alleleSequencePattern = null;
-    private Pattern alleleTypePattern = null;
     private Matcher regexMatcher = null;
 
 
@@ -102,7 +98,7 @@ public class EUCOMMProcessor extends KnockoutAlleleProcessor
 
 		
 		alleleSequencePattern = Pattern.compile(".*tm(\\d){1,2}[ae]{0,1}.*");
-		alleleTypePattern = Pattern.compile(".*tm\\d{1,2}([ae]){0,1}.*");
+		Pattern.compile(".*tm\\d{1,2}([ae]){0,1}.*");
     }
 
     /**

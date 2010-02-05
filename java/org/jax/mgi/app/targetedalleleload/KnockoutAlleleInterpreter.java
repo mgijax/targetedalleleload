@@ -1,12 +1,6 @@
 package org.jax.mgi.app.targetedalleleload;
 
-import java.lang.Integer;
-import java.util.TreeMap;
-
 import org.jax.mgi.shr.ioutils.RecordDataInterpreter;
-import org.jax.mgi.shr.ioutils.RecordFormatException;
-import org.jax.mgi.shr.exception.MGIException;
-import org.jax.mgi.shr.config.ConfigException;
 
 /**
  * @is An abstract object that knows how to read clone records from

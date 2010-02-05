@@ -1,13 +1,9 @@
 package org.jax.mgi.app.targetedalleleload;
 
-import java.lang.Integer;
-
 import org.jax.mgi.shr.dla.log.DLALogger;
 import org.jax.mgi.shr.dla.log.DLALoggingException;
-
-import org.jax.mgi.shr.ioutils.RecordDataInterpreter;
-import org.jax.mgi.shr.ioutils.RecordFormatException;
 import org.jax.mgi.shr.exception.MGIException;
+import org.jax.mgi.shr.ioutils.RecordFormatException;
 
 /**
  * @is An object that knows how to create RegeneronAlleleInput objects from 

@@ -1,17 +1,15 @@
 package org.jax.mgi.app.targetedalleleload;
 
-import org.jax.mgi.shr.cache.CacheException;
-import org.jax.mgi.shr.cache.KeyValue;
-import org.jax.mgi.shr.cache.FullCachedLookup;
-import org.jax.mgi.shr.dbutils.SQLDataManager;
-import org.jax.mgi.shr.dbutils.SQLDataManagerFactory;
 import org.jax.mgi.dbs.SchemaConstants;
-import org.jax.mgi.dbs.mgd.LogicalDBConstants;
-import org.jax.mgi.shr.dbutils.RowDataInterpreter;
-import org.jax.mgi.shr.dbutils.DBException;
-import org.jax.mgi.shr.dbutils.RowReference;
-import org.jax.mgi.shr.config.ConfigException;
+import org.jax.mgi.shr.cache.CacheException;
+import org.jax.mgi.shr.cache.FullCachedLookup;
 import org.jax.mgi.shr.cache.KeyNotFoundException;
+import org.jax.mgi.shr.cache.KeyValue;
+import org.jax.mgi.shr.config.ConfigException;
+import org.jax.mgi.shr.dbutils.DBException;
+import org.jax.mgi.shr.dbutils.RowDataInterpreter;
+import org.jax.mgi.shr.dbutils.RowReference;
+import org.jax.mgi.shr.dbutils.SQLDataManagerFactory;
 
 /**
  *

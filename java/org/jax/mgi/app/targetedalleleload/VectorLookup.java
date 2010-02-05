@@ -1,24 +1,20 @@
 package org.jax.mgi.app.targetedalleleload;
 
-import java.util.HashSet;
-
-import org.jax.mgi.shr.cache.KeyValue;
-import org.jax.mgi.shr.cache.FullCachedLookup;
-import org.jax.mgi.shr.dbutils.SQLDataManager;
-import org.jax.mgi.shr.dbutils.SQLDataManagerFactory;
 import org.jax.mgi.dbs.SchemaConstants;
+import org.jax.mgi.shr.cache.CacheException;
+import org.jax.mgi.shr.cache.FullCachedLookup;
+import org.jax.mgi.shr.cache.KeyNotFoundException;
+import org.jax.mgi.shr.cache.KeyValue;
+import org.jax.mgi.shr.config.ConfigException;
+import org.jax.mgi.shr.dbutils.DBException;
 import org.jax.mgi.shr.dbutils.RowDataInterpreter;
 import org.jax.mgi.shr.dbutils.RowReference;
-
-import org.jax.mgi.shr.dbutils.DBException;
-import org.jax.mgi.shr.config.ConfigException;
-import org.jax.mgi.shr.cache.CacheException;
-import org.jax.mgi.shr.cache.KeyNotFoundException;
+import org.jax.mgi.shr.dbutils.SQLDataManagerFactory;
 
 /**
  *
  * is a FullCachedLookup storing es cell line name associations to project id
- * @has internal cache of hashset objects indexed by project id
+ * @has internal cache of set objects indexed by project id
  * @does provides a lookup for accessing the cache
  * @company Jackson Laboratory
  * @author jmason

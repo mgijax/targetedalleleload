@@ -1,37 +1,28 @@
 package org.jax.mgi.app.targetedalleleload;
 
-import java.lang.Integer;
-import java.lang.Math;
-import java.util.Iterator;
-import java.util.Vector;
-import java.util.HashMap;
-import java.util.Comparator;
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.Vector;
 
-import org.jax.mgi.shr.config.RecordStampCfg;
-import org.jax.mgi.dbs.mgd.lookup.JNumberLookup;
-import org.jax.mgi.shr.dbutils.dao.SQLStream;
-import org.jax.mgi.dbs.mgd.AccessionLib;
-
-import org.jax.mgi.shr.config.ConfigException;
-import org.jax.mgi.shr.cache.CacheException;
-import org.jax.mgi.shr.dbutils.DBException;
-
-import org.jax.mgi.dbs.mgd.dao.ALL_AlleleState;
 import org.jax.mgi.dbs.mgd.dao.ALL_AlleleDAO;
-import org.jax.mgi.dbs.mgd.dao.ALL_Marker_AssocState;
-import org.jax.mgi.dbs.mgd.dao.ALL_Marker_AssocDAO;
-import org.jax.mgi.dbs.mgd.dao.ALL_Allele_MutationState;
+import org.jax.mgi.dbs.mgd.dao.ALL_AlleleState;
 import org.jax.mgi.dbs.mgd.dao.ALL_Allele_MutationDAO;
-import org.jax.mgi.dbs.mgd.dao.MGI_NoteState;
-import org.jax.mgi.dbs.mgd.dao.MGI_NoteDAO;
-import org.jax.mgi.dbs.mgd.dao.MGI_Reference_AssocState;
-import org.jax.mgi.dbs.mgd.dao.MGI_Reference_AssocDAO;
-import org.jax.mgi.dbs.mgd.dao.MGI_NoteChunkState;
+import org.jax.mgi.dbs.mgd.dao.ALL_Allele_MutationState;
+import org.jax.mgi.dbs.mgd.dao.ALL_Marker_AssocDAO;
+import org.jax.mgi.dbs.mgd.dao.ALL_Marker_AssocState;
 import org.jax.mgi.dbs.mgd.dao.MGI_NoteChunkDAO;
-import org.jax.mgi.dbs.mgd.dao.ACC_AccessionState;
-import org.jax.mgi.dbs.mgd.dao.ACC_AccessionDAO;
+import org.jax.mgi.dbs.mgd.dao.MGI_NoteChunkState;
+import org.jax.mgi.dbs.mgd.dao.MGI_NoteDAO;
+import org.jax.mgi.dbs.mgd.dao.MGI_NoteState;
+import org.jax.mgi.dbs.mgd.dao.MGI_Reference_AssocDAO;
+import org.jax.mgi.dbs.mgd.dao.MGI_Reference_AssocState;
+import org.jax.mgi.dbs.mgd.lookup.JNumberLookup;
+import org.jax.mgi.shr.cache.CacheException;
+import org.jax.mgi.shr.config.ConfigException;
+import org.jax.mgi.shr.config.RecordStampCfg;
+import org.jax.mgi.shr.dbutils.DBException;
+import org.jax.mgi.shr.dbutils.dao.SQLStream;
 
 
 
@@ -81,8 +72,6 @@ public class KnockoutAllele implements Comparable
     private Integer projectLogicalDb = null;
     private Vector mutationTypes = new Vector();
 
-    // Default values for all KO Alleles
-    private String nomenSymbol = null;
     private Integer modeKey = new Integer(Constants.ALLELE_MODE);
     private Integer typeKey = new Integer(Constants.ALLELE_TYPE);
     private Integer statusKey = new Integer(Constants.ALLELE_STATUS);

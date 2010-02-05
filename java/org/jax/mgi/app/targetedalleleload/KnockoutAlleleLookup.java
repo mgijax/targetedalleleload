@@ -1,29 +1,22 @@
 package org.jax.mgi.app.targetedalleleload;
 
-import java.util.Vector;
 import java.util.Iterator;
+import java.util.Vector;
 
-import org.jax.mgi.shr.cache.KeyValue;
-import org.jax.mgi.shr.cache.FullCachedLookup;
-import org.jax.mgi.shr.dbutils.SQLDataManager;
-import org.jax.mgi.shr.dbutils.SQLDataManagerFactory;
 import org.jax.mgi.dbs.SchemaConstants;
-import org.jax.mgi.dbs.mgd.LogicalDBConstants;
-import org.jax.mgi.shr.dbutils.RowDataInterpreter;
-import org.jax.mgi.shr.dbutils.MultiRowInterpreter;
-import org.jax.mgi.shr.dbutils.RowReference;
-
-import org.jax.mgi.shr.exception.MGIException;
-import org.jax.mgi.shr.dbutils.DBException;
 import org.jax.mgi.shr.cache.CacheException;
+import org.jax.mgi.shr.cache.FullCachedLookup;
+import org.jax.mgi.shr.cache.KeyValue;
 import org.jax.mgi.shr.config.ConfigException;
-import org.jax.mgi.shr.dla.log.DLALoggingException;
-import org.jax.mgi.shr.cache.KeyNotFoundException;
-
+import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
+import org.jax.mgi.shr.dbutils.DBException;
+import org.jax.mgi.shr.dbutils.MultiRowInterpreter;
+import org.jax.mgi.shr.dbutils.RowDataInterpreter;
+import org.jax.mgi.shr.dbutils.RowReference;
+import org.jax.mgi.shr.dbutils.SQLDataManagerFactory;
 import org.jax.mgi.shr.dla.log.DLALogger;
 import org.jax.mgi.shr.dla.log.DLALoggingException;
-
-import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
+import org.jax.mgi.shr.exception.MGIException;
 
 /**
  *
@@ -195,7 +188,6 @@ extends FullCachedLookup
                 // for the alleleNote column (one row per note chunk)
                 RowData rd = (RowData)v.get(0);
                 
-                String projectId = rd.projectId;
                 String completeNote = "";
 
                 DLALogger logger = null;
@@ -207,7 +199,7 @@ extends FullCachedLookup
                 }
                 catch (DLALoggingException e)
                 {
-                    logger.logdInfo(e.getMessage(), true);
+                    //logger.logdInfo(e.getMessage(), true);
                     return null;
                 }
 
@@ -295,7 +287,6 @@ extends FullCachedLookup
             alleleNote = row.getString("alleleNote");
             alleleNoteKey = row.getInt("alleleNoteKey");
             alleleNoteCreatedBy = row.getInt("alleleNoteCreatedBy");
-//            alleleNoteModifiedBy = new Integer(row.getInt("alleleNoteModifiedBy").intValue());
             alleleNoteModifiedBy = row.getInt("alleleNoteModifiedBy");
             jNumber = row.getString("jNumber");
             geneMgiid = row.getString("geneMgiid");

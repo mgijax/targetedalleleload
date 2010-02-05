@@ -1,27 +1,25 @@
 package org.jax.mgi.app.targetedalleleload;
 
-import java.lang.Integer;
-import java.util.Vector;
-import java.util.Iterator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.*;
+import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
-import org.jax.mgi.shr.ioutils.RecordDataInterpreter;
-import org.jax.mgi.dbs.mgd.lookup.VocabKeyLookup;
 import org.jax.mgi.dbs.mgd.lookup.StrainKeyLookup;
-
-import org.jax.mgi.shr.ioutils.RecordFormatException;
-import org.jax.mgi.shr.config.ConfigException;
-import org.jax.mgi.shr.dla.log.DLALoggingException;
-import org.jax.mgi.shr.dbutils.DBException;
-import org.jax.mgi.shr.cache.CacheException;
 import org.jax.mgi.dbs.mgd.lookup.TranslationException;
+import org.jax.mgi.dbs.mgd.lookup.VocabKeyLookup;
+import org.jax.mgi.shr.cache.CacheException;
 import org.jax.mgi.shr.cache.KeyNotFoundException;
+import org.jax.mgi.shr.config.ConfigException;
+import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
+import org.jax.mgi.shr.dbutils.DBException;
+import org.jax.mgi.shr.dla.log.DLALoggingException;
 import org.jax.mgi.shr.exception.MGIException;
+import org.jax.mgi.shr.ioutils.RecordFormatException;
 
 
 
@@ -143,8 +141,6 @@ public class RegeneronProcessor extends KnockoutAlleleProcessor
         }
         
         HashMap alleles = alleleLookpuByProjectId.lookup(in.getProjectId());
-        HashMap matchingAllele = null;
-
         if (alleles != null && alleles.size() > 0)
         {
             Boolean alleleFound = Boolean.FALSE;

@@ -1,12 +1,8 @@
 package org.jax.mgi.app.targetedalleleload;
 
-import java.util.HashMap;
-
-import org.jax.mgi.dbs.mgd.loads.Alo.MutantCellLineLookupByCellLineID;
-import org.jax.mgi.dbs.mgd.loads.Alo.MutantCellLine;
-
-import org.jax.mgi.dbs.mgd.MGITypeConstants;
 import org.jax.mgi.dbs.SchemaConstants;
+import org.jax.mgi.dbs.mgd.MGITypeConstants;
+import org.jax.mgi.dbs.mgd.loads.Alo.MutantCellLine;
 import org.jax.mgi.shr.cache.CacheException;
 import org.jax.mgi.shr.cache.FullCachedLookup;
 import org.jax.mgi.shr.cache.KeyNotFoundException;
