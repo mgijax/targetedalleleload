@@ -1,22 +1,19 @@
 package org.jax.mgi.shr.config;
 
-import java.lang.*;
-import java.lang.reflect.Constructor;
-import org.jax.mgi.shr.ioutils.RecordDataInterpreter;
-import org.jax.mgi.shr.dla.log.DLALogger;
-import org.jax.mgi.shr.dla.log.DLALoggingException;
-
 import java.util.HashMap;
-import org.jax.mgi.shr.cache.FullCachedLookup;
+
+import org.jax.mgi.dbs.SchemaConstants;
 import org.jax.mgi.shr.cache.CacheException;
-import org.jax.mgi.shr.cache.KeyValue;
+import org.jax.mgi.shr.cache.FullCachedLookup;
 import org.jax.mgi.shr.cache.KeyNotFoundException;
-import org.jax.mgi.shr.dbutils.SQLDataManagerFactory;
+import org.jax.mgi.shr.cache.KeyValue;
+import org.jax.mgi.shr.dbutils.DBException;
 import org.jax.mgi.shr.dbutils.RowDataInterpreter;
 import org.jax.mgi.shr.dbutils.RowReference;
-import org.jax.mgi.shr.dbutils.DBException;
+import org.jax.mgi.shr.dbutils.SQLDataManagerFactory;
+import org.jax.mgi.shr.dla.log.DLALogger;
+import org.jax.mgi.shr.dla.log.DLALoggingException;
 import org.jax.mgi.shr.exception.MGIException;
-import org.jax.mgi.dbs.SchemaConstants;
 
 /**
  * @is An object that is used to retrieve targeted allele load specific
@@ -37,22 +34,13 @@ import org.jax.mgi.dbs.SchemaConstants;
 
 public class TargetedAlleleLoadCfg extends InputDataCfg
 {
-    /**
-     * Sole constructor. Constructs a targeted allele load configurator.
-     * @assumes Nothing
-     * @effects Nothing
-     * @throws ConfigException if a configuration manager cannot be obtained
-     * @throws DLALoggingException if a logger instance cannot be obtained
-     */
-
-    private DLALogger logger = null;
     private static String UserNotFound = ConfigExceptionFactory.UserNotFound;
     private static HashMap cache = new HashMap();
 
     public TargetedAlleleLoadCfg()
     throws ConfigException, DLALoggingException
     {
-        logger = DLALogger.getInstance();
+        DLALogger.getInstance();
     }
 
     /**
@@ -177,6 +165,17 @@ public class TargetedAlleleLoadCfg extends InputDataCfg
                 return getConfigString("DERIVATION_CREATOR_KEY_WTSI");
             }
         }
+        if (creator.equals("CSD"))
+        {
+            if (cellline.startsWith("D"))
+            {
+                return getConfigString("DERIVATION_CREATOR_KEY_UCD");
+            }
+            else if (cellline.startsWith("E"))
+            {
+                return getConfigString("DERIVATION_CREATOR_KEY_WTSI");
+            }
+        }
         return getConfigString("DERIVATION_CREATOR_KEY");
     }
 
@@ -279,10 +278,14 @@ public class TargetedAlleleLoadCfg extends InputDataCfg
         if (cellline.startsWith("H"))
         {
             return getConfigString("NAME_TEMPLATE_HMGU");
-        } 
+        }
         else if (cellline.startsWith("E"))
         {
             return getConfigString("NAME_TEMPLATE_WTSI");
+        }
+        else if (cellline.startsWith("D"))
+        {
+            return getConfigString("NAME_TEMPLATE_UCD");
         }
         return getConfigString("NAME_TEMPLATE");
     }
@@ -378,8 +381,6 @@ public class TargetedAlleleLoadCfg extends InputDataCfg
      */
     public class UserLookup
         extends FullCachedLookup {
-        // internal cache
-        private HashMap cache = new HashMap();
         /**
          * the default constructor
          * @assumes nothing
