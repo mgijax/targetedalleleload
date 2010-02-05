@@ -79,6 +79,8 @@ OVERWRITE_NOTE='false'
 # ~~SEQUENCE~~ is replaced with the (number of Existing Alleles)+1
 #
 SYMBOL_TEMPLATE='~~SYMBOL~~<tm~~SEQUENCE~~(KOMP)Wtsi>'
+SYMBOL_TEMPLATE_WTSI='~~SYMBOL~~<tm~~SEQUENCE~~(KOMP)Wtsi>'
+SYMBOL_TEMPLATE_UCD='~~SYMBOL~~<tm~~SEQUENCE~~(KOMP)Ucd>'
 
 #
 # These strings identify which cassettes are promoter driven
@@ -93,6 +95,8 @@ PROMOTERLESS_CASSETTES="L1L2_gt0|L1L2_gt1|L1L2_gt2|L1L2_gtK|L1L2_gtk|L1L2_st0|L1
 # ~~SEQUENCE~~ is replaced with the (number of Existing Alleles)+1
 #
 NAME_TEMPLATE='targeted mutation ~~SEQUENCE~~, Wellcome Trust Sanger Institute'
+NAME_TEMPLATE_WTSI='targeted mutation ~~SEQUENCE~~, Wellcome Trust Sanger Institute'
+NAME_TEMPLATE_UCD='targeted mutation ~~SEQUENCE~~, University of California, Davis'
 
 #
 # New Alleles are created using the following template as a molecular note.  
@@ -152,6 +156,8 @@ export PROJECT_LOGICAL_DB
 # combinations of 6 Parental strains and 9 cassettes
 #
 DERIVATION_CREATOR_KEY='4971616'
+DERIVATION_CREATOR_KEY_WTSI='4971616'
+DERIVATION_CREATOR_KEY_UCD='5372202'
 
 # Parental Cell Line JM8
 DERIVATION_PARENTAL_KEY_JM8='40220'
