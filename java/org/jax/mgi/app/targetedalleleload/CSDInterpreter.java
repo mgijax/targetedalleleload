@@ -1,15 +1,10 @@
 package org.jax.mgi.app.targetedalleleload;
 
-import java.lang.Integer;
-
 import org.jax.mgi.shr.dla.log.DLALogger;
 import org.jax.mgi.shr.dla.log.DLALoggingException;
 
-import org.jax.mgi.shr.ioutils.RecordDataInterpreter;
 import org.jax.mgi.shr.ioutils.RecordFormatException;
 import org.jax.mgi.shr.exception.MGIException;
-import org.jax.mgi.shr.config.ConfigException;
-
 // Support for CSV splitting
 import java.util.ArrayList;
 import java.util.List;
@@ -38,8 +33,6 @@ public class CSDInterpreter extends KnockoutAlleleInterpreter
     // The minimum length of a valid input record (including NL character).
     //
     private static final int MIN_REC_LENGTH = 50;
-    private static final String DELIM = ",";
-
     public static final String CSV_PATTERN = "\"([^\"]+?)\",?|([^,]+),?|,";
     private static Pattern csvRE;
 
