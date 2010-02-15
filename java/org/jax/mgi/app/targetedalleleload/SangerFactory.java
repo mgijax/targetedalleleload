@@ -6,19 +6,19 @@ import org.jax.mgi.shr.config.ConfigException;
 import org.jax.mgi.shr.dbutils.DBException;
 import org.jax.mgi.shr.dla.log.DLALoggingException;
 
-public class EUCOMMFactory extends KnockoutAlleleFactory
+public class SangerFactory extends KnockoutAlleleFactory
 {
 
     public KnockoutAlleleInterpreter getInterpreter()
     {
-        return new EUCOMMInterpreter();
+        return new SangerInterpreter();
     }
 
     public KnockoutAlleleProcessor getProcessor()
     throws ConfigException,DLALoggingException,
     DBException,CacheException,TranslationException
     {
-        return new EUCOMMProcessor();
+        return new SangerProcessor();
     }
 
 }

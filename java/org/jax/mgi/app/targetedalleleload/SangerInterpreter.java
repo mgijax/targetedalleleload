@@ -1,69 +1,48 @@
 package org.jax.mgi.app.targetedalleleload;
 
+import org.jax.mgi.shr.ioutils.RecordFormatException;
+import org.jax.mgi.shr.exception.MGIException;
+
+// Support for CSV splitting
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jax.mgi.shr.dla.log.DLALogger;
-import org.jax.mgi.shr.dla.log.DLALoggingException;
-import org.jax.mgi.shr.exception.MGIException;
-import org.jax.mgi.shr.ioutils.RecordFormatException;
-
 /**
- * @is An object that knows how to Interpret
- * the EUCOMM allele file 
+ * @is An object that knows how to Interpret the Sanger allele file 
  * @has
- *   <UL>
- *   <LI> logger
- *   </UL>
- * @does
- *   <UL>
- *   <LI> Interprets a EUCOMM Allele record into it's various parts
- *   </UL>
+ * @does Interprets a Sanger Allele input record into it's various parts
  * @company The Jackson Laboratory
  * @author jmason
- * @version 1.0
  */
 
-public class EUCOMMInterpreter extends KnockoutAlleleInterpreter
+public class SangerInterpreter extends KnockoutAlleleInterpreter
 {
 
     // The minimum length of a valid input record (including NL character).
-    //
     private static final int MIN_REC_LENGTH = 50;
     public static final String CSV_PATTERN = "\"([^\"]+?)\",?|([^,]+),?|,";
     private static Pattern csvRE;
 
-    private DLALogger logger = null;
-
-
-
     /**
-     * Constructs a EUCOMM specific interpreter object
+     * Constructs a Sanger specific interpreter object
      * @assumes Nothing
      * @effects Nothing
      */
-    public EUCOMMInterpreter ()
+    public SangerInterpreter ()
     {
         csvRE = Pattern.compile(CSV_PATTERN);
-        try
-        {
-            logger = DLALogger.getInstance();
-        }
-        catch (DLALoggingException e)
-        {
-            logger.logdInfo(e.getMessage(), true);
-        }
     }
 
-    /** Parse one line.
-     * @return List of Strings, minus their double quotes
+    /** Parse one line. Split the line apart on comma and remove the
+     *  double quotes from each piece. Also remove trailing whitespace
+     * @return List of Strings
      */
     public List parse(String line) {
         List list = new ArrayList();
         Matcher m = csvRE.matcher(line);
-        // For each field
+
         while (m.find()) {
             String match = m.group();
             if (match == null)
@@ -76,6 +55,8 @@ public class EUCOMMInterpreter extends KnockoutAlleleInterpreter
             }
             if (match.length() == 0)
                 match = null;
+            else
+            	match = match.trim();
             list.add(match);
         }
         return list;
@@ -94,7 +75,7 @@ public class EUCOMMInterpreter extends KnockoutAlleleInterpreter
     throws MGIException
     {
 
-        EUCOMMAlleleInput inputData = new EUCOMMAlleleInput();
+        SangerAlleleInput inputData = new SangerAlleleInput();
         qcStatistics.record("SUMMARY", "Number of input records");
         
 
@@ -110,24 +91,16 @@ public class EUCOMMInterpreter extends KnockoutAlleleInterpreter
         }
 
         // Get fields from the input record
-        // The file is DELIM delimited
-        //String[] fields = rec.split(DELIM);
+        // The file is a CSV file
         List list = parse(rec);
         String[] fields = (String[]) list.toArray(new String[0]);
-        
-        // Strip off any trailing whitespace from each field
-        // Also remove the double quotes.
-        for (int i=0; i< fields.length; i++)
-        {
-            fields[i] = fields[i].trim().replaceAll("\"", "");
-        }
 
         // Set the attributes of the inputData object using the fields parsed
         // from the input record.
         // 0 - Gene ID
         // 1 - Genome Build
         // 2 - Cassette
-        // 3 - Project (CSD, EUCOMM, NorCOMM)
+        // 3 - Project (KOMP, EUCOMM, NorCOMM)
         // 4 - Project ID
         // 5 - Mutant ES cell line ID
         // 6 - Parent ES cell line name
@@ -141,8 +114,8 @@ public class EUCOMMInterpreter extends KnockoutAlleleInterpreter
         inputData.setCassette(fields[2]);
 
         // field 3 defines which pipeline created the MCL
-        // This being the EUCOMM interpreter, we already know because we
-        // filter out all the other lines in the isValid check.
+        // we filter out all the other pipelines using field 3
+        // in the isValid check.
 
         inputData.setProjectId(fields[4]);
         inputData.setESCellName(fields[5]);
@@ -151,7 +124,7 @@ public class EUCOMMInterpreter extends KnockoutAlleleInterpreter
         String[] locus1parts = fields[9].split("-");
         inputData.setLocus1(locus1parts[0]);
         
-        if (fields[10].compareTo("-") == 0)
+        if (fields[10].equals("-"))
         {
             // Deletion allele doesn't have second coord pair, use the second
             // part of the first coord pair
@@ -164,7 +137,6 @@ public class EUCOMMInterpreter extends KnockoutAlleleInterpreter
         }
 
         // Return the populated inputData object.
-        //
         return inputData;
     }
 
@@ -173,62 +145,58 @@ public class EUCOMMInterpreter extends KnockoutAlleleInterpreter
      * line is considered to be invalid.  The header line is invalid.
      * @assumes Nothing
      * @effects Nothing
-     * @param rec A record from the Regeneron input file
+     * @param rec A record from the Sanger input file
      * @return Indicator of whether the input record is valid (true)
      * or not (false)
      */
     public boolean isValid (String rec)
     {
-        // If the first character of the input record is a "#", it is a
-        // comment and should be ignored.
-        // The first line is a header starting with the string "CloneID"
-        // and should be ignored.
-        //String[] parts = rec.split(DELIM);
         List list = parse(rec);
         String[] parts = (String[]) list.toArray(new String[0]);
         
-        if (rec.substring(0,1).equals("#"))
+        if (parts[0].equals("MGI ACCESSION ID"))
         {
-            // Ignore comment lines which start with a "#" character
+            // Ignore header line
             return false;
         }
-        else if (!parts[3].replaceAll("\"", "").matches("EUCOMM"))
+        else if (parts[0].substring(0,1).equals("#"))
+        {
+            // Ignore any comment lines which start with a "#" character
+            return false;
+        }
+        else if (!parts[3].replaceAll("\"", "").matches("KOMP"))
         {
             // Wrong project
-            qcStatistics.record("SUMMARY", "Non EUCOMM input record(s) skipped");
+            qcStatistics.record("SUMMARY", "Input record(s) not approriate for this provider, skipped");
+            return false;
+        }
+        else if (parts[5].replaceAll("\"", "").matches("^HEPD.*"))
+        {
+            // Wrong project
+            qcStatistics.record("SUMMARY", "(Helmholtz) Input record(s) not approriate for this provider, skipped");
             return false;
         }
         else if (parts[5].replaceAll("\"", "").matches("^DEPD.*"))
         {
             // Wrong project
-            qcStatistics.record("SUMMARY", "Non EUCOMM input record(s) skipped");
+            qcStatistics.record("SUMMARY", "Input record(s) not approriate for this provider, skipped");
             return false;
         }
         else if (parts[6].indexOf(",") > 0)
         {
             // strangely formatted ES Cell (parental)
-            // String msg = "SKIPPING THIS RECORD: ";
-            // msg += "Parental cell line is: "+parts[6];
-            // msg += "\n";
-            // msg += rec;
-            // logger.logdInfo(msg,false);
             qcStatistics.record("WARNING", "Input record(s) with unknown parental cell line skipped");
             return false;
         }
         else if (!parts[8].replaceAll("\"", "").matches("Conditional|Targeted non-conditional|Deletion"))
         {
             // unknown mutation type
-            // String msg = "SKIPPING THIS RECORD: ";
-            // msg += "Mutation type is: "+parts[8];
-            // msg += "which is an unknown mutation type\n";
-            // msg += rec;
-            // logger.logdInfo(msg,false);
             qcStatistics.record("WARNING", "Input record(s) with unknown mutation type skipped");
             return false;
         }
         else
         {
-            qcStatistics.record("SUMMARY", "Successfully interpreted EUCOMM input record(s)");
+            qcStatistics.record("SUMMARY", "Successfully interpreted input record(s)");
             return true;
         }
     }

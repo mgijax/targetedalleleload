@@ -23,12 +23,12 @@ abstract class KnockoutAlleleFactory
         else if (jNumber.equals("J:148605"))
         {
             // CSD
-            return new CSDFactory();
+            return new SangerFactory();
         }
         else if (jNumber.equals("J:155845"))
         {
             // EUCOMM
-            return new EUCOMMFactory();
+            return new SangerFactory();
         }
 
     return null;

@@ -16,7 +16,7 @@ package org.jax.mgi.app.targetedalleleload;
  * @author jmason
  */
 
-public class CSDAlleleInput implements KnockoutAlleleInput
+public class SangerAlleleInput implements KnockoutAlleleInput
 {
     private final String PROVIDER = "CSD";
     /////////////////
@@ -50,7 +50,7 @@ public class CSDAlleleInput implements KnockoutAlleleInput
      * @assumes Nothing
      * @effects Set the class variables.
      */
-    public CSDAlleleInput()
+    public SangerAlleleInput()
     {}
 
     // Getters
