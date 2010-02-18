@@ -34,8 +34,7 @@ abstract class KnockoutAlleleFactory
     return null;
     }
     
-    public abstract KnockoutAlleleInterpreter getInterpreter();
-    public abstract KnockoutAlleleProcessor getProcessor()
-    throws MGIException;
+    public abstract KnockoutAlleleInterpreter getInterpreter() throws MGIException;
+    public abstract KnockoutAlleleProcessor getProcessor() throws MGIException;
 
 } 
