@@ -38,8 +38,6 @@ export MGD_BCP_DROP_INDEXES MGD_BCP_RECORD_STAMPING MGD_BCP_AUTO_FLUSH
 export MGD_BCP_OK_TO_OVERWRITE
 
 
-
-
 #  Java applications
 INTERPRETER=org.jax.mgi.app.targetedalleleload.RegeneronInterpreter
 
@@ -54,10 +52,11 @@ LOG_DIAG=${LOGDIR}/regeneron_tal.diag.log
 LOG_CUR=${LOGDIR}/regeneron_tal.cur.log
 LOG_VAL=${LOGDIR}/regeneron_tal.val.log
 
+
 #
-# Allele provider name (will be stored in ALL_Allele.provider
+# Pipeline this configuration file is for
 #
-ALLELE_PROVIDER='Velocigene'
+PIPELINE='KOMP'
 
 #
 # JNumber reference for Regeneron Alleles
@@ -94,7 +93,6 @@ NAME_TEMPLATE='targeted mutation ~~SEQUENCE~~, Velocigene'
 # ~~JNUMBER~~ is replaced with the JNUMBER specified in this file
 #
 NOTE_TEMPLATE='The insertion of Velocigene cassette ~~CASSETTE~~ created a deletion of size ~~SIZE~~bp starting at position ~~START~~ and ending at position ~~END~~ of Chromosome ~~CHROMOSOME~~ (Genome Build ~~BUILD~~).'
-#MISSINGCOORDS_NOTE_TEMPLATE='The insertion of Velocigene cassette ~~CASSETTE~~ created a deletion in the gene on Chromosome ~~CHROMOSOME~~ (Genome Build ~~BUILD~~).'
 MISSINGCOORDS_NOTE_TEMPLATE='The insertion of Velocigene cassette ~~CASSETTE~~ deleted the coding region of this gene located on Chromosome ~~CHROMOSOME~~.'
 
 #
@@ -115,8 +113,7 @@ export PROJECT_LOGICAL_DB
 
 #
 # The derivation for these types of alleles is determined by the unique
-# combination of Creator, Vector, and Parental Strain.  For Regeneron
-# alleles, there is only one combination of these
+# combination of Creator, Vector, and Parental Strain.
 #
 DERIVATION_CREATOR_KEY='4247545'
-DERIVATION_PARENTAL_KEY_VGB6='38684'
+
