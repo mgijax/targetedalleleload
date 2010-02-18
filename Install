@@ -5,8 +5,11 @@
 #
 # 1) cp tal_common.config.default tal_common.config
 # 2) cp tal_regeneron.config.default tal_regeneron.config
-# 3) cp tal_csd.config.default tal_csd.config
-# 4) Install 
+# 3) cp tal_csd_ucd.config.default tal_csd_ucd.config
+# 4) cp tal_csd_wtsi.config.default tal_csd_wtsi.config
+# 5) cp tal_eucomm_wtsi.config.default tal_eucomm_wtsi.config
+# 6) cp tal_eucomm_hgmu.config.default tal_eucomm_hgmu.config
+# 7) Install 
 #
 
 Usage=Install
@@ -29,6 +32,15 @@ then
     installFailed
 fi
 
+# Check to see if this is a development installation
+#
+DEV=""
+if [ "${INSTALL_TYPE}" = "dev" ]
+then
+    DEV="-d"
+fi
+
+
 #
 # Make sure config files exist
 #
@@ -36,7 +48,10 @@ cd `dirname $0`
 
 # establish the config files
 REGENERON_CONFIG=tal_regeneron.config
-CSD_CONFIG=tal_csd.config
+CSD_WTSI_CONFIG-tal_csd_wtsi.config
+CSD_UCD_CONFIG-tal_csd_ucd.config
+EUCOMM_WTSI_CONFIG-tal_eucomm_wtsi.config
+EUCOMM_HGMU_CONFIG-tal_eucomm_hgmu.config
 COMMON_CONFIG=tal_common.config
 
 # Make sure config file exists and source it
@@ -59,13 +74,6 @@ else
     installFailed
 fi
 
-# Check to see if this is a development installation
-#
-DEV=""
-if [ "${INSTALL_TYPE}" = "dev" ]
-then
-    DEV="-d"
-fi
 
 #
 # run DLAInstall for each configuration file
@@ -74,20 +82,73 @@ echo 'running DLAINSTALL'
 ${DLAINSTALL} ${DEV}
 
 # Make sure config file exists and source it
-if [ -r ${CSD_CONFIG} ]
+if [ -r ${CSD_WTSI_CONFIG} ]
 then
-    echo "Source ${CSD_CONFIG}"
-    . ${CSD_CONFIG}
+    echo "Source ${CSD_WTSI_CONFIG}"
+    . ${CSD_WTSI_CONFIG}
 else
-    echo "Cannot source configuration file: ${CSD_CONFIG}"
+    echo "Cannot source configuration file: ${CSD_WTSI_CONFIG}"
     installFailed
 fi
 
-# cource tal_common.config again
+#
+# run DLAInstall for tal_csd_ucd
+# source tal_common.config again
+#
 . ${COMMON_CONFIG}
+${DLAINSTALL} ${DEV}
+
+
+# Make sure config file exists and source it
+if [ -r ${CSD_UCD_CONFIG} ]
+then
+    echo "Source ${CSD_UCD_CONFIG}"
+    . ${CSD_UCD_CONFIG}
+else
+    echo "Cannot source configuration file: ${CSD_UCD_CONFIG}"
+    installFailed
+fi
 
 #
-# run DLAInstall for tal_csd
+# run DLAInstall for tal_csd_ucd
+# source tal_common.config again
 #
+. ${COMMON_CONFIG}
+${DLAINSTALL} ${DEV}
+
+
+# Make sure config file exists and source it
+if [ -r ${EUCOMM_WTSI_CONFIG} ]
+then
+    echo "Source ${EUCOMM_WTSI_CONFIG}"
+    . ${EUCOMM_WTSI_CONFIG}
+else
+    echo "Cannot source configuration file: ${EUCOMM_WTSI_CONFIG}"
+    installFailed
+fi
+
+#
+# run DLAInstall for tal_csd_ucd
+# source tal_common.config again
+#
+. ${COMMON_CONFIG}
+${DLAINSTALL} ${DEV}
+
+
+# Make sure config file exists and source it
+if [ -r ${EUCOMM_WTSI_CONFIG} ]
+then
+    echo "Source ${EUCOMM_HGMU_CONFIG}"
+    . ${EUCOMM_HGMU_CONFIG}
+else
+    echo "Cannot source configuration file: ${EUCOMM_HGMU_CONFIG}"
+    installFailed
+fi
+
+#
+# run DLAInstall for tal_csd_ucd
+# source tal_common.config again
+#
+. ${COMMON_CONFIG}
 ${DLAINSTALL} ${DEV}
 

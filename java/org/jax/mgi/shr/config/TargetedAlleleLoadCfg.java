@@ -1,6 +1,9 @@
 package org.jax.mgi.shr.config;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 
 import org.jax.mgi.dbs.SchemaConstants;
 import org.jax.mgi.shr.cache.CacheException;
@@ -54,10 +57,11 @@ public class TargetedAlleleLoadCfg extends InputDataCfg
     {
         return getConfigBoolean("OVERWRITE_NOTE").booleanValue();
     }
+
     /**
      * Get the mutation types string - a string indicating the project's logical db for cell lines
      * @assumes The "ESCELL_LOGICAL_DB" constant is defined in the config file and
-     * that the logical DB specifed there aligns with the database
+     * that the logical DB specified there aligns with the database
      * @effects Nothing
      * @return The configuration value
      * @throws ConfigException if the value is not found
@@ -71,7 +75,7 @@ public class TargetedAlleleLoadCfg extends InputDataCfg
      * Get the project logical database id - indicates the private logical DB
      * for the project identifiers
      * @assumes The "PROJECT_LOGICAL_DB" constant is defined in the config 
-     * file and that the logical DB specifed there aligns with the database
+     * file and that the logical DB specified there aligns with the database
      * @effects Nothing
      * @return The configuration value
      * @throws ConfigException if the value is not found
@@ -81,6 +85,47 @@ public class TargetedAlleleLoadCfg extends InputDataCfg
         return getConfigInteger("PROJECT_LOGICAL_DB");
     }
 
+    /**
+     * Celllines that the load knows about
+     * @assumes The "KNOWN_CELLLINES" constant is defined in the config file and
+     * @effects Nothing
+     * @return The configuration value
+     * @throws ConfigException if the value is not found
+     */
+    public List getKnownCelllines() throws ConfigException
+    {
+    	List a = Arrays.asList(getConfigString("KNOWN_CELLLINES").split(","));
+    	for (Iterator it = a.iterator();it.hasNext();)
+    	{
+    		String i = (String)it.next();
+    		i.replaceAll(" ", "");
+    	}
+    	return a;
+    }
+
+    /**
+     * Celllines that this instance of the load is allowed to load
+     * @assumes The "ALLOWED_CELLLINES" constant is defined in the config file and
+     * @effects Nothing
+     * @return The configuration value
+     * @throws ConfigException if the value is not found
+     */
+    public String getAllowedCelllines() throws ConfigException
+    {
+        return getConfigString("ALLOWED_CELLLINES");
+    }
+
+    /**
+     * The pipeline this load is loading alleles for
+     * @assumes The "ALLOWED_CELLLINES" constant is defined in the config file and
+     * @effects Nothing
+     * @return The configuration value
+     * @throws ConfigException if the value is not found
+     */
+    public String getPipeline() throws ConfigException
+    {
+        return getConfigString("PIPELINE");
+    }
 
     /**
      * Get the promotor for a given cassette
@@ -111,7 +156,7 @@ public class TargetedAlleleLoadCfg extends InputDataCfg
      * Get the mutation types string from the config file - a comma separated
      * list of mutation types
      * @assumes The "MUTATION_TYPES" constant is defined in the config file
-     * as a comma seperated list of names of mutation types that exist in
+     * as a comma separated list of names of mutation types that exist in
      * the MGI VOC_Term table for _vocab_key = 36 (Allele Molecular Mutation)
      * @effects Nothing
      * @return The configuration value
@@ -126,7 +171,7 @@ public class TargetedAlleleLoadCfg extends InputDataCfg
      * Get the mutation types string from the config file - a comma separated
      * list of mutation types
      * @assumes The "MUTATION_TYPES" constant is defined in the config file
-     * as a comma seperated list of names of mutation types that exist in
+     * as a comma separated list of names of mutation types that exist in
      * the MGI VOC_Term table for _vocab_key = 36 (Allele Molecular Mutation)
      * an optional "type" is included, with the default type being returned
      * if the "type" is not specified here
@@ -152,30 +197,8 @@ public class TargetedAlleleLoadCfg extends InputDataCfg
      * @return The configuration value
      * @throws ConfigException if the value is not found
      */
-    public String getCreatorKey(String creator, String cellline) throws ConfigException
+    public String getCreatorKey() throws ConfigException
     {
-        if (creator.equals("EUCOMM"))
-        {
-            if (cellline.startsWith("H"))
-            {
-                return getConfigString("DERIVATION_CREATOR_KEY_HMGU");
-            }
-            else if (cellline.startsWith("E"))
-            {
-                return getConfigString("DERIVATION_CREATOR_KEY_WTSI");
-            }
-        }
-        if (creator.equals("CSD"))
-        {
-            if (cellline.startsWith("D"))
-            {
-                return getConfigString("DERIVATION_CREATOR_KEY_UCD");
-            }
-            else if (cellline.startsWith("E"))
-            {
-                return getConfigString("DERIVATION_CREATOR_KEY_WTSI");
-            }
-        }
         return getConfigString("DERIVATION_CREATOR_KEY");
     }
 
@@ -273,22 +296,6 @@ public class TargetedAlleleLoadCfg extends InputDataCfg
     {
         return getConfigString("NAME_TEMPLATE");
     }
-    public String getNameTemplate(String cellline) throws ConfigException
-    {
-        if (cellline.startsWith("H"))
-        {
-            return getConfigString("NAME_TEMPLATE_HMGU");
-        }
-        else if (cellline.startsWith("E"))
-        {
-            return getConfigString("NAME_TEMPLATE_WTSI");
-        }
-        else if (cellline.startsWith("D"))
-        {
-            return getConfigString("NAME_TEMPLATE_UCD");
-        }
-        return getConfigString("NAME_TEMPLATE");
-    }
 
     /**
      * Get the Allele Symbol template string
@@ -299,18 +306,6 @@ public class TargetedAlleleLoadCfg extends InputDataCfg
      */
     public String getSymbolTemplate() throws ConfigException
     {
-        return getConfigString("SYMBOL_TEMPLATE");
-    }
-    public String getSymbolTemplate(String cellline) throws ConfigException
-    {
-        if (cellline.startsWith("H"))
-        {
-            return getConfigString("SYMBOL_TEMPLATE_HMGU");
-        } 
-        else if (cellline.startsWith("E"))
-        {
-            return getConfigString("SYMBOL_TEMPLATE_WTSI");
-        }
         return getConfigString("SYMBOL_TEMPLATE");
     }
 
@@ -374,7 +369,7 @@ public class TargetedAlleleLoadCfg extends InputDataCfg
      * A class for looking up key values in the database for a given user of
      * the system
      * @has an internal cache of user keys to user names
-     * @does maintains the internal cache and provoides lookup functiomality
+     * @does maintains the internal cache and provides lookup functionality
      * @company The Jackson Laboratory
      * @author M Walker
      *
@@ -395,11 +390,11 @@ public class TargetedAlleleLoadCfg extends InputDataCfg
         }
 
         /**
-         * look up a userid for the given user name from the MGI_USER table
+         * look up a user id for the given user name from the MGI_USER table
          * @param name the name to lookup
          * @assumes nothing
          * @effects nothing
-         * @return the userid
+         * @return the user id
          * @throws DBException thrown if there is an error accessing the
          * database
          * @throws CacheException thrown if there is an error accessing the
