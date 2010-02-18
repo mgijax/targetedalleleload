@@ -1,22 +1,18 @@
 package org.jax.mgi.app.targetedalleleload;
 
-import org.jax.mgi.dbs.mgd.lookup.TranslationException;
-import org.jax.mgi.shr.cache.CacheException;
-import org.jax.mgi.shr.config.ConfigException;
-import org.jax.mgi.shr.dbutils.DBException;
-import org.jax.mgi.shr.dla.log.DLALoggingException;
+import org.jax.mgi.shr.exception.MGIException;
 
 public class SangerFactory extends KnockoutAlleleFactory
 {
 
     public KnockoutAlleleInterpreter getInterpreter()
+    throws MGIException
     {
         return new SangerInterpreter();
     }
 
     public KnockoutAlleleProcessor getProcessor()
-    throws ConfigException,DLALoggingException,
-    DBException,CacheException,TranslationException
+    throws MGIException
     {
         return new SangerProcessor();
     }

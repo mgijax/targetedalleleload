@@ -511,7 +511,7 @@ extends DLALoader
 		String cassette = in.getCassette();
 		String dCompoundKey = vectorLookup.lookup(cassette) + "|";
 
-		dCompoundKey += cfg.getCreatorKey(in.getProvider(), in.getMutantCellLine()) + "|";
+		dCompoundKey += cfg.getCreatorKey() + "|";
 
 		try
 		{
@@ -533,7 +533,7 @@ extends DLALoader
 		{
 			String s = "Skipping record. Cannot find derivation for:";
 			s += "\n Vector: " + cassette;
-			s += "\n Creator Key: " + cfg.getCreatorKey(in.getProvider(), in.getMutantCellLine());
+			s += "\n Creator Key: " + cfg.getCreatorKey();
 			s += "\n Parental: " + in.getParentCellLine();
 			s += "\n";
 			logger.logdInfo(s, true);

@@ -1,13 +1,13 @@
 package org.jax.mgi.app.targetedalleleload;
 
-import org.jax.mgi.shr.ioutils.RecordFormatException;
-import org.jax.mgi.shr.exception.MGIException;
-
-// Support for CSV splitting
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
+import org.jax.mgi.shr.exception.MGIException;
+import org.jax.mgi.shr.ioutils.RecordFormatException;
 
 /**
  * @is An object that knows how to Interpret the Sanger allele file 
@@ -24,15 +24,25 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter
     private static final int MIN_REC_LENGTH = 50;
     public static final String CSV_PATTERN = "\"([^\"]+?)\",?|([^,]+),?|,";
     private static Pattern csvRE;
+    private TargetedAlleleLoadCfg cfg = null;
+    private String allowedCelllines = null;
+    private List knownCelllines = null;
+    private String pipeline = null;
 
     /**
      * Constructs a Sanger specific interpreter object
+     * @throws MGIException 
      * @assumes Nothing
      * @effects Nothing
      */
     public SangerInterpreter ()
+    throws MGIException
     {
         csvRE = Pattern.compile(CSV_PATTERN);
+        cfg = new TargetedAlleleLoadCfg();
+        allowedCelllines = cfg.getAllowedCelllines();
+        knownCelllines = cfg.getKnownCelllines();
+        pipeline = cfg.getPipeline();
     }
 
     /** Parse one line. Split the line apart on comma and remove the
@@ -154,51 +164,52 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter
         List list = parse(rec);
         String[] parts = (String[]) list.toArray(new String[0]);
         
+        String firstLetter = parts[5].substring(0, 1);
+        
+        if(!knownCelllines.contains(firstLetter))
+        {
+        	// A new provider!
+        	qcStatistics.record("ERROR", "Records with a new provider ("+firstLetter+")");
+        	return false;
+        }
+        if(!allowedCelllines.contains(firstLetter))
+        {
+        	// Cellline not appropriate for this provider
+        	qcStatistics.record("SUMMARY", "Input record(s) not approriate for this provider, skipped");
+        	return false;
+        }
         if (parts[0].equals("MGI ACCESSION ID"))
         {
             // Ignore header line
             return false;
         }
-        else if (parts[0].substring(0,1).equals("#"))
+        if (parts[0].substring(0,1).equals("#"))
         {
             // Ignore any comment lines which start with a "#" character
             return false;
         }
-        else if (!parts[3].replaceAll("\"", "").matches("KOMP"))
+        if (!parts[3].replaceAll("\"", "").matches(pipeline))
         {
             // Wrong project
             qcStatistics.record("SUMMARY", "Input record(s) not approriate for this provider, skipped");
             return false;
         }
-        else if (parts[5].replaceAll("\"", "").matches("^HEPD.*"))
-        {
-            // Wrong project
-            qcStatistics.record("SUMMARY", "(Helmholtz) Input record(s) not approriate for this provider, skipped");
-            return false;
-        }
-        else if (parts[5].replaceAll("\"", "").matches("^DEPD.*"))
-        {
-            // Wrong project
-            qcStatistics.record("SUMMARY", "Input record(s) not approriate for this provider, skipped");
-            return false;
-        }
-        else if (parts[6].indexOf(",") > 0)
+        if (parts[6].contains(","))
         {
             // strangely formatted ES Cell (parental)
             qcStatistics.record("WARNING", "Input record(s) with unknown parental cell line skipped");
             return false;
         }
-        else if (!parts[8].replaceAll("\"", "").matches("Conditional|Targeted non-conditional|Deletion"))
+        if (!parts[8].replaceAll("\"", "").matches("Conditional|Targeted non-conditional|Deletion"))
         {
             // unknown mutation type
             qcStatistics.record("WARNING", "Input record(s) with unknown mutation type skipped");
             return false;
         }
-        else
-        {
-            qcStatistics.record("SUMMARY", "Successfully interpreted input record(s)");
-            return true;
-        }
+
+        // Default action is to indicate this record as valid
+        qcStatistics.record("SUMMARY", "Successfully interpreted input record(s)");
+        return true;
     }
 }
 

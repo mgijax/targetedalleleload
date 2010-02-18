@@ -118,6 +118,9 @@ public class RegeneronProcessor extends KnockoutAlleleProcessor
         koAllele.setProjectLogicalDb(cfg.getProjectLogicalDb());
         koAllele.setStrainKey(strainKey);
 
+        // Regeneron alleles are all DELETION type alleles (Targeted Knockout)
+        koAllele.setTypeKey(cfg.getAlleleType("DELETION"));
+        
         // Regeneron Specific Mutation types
         Vector mutationTypeKeys = new Vector();
         String[] types = cfg.getMutationTypes().split(",");
