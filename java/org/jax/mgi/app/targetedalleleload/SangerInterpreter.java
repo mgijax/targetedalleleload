@@ -199,7 +199,7 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter
             qcStatistics.record("SUMMARY", "Input record(s) not approriate for this provider, skipped");
             return false;
         }
-        if (parts[6].contains(","))
+        if (parts[6].indexOf(",") != -1)
         {
             // strangely formatted ES Cell (parental)
             qcStatistics.record("WARNING", "Input record(s) with unknown parental cell line skipped");
