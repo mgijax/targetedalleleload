@@ -48,11 +48,16 @@ cd `dirname $0`
 
 # establish the config files
 REGENERON_CONFIG=tal_regeneron.config
-CSD_WTSI_CONFIG-tal_csd_wtsi.config
-CSD_UCD_CONFIG-tal_csd_ucd.config
-EUCOMM_WTSI_CONFIG-tal_eucomm_wtsi.config
-EUCOMM_HGMU_CONFIG-tal_eucomm_hgmu.config
+CSD_WTSI_CONFIG=tal_csd_wtsi.config
+CSD_UCD_CONFIG=tal_csd_ucd.config
+EUCOMM_WTSI_CONFIG=tal_eucomm_wtsi.config
+EUCOMM_HMGU_CONFIG=tal_eucomm_hmgu.config
 COMMON_CONFIG=tal_common.config
+
+#
+# Don't do the build for every config file.
+#
+DO_BUILD="-x"
 
 # Make sure config file exists and source it
 if [ -r ${REGENERON_CONFIG} ]
@@ -76,10 +81,35 @@ fi
 
 
 #
+# Create the input diretory
+#
+if [ ! -d ${INPUTDIR} ]
+then
+    mkdir -p ${INPUTDIR} >/dev/null 2>&1
+    if [ $? -eq 0 ]
+    then
+          echo "Directory created: ${INPUTDIR}"
+    else
+          echo "Cannot create directory: ${INPUTDIR}"
+          installFailed
+    fi
+else
+    echo "Directory already exists: ${INPUTDIR}"
+fi
+
+if [ "${DEV}" = "-d" ]
+then
+    chmod -f 775 ${INPUTDIR}
+else
+    chmod -f 755 ${INPUTDIR}
+fi
+
+
+#
 # run DLAInstall for each configuration file
 #
 echo 'running DLAINSTALL'
-${DLAINSTALL} ${DEV}
+${DLAINSTALL} ${DEV} ${DO_BUILD}
 
 # Make sure config file exists and source it
 if [ -r ${CSD_WTSI_CONFIG} ]
@@ -92,11 +122,11 @@ else
 fi
 
 #
-# run DLAInstall for tal_csd_ucd
+# run DLAInstall for tal_csd_wtsi
 # source tal_common.config again
 #
 . ${COMMON_CONFIG}
-${DLAINSTALL} ${DEV}
+${DLAINSTALL} ${DEV} ${DO_BUILD}
 
 
 # Make sure config file exists and source it
@@ -114,7 +144,7 @@ fi
 # source tal_common.config again
 #
 . ${COMMON_CONFIG}
-${DLAINSTALL} ${DEV}
+${DLAINSTALL} ${DEV} ${DO_BUILD}
 
 
 # Make sure config file exists and source it
@@ -128,27 +158,31 @@ else
 fi
 
 #
-# run DLAInstall for tal_csd_ucd
+# run DLAInstall for tal_eucomm_wtsi
 # source tal_common.config again
 #
 . ${COMMON_CONFIG}
-${DLAINSTALL} ${DEV}
+${DLAINSTALL} ${DEV} ${DO_BUILD}
 
 
 # Make sure config file exists and source it
-if [ -r ${EUCOMM_WTSI_CONFIG} ]
+if [ -r ${EUCOMM_HMGU_CONFIG} ]
 then
-    echo "Source ${EUCOMM_HGMU_CONFIG}"
-    . ${EUCOMM_HGMU_CONFIG}
+    echo "Source ${EUCOMM_HMGU_CONFIG}"
+    . ${EUCOMM_HMGU_CONFIG}
 else
-    echo "Cannot source configuration file: ${EUCOMM_HGMU_CONFIG}"
+    echo "Cannot source configuration file: ${EUCOMM_HMGU_CONFIG}"
     installFailed
 fi
 
+DO_BUILD=""
+
 #
-# run DLAInstall for tal_csd_ucd
+# run DLAInstall for the last time, this time build the software
+#
+# run DLAInstall for tal_eucomm_hmgu
 # source tal_common.config again
 #
 . ${COMMON_CONFIG}
-${DLAINSTALL} ${DEV}
+${DLAINSTALL} ${DEV} ${DO_BUILD}
 
