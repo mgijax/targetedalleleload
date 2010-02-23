@@ -6,6 +6,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
+import org.jax.mgi.shr.dla.log.DLALogger;
 import org.jax.mgi.shr.exception.MGIException;
 import org.jax.mgi.shr.ioutils.RecordFormatException;
 
@@ -28,6 +29,7 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter
     private String allowedCelllines = null;
     private List knownCelllines = null;
     private String pipeline = null;
+    protected DLALogger logger = null;
 
     /**
      * Constructs a Sanger specific interpreter object
@@ -43,6 +45,7 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter
         allowedCelllines = cfg.getAllowedCelllines();
         knownCelllines = cfg.getKnownCelllines();
         pipeline = cfg.getPipeline();
+        this.logger = DLALogger.getInstance();
     }
 
     /** Parse one line. Split the line apart on comma and remove the
@@ -164,17 +167,19 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter
         List list = parse(rec);
         String[] parts = (String[]) list.toArray(new String[0]);
         
+        // The first letter of the cell line ID indicates what lab created it
         String firstLetter = parts[5].substring(0, 1);
         
         if(!knownCelllines.contains(firstLetter))
         {
         	// A new provider!
         	qcStatistics.record("ERROR", "Records with a new provider ("+firstLetter+")");
+        	logger.logInfo("Cell line record with a new provider ("+parts[5]+")");
         	return false;
         }
         if(!allowedCelllines.contains(firstLetter))
         {
-        	// Cellline not appropriate for this provider
+        	// This cell line is not appropriate for this provider
         	qcStatistics.record("SUMMARY", "Input record(s) not approriate for this provider, skipped");
         	return false;
         }

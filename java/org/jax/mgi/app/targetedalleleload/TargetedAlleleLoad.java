@@ -32,7 +32,7 @@ import org.jax.mgi.shr.ioutils.RecordDataIterator;
 /**
  * @is a DLALoader for loading KOMP produced Alleles into the database
  * and associating them with appropriate marker annotations, strains,
- * moleculare notes, and J-number references.  This process will also
+ * molecular notes, and J-number references.  This process will also
  * create the official nomenclature and generate an official MGI ID 
  * for the allele.
  * @has nothing
