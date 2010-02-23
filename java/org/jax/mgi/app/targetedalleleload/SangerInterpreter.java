@@ -26,7 +26,7 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter
     public static final String CSV_PATTERN = "\"([^\"]+?)\",?|([^,]+),?|,";
     private static Pattern csvRE;
     private TargetedAlleleLoadCfg cfg = null;
-    private String allowedCelllines = null;
+    private List allowedCelllines = null;
     private List knownCelllines = null;
     private String pipeline = null;
     protected DLALogger logger = null;

@@ -97,6 +97,7 @@ public class TargetedAlleleLoadCfg extends InputDataCfg
     	List a = Arrays.asList(getConfigString("KNOWN_CELLLINES").split(","));
     	for (Iterator it = a.iterator();it.hasNext();)
     	{
+    		// Strip the spaces out of the elements
     		String i = (String)it.next();
     		i.replaceAll(" ", "");
     	}
@@ -110,9 +111,17 @@ public class TargetedAlleleLoadCfg extends InputDataCfg
      * @return The configuration value
      * @throws ConfigException if the value is not found
      */
-    public String getAllowedCelllines() throws ConfigException
+    public List getAllowedCelllines() throws ConfigException
     {
-        return getConfigString("ALLOWED_CELLLINES");
+    	List a = Arrays.asList(getConfigString("ALLOWED_CELLLINES").split(","));
+    	for (Iterator it = a.iterator();it.hasNext();)
+    	{
+    		// Strip the spaces out of the elements
+    		String i = (String)it.next();
+    		i.replaceAll(" ", "");
+    	}
+    	return a;
+
     }
 
     /**
