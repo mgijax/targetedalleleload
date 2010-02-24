@@ -13,7 +13,7 @@ LOGDIR=${FILEDIR}/logs
 RPTDIR=${FILEDIR}/reports
 ARCHIVEDIR=${FILEDIR}/archive
 OUTPUTDIR=${FILEDIR}/output
-INPUTDIR=${FILEDIR}/input
+INPUTDIR=${BASEDIR}/input
 
 #  Full path of the log files
 LOG_PROC=${LOGDIR}/tal.proc.log
@@ -23,7 +23,7 @@ LOG_VAL=${LOGDIR}/tal.val.log
 
 #  Full path of the downloaded and input files
 DOWNLOADILE_NAME=/data/downloads/ftp.regeneron/regn_clones.tab
-INFILE_NAME=${INPUT_DIR}/regn_clones.tab
+INFILE_NAME=${INPUTDIR}/regn_clones.tab
 
 export FILEDIR LOGDIR RPTDIR ARCHIVEDIR OUTPUTDIR 
 export INPUTDIR INFILE_NAME DOWNLOADILE_NAME

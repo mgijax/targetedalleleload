@@ -13,7 +13,7 @@ LOGDIR=${FILEDIR}/logs
 RPTDIR=${FILEDIR}/reports
 ARCHIVEDIR=${FILEDIR}/archive
 OUTPUTDIR=${FILEDIR}/output
-INPUTDIR=${FILEDIR}/input
+INPUTDIR=${BASEDIR}/input
 
 #  Full path of the log files
 LOG_PROC=${LOGDIR}/tal.proc.log
