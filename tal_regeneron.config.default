@@ -22,11 +22,12 @@ LOG_CUR=${LOGDIR}/tal.cur.log
 LOG_VAL=${LOGDIR}/tal.val.log
 
 #  Full path of the downloaded and input files
-DOWNLOADILE_NAME=/data/downloads/ftp.regeneron/regn_clones.tab
+DOWNLOADFILE_PATH=/data/downloads/ftp.regeneron
+DOWNLOADFILE_NAME=regn_clones.tab
 INFILE_NAME=${INPUTDIR}/regn_clones.tab
 
 export FILEDIR LOGDIR RPTDIR ARCHIVEDIR OUTPUTDIR 
-export INPUTDIR INFILE_NAME DOWNLOADILE_NAME
+export INPUTDIR INFILE_NAME DOWNLOADILE_PATH DOWNLOADILE_NAME
 
 ###########################################################################
 #

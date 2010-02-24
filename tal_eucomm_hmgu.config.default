@@ -22,11 +22,12 @@ LOG_CUR=${LOGDIR}/tal.cur.log
 LOG_VAL=${LOGDIR}/tal.val.log
 
 #  Full path of the downloaded and input files
-DOWNLOADILE_NAME=/data/downloads/www.sanger.ac.uk/htgt/mgi_allele_report.csv.gz
+DOWNLOADFILE_PATH=/data/downloads/www.sanger.ac.uk/htgt
+DOWNLOADFILE_NAME=mgi_allele_report.csv.gz
 INFILE_NAME=${INPUTDIR}/mgi_allele_report.csv
 
 export FILEDIR LOGDIR RPTDIR ARCHIVEDIR OUTPUTDIR 
-export INPUTDIR INFILE_NAME DOWNLOADILE_NAME
+export INPUTDIR INFILE_NAME DOWNLOADILE_PATH DOWNLOADILE_NAME
 
 ###########################################################################
 #
