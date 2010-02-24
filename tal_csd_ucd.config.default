@@ -1,13 +1,13 @@
 #format: sh
 #
-#  tal_csd-ucd.config.default
+#  tal_csd_ucd.config.default
 #
 #  This file sets up environment variables that are needed for
 #  loading the CSD Alleles 
 #
 ###########################################################################
 
-# Full path the the logs, reports, and archive directories
+# Full path of the logs, reports, and archive directories
 FILEDIR=${BASEDIR}/csd_load_ucd
 LOGDIR=${FILEDIR}/logs
 RPTDIR=${FILEDIR}/reports
@@ -15,18 +15,18 @@ ARCHIVEDIR=${FILEDIR}/archive
 OUTPUTDIR=${FILEDIR}/output
 INPUTDIR=${FILEDIR}/input
 
-export FILEDIR LOGDIR RPTDIR ARCHIVEDIR OUTPUTDIR
+#  Full path of the log files
+LOG_PROC=${LOGDIR}/tal.proc.log
+LOG_DIAG=${LOGDIR}/tal.diag.log
+LOG_CUR=${LOGDIR}/tal.cur.log
+LOG_VAL=${LOGDIR}/tal.val.log
 
-#  Complete path name of the log files
-LOG_PROC=${LOGDIR}/csd_tal.proc.log
-LOG_DIAG=${LOGDIR}/csd_tal.diag.log
-LOG_CUR=${LOGDIR}/csd_tal.cur.log
-LOG_VAL=${LOGDIR}/csd_tal.val.log
-
+#  Full path of the downloaded and input files
 DOWNLOADILE_NAME=/data/downloads/www.sanger.ac.uk/htgt/mgi_allele_report.csv.gz
 INFILE_NAME=${INPUTDIR}/mgi_allele_report.csv
 
-export INFILE_NAME DOWNLOADFILE_NAME
+export FILEDIR LOGDIR RPTDIR ARCHIVEDIR OUTPUTDIR 
+export INPUTDIR INFILE_NAME DOWNLOADILE_NAME
 
 ###########################################################################
 #
@@ -50,16 +50,20 @@ export MGD_BCP_OK_TO_OVERWRITE
 #  Java applications
 INTERPRETER=org.jax.mgi.app.targetedalleleload.SangerInterpreter
 
-
 #
 # Pipeline this configuration file is for
 #
 PIPELINE='KOMP'
 
 #
+# Provider this configuration file is for
+#
+PROVIDER='Ucd'
+
+#
 # JNumber reference for CSD Alleles
 #
-JNUMBER='J:148605'
+JNUMBER='J:157064'
 
 #
 # Should the load be allowed to overwrite curator entered notes?

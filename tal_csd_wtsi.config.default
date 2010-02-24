@@ -1,22 +1,32 @@
 #format: sh
 #
-#  tal_csd.config.default
+#  tal_csd_wtsi.config.default
 #
 #  This file sets up environment variables that are needed for
 #  loading the CSD Alleles 
 #
 ###########################################################################
 
-
-
-# Full path the the logs, reports, and archive directories
-FILEDIR=/data/loads/targetedallele/csd_load_wtsi
+# Full path of the logs, reports, and archive directories
+FILEDIR=${BASEDIR}/csd_load_wtsi
 LOGDIR=${FILEDIR}/logs
 RPTDIR=${FILEDIR}/reports
 ARCHIVEDIR=${FILEDIR}/archive
 OUTPUTDIR=${FILEDIR}/output
+INPUTDIR=${FILEDIR}/input
 
-export FILEDIR LOGDIR RPTDIR ARCHIVEDIR OUTPUTDIR
+#  Full path of the log files
+LOG_PROC=${LOGDIR}/tal.proc.log
+LOG_DIAG=${LOGDIR}/tal.diag.log
+LOG_CUR=${LOGDIR}/tal.cur.log
+LOG_VAL=${LOGDIR}/tal.val.log
+
+#  Full path of the downloaded and input files
+DOWNLOADILE_NAME=/data/downloads/www.sanger.ac.uk/htgt/mgi_allele_report.csv.gz
+INFILE_NAME=${INPUTDIR}/mgi_allele_report.csv
+
+export FILEDIR LOGDIR RPTDIR ARCHIVEDIR OUTPUTDIR 
+export INPUTDIR INFILE_NAME DOWNLOADILE_NAME
 
 ###########################################################################
 #
@@ -37,26 +47,18 @@ export MGD_BCP_PATH MGD_BCP_PREVENT_EXECUTE MGD_BCP_TRUNCATE_LOG
 export MGD_BCP_DROP_INDEXES MGD_BCP_RECORD_STAMPING MGD_BCP_AUTO_FLUSH
 export MGD_BCP_OK_TO_OVERWRITE
 
-
 #  Java applications
 INTERPRETER=org.jax.mgi.app.targetedalleleload.SangerInterpreter
-
-INPUT_DIR=/data/komp/static
-INFILE_NAME=${INPUT_DIR}/allele_report.csv
-
-export INFILE_NAME
-
-#  Complete path name of the log files
-LOG_PROC=${LOGDIR}/csd_tal.proc.log
-LOG_DIAG=${LOGDIR}/csd_tal.diag.log
-LOG_CUR=${LOGDIR}/csd_tal.cur.log
-LOG_VAL=${LOGDIR}/csd_tal.val.log
-
 
 #
 # Pipeline this configuration file is for
 #
 PIPELINE='KOMP'
+
+#
+# Provider this configuration file is for
+#
+PROVIDER='Wtsi'
 
 #
 # JNumber reference for CSD Alleles

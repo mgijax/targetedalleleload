@@ -1,22 +1,32 @@
 #format: sh
 #
-#  tal_eucomm.config.default
+#  tal_eucomm_hmgu.config.default
 #
 #  This file sets up environment variables that are needed for
-#  loading the EUCOMM Alleles 
+#  loading the Hmgu EUCOMM Alleles 
 #
 ###########################################################################
 
-
-
-# Full path the the logs, reports, and archive directories
-FILEDIR=/data/loads/targetedallele/eucomm_load_hmgu
+# Full path of the logs, reports, and archive directories
+FILEDIR=${BASEDIR}/eucomm_load_hmgu
 LOGDIR=${FILEDIR}/logs
 RPTDIR=${FILEDIR}/reports
 ARCHIVEDIR=${FILEDIR}/archive
 OUTPUTDIR=${FILEDIR}/output
+INPUTDIR=${FILEDIR}/input
 
-export FILEDIR LOGDIR RPTDIR ARCHIVEDIR OUTPUTDIR
+#  Full path of the log files
+LOG_PROC=${LOGDIR}/tal.proc.log
+LOG_DIAG=${LOGDIR}/tal.diag.log
+LOG_CUR=${LOGDIR}/tal.cur.log
+LOG_VAL=${LOGDIR}/tal.val.log
+
+#  Full path of the downloaded and input files
+DOWNLOADILE_NAME=/data/downloads/www.sanger.ac.uk/htgt/mgi_allele_report.csv.gz
+INFILE_NAME=${INPUTDIR}/mgi_allele_report.csv
+
+export FILEDIR LOGDIR RPTDIR ARCHIVEDIR OUTPUTDIR 
+export INPUTDIR INFILE_NAME DOWNLOADILE_NAME
 
 ###########################################################################
 #
@@ -37,21 +47,8 @@ export MGD_BCP_PATH MGD_BCP_PREVENT_EXECUTE MGD_BCP_TRUNCATE_LOG
 export MGD_BCP_DROP_INDEXES MGD_BCP_RECORD_STAMPING MGD_BCP_AUTO_FLUSH
 export MGD_BCP_OK_TO_OVERWRITE
 
-
 #  Java applications
 INTERPRETER=org.jax.mgi.app.targetedalleleload.SangerInterpreter
-
-INPUT_DIR=/data/komp/static
-INFILE_NAME=${INPUT_DIR}/allele_report.csv
-
-export INFILE_NAME
-
-#  Complete path name of the log files
-LOG_PROC=${LOGDIR}/eucomm_tal.proc.log
-LOG_DIAG=${LOGDIR}/eucomm_tal.diag.log
-LOG_CUR=${LOGDIR}/eucomm_tal.cur.log
-LOG_VAL=${LOGDIR}/eucomm_tal.val.log
-
 
 #
 # Pipeline this configuration file is for
@@ -59,14 +56,26 @@ LOG_VAL=${LOGDIR}/eucomm_tal.val.log
 PIPELINE='EUCOMM'
 
 #
+# Provider this configuration file is for
+#
+PROVIDER='Hmgu'
+
+#
 # JNumber reference for EUCOMM Alleles
 #
-JNUMBER='J:155845'
+JNUMBER='J:157065'
 
 #
 # Should the load be allowed to overwrite curator entered notes?
 #
 OVERWRITE_NOTE='false'
+
+#
+# These strings identify which cassettes are promoter driven
+# They are cassette names separated by pipe "|" characters
+#
+PROMOTERDRIVEN_CASSETTES="L1L2_Bact_P|L1L2_PGK_P|L1L2_Pgk_P|L1L2_Pgk_PM"
+PROMOTERLESS_CASSETTES="L1L2_gt0|L1L2_gt1|L1L2_gt2|L1L2_gtK|L1L2_gtk|L1L2_st0|L1L2_st1|L1L2_st2"
 
 #
 # New Alleles are created using the following template strings.
@@ -91,14 +100,6 @@ NOTE_TEMPLATE_NONCONDITIONAL_PROMOTERLESS='The ~~CASSETTE~~ cassette was inserte
 NOTE_TEMPLATE_DELETION_PROMOTERDRIVEN='The insertion of the ~~CASSETTE~~ cassette created a deletion of size ~~DELSIZE~~ starting at position ~~LOCUS1~~ and ending at position ~~LOCUS2~~ of Chromosome ~~CHROMOSOME~~ (Genome Build ~~BUILD~~).  This deletion results in the removal of functionally critical exon(s).  The cassette is composed of an FRT site followed by lacZ sequence and a loxP site.  This first loxP site is followed by neomycin under the control of the ~~PROMOTER~~ promoter, a second FRT site and a second loxP site.'
 NOTE_TEMPLATE_DELETION_PROMOTERLESS='The insertion of the ~~CASSETTE~~ cassette created a deletion of size ~~DELSIZE~~ starting at position ~~LOCUS1~~ and ending at position ~~LOCUS2~~ of Chromosome ~~CHROMOSOME~~ (Genome Build ~~BUILD~~).  This deletion results in the removal of functionally critical exon(s).  The cassette is composed of an FRT flanked lacZ/neomycin sequence followed by a loxP site.'
 
-
-#
-# These strings identify which cassettes are promoter driven
-# They are cassette names separated by pipe "|" characters
-#
-PROMOTERDRIVEN_CASSETTES="L1L2_Bact_P|L1L2_PGK_P|L1L2_Pgk_P|L1L2_Pgk_PM"
-PROMOTERLESS_CASSETTES="L1L2_gt0|L1L2_gt1|L1L2_gt2|L1L2_gtK|L1L2_gtk|L1L2_st0|L1L2_st1|L1L2_st2"
-
 # Cassette names for promoter driven cassettes
 CASSETTE_L1L2_BACT_P='human beta-actin promoter / neomycin phosphotransferase (neoR) gene / SV40 polyA'
 CASSETTE_L1L2_PGK_P='PGK promoter / neomycin phosphotransferase (neoR) gene / SV40 polyA'
@@ -116,14 +117,14 @@ MUTATION_TYPES_DELETION='Insertion, Intragenic deletion'
 ESCELL_LOGICAL_DB='137'
 
 #
-# The projects for regeneron are stored using the following logical db
+# The projects for eucomm are stored using the following logical db
 #
 PROJECT_LOGICAL_DB='138'
 export PROJECT_LOGICAL_DB
 
 #
 # The derivation for these types of alleles is determined by the unique
-# combination of Creator, Vector, and Parental Strain. Creator is Hmgu
+# combination of Creator, Vector, and Parental Strain.
 #
 DERIVATION_CREATOR_KEY='5348468'
 
