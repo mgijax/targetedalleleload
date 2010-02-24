@@ -55,7 +55,7 @@ public class SangerProcessor extends KnockoutAlleleProcessor
     private AlleleLookupByMarker alleleLookupByMarker = null;
     private ParentStrainLookupByParentKey parentStrainLookupByParentKey = null;
     private StrainKeyLookup strainKeyLookup = null;
-    private KnockoutAlleleLookup koAlleleLookup = null;
+    private AlleleLookupByKey alleleLookupByKey = null;
 
     
     private String PROMOTER_DRIVEN = "";
@@ -90,12 +90,12 @@ public class SangerProcessor extends KnockoutAlleleProcessor
         //alleleLookupByProjectId = new AlleleLookupByProjectId(projectLogicalDB);
         //alleleLookupByMarker = new AlleleLookupByMarker(projectLogicalDB);
         alleleLookupByProjectId = AlleleLookupByProjectId.getInstance(projectLogicalDB);
-        alleleLookupByMarker = AlleleLookupByMarker.getInstance(projectLogicalDB);
+        alleleLookupByMarker = AlleleLookupByMarker.getInstance();
         markerLookup = new MarkerLookupByMGIID();
 		vocabLookup = new VocabKeyLookup(Constants.ALLELE_VOCABULARY);
 		parentStrainLookupByParentKey = new ParentStrainLookupByParentKey();
 		strainKeyLookup = new StrainKeyLookup();
-        koAlleleLookup = KnockoutAlleleLookup.getInstance();
+        alleleLookupByKey = AlleleLookupByKey.getInstance();
 
 		
 		alleleSequencePattern = Pattern.compile(".*tm(\\d){1,2}[ae]{0,1}.*");
@@ -249,7 +249,7 @@ public class SangerProcessor extends KnockoutAlleleProcessor
             while (alleleSetIt.hasNext())
             {
                 Integer nextKey = (Integer) alleleSetIt.next();
-                KnockoutAllele existingKoAllele = koAlleleLookup.lookup(nextKey);
+                KnockoutAllele existingKoAllele = alleleLookupByKey.lookup(nextKey);
                 if (existingKoAllele == null)
                 {
                     throw new MGIException(

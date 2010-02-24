@@ -126,7 +126,7 @@ public class TargetedAlleleLoadCfg extends InputDataCfg
 
     /**
      * The pipeline this load is loading alleles for
-     * @assumes The "ALLOWED_CELLLINES" constant is defined in the config file and
+     * @assumes The "PIPELINE" constant is defined in the config file and
      * @effects Nothing
      * @return The configuration value
      * @throws ConfigException if the value is not found
@@ -136,6 +136,20 @@ public class TargetedAlleleLoadCfg extends InputDataCfg
         return getConfigString("PIPELINE");
     }
 
+
+    /**
+     * The provider this load is loading alleles for
+     * @assumes The "PROVIDER" constant is defined in the config file and
+     * @effects Nothing
+     * @return The configuration value
+     * @throws ConfigException if the value is not found
+     */
+	public String getProvider() throws ConfigException
+	{
+		return getConfigString("PROVIDER");
+	}
+
+    
     /**
      * Get the promotor for a given cassette
      * @assumes The "CASSETTE_<cassette>" constant is defined in the config file

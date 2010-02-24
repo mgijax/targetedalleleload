@@ -9,7 +9,6 @@ import org.jax.mgi.shr.cache.CacheException;
 import org.jax.mgi.shr.cache.FullCachedLookup;
 import org.jax.mgi.shr.cache.KeyValue;
 import org.jax.mgi.shr.config.ConfigException;
-import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
 import org.jax.mgi.shr.dbutils.DBException;
 import org.jax.mgi.shr.dbutils.MultiRowInterpreter;
 import org.jax.mgi.shr.dbutils.RowDataInterpreter;
@@ -34,7 +33,6 @@ public class AlleleLookupByCellLine
 extends FullCachedLookup
 {
 
-    private TargetedAlleleLoadCfg cfg = null;
     private MarkerLookupByMGIID markerLookup = null;
 
     /**
@@ -49,16 +47,8 @@ extends FullCachedLookup
     throws CacheException,ConfigException,DBException
     {
         super(SQLDataManagerFactory.getShared(SchemaConstants.MGD));
-        try
-        {
-            cfg = new TargetedAlleleLoadCfg();
-            markerLookup = new MarkerLookupByMGIID();
-            markerLookup.initCache();
-        }
-        catch (DLALoggingException e)
-        {
-            System.out.println("KnockoutAlleleLookup DLALoggingException exception");
-        }
+        markerLookup = new MarkerLookupByMGIID();
+        markerLookup.initCache();
     }
 
     /**
@@ -111,15 +101,6 @@ extends FullCachedLookup
      */
     public String getFullInitQuery()
     {
-        String jNumber = null;
-        try
-        {
-            jNumber = cfg.getJNumber();
-        }
-        catch( ConfigException e)
-        {
-            System.out.println("Config Exception retrieving JNUMBER");
-        }
 
         return "SELECT alleleKey=a._Allele_key, alleleName=a.name, " +
                "alleleSymbol=a.symbol, alleleType=a._Allele_Type_key, " +
@@ -136,8 +117,7 @@ extends FullCachedLookup
                "MRK_Marker mrk, ALL_Allele_CellLine_View aacv, " +
                "MGI_Note n, MGI_NoteChunk nc, ACC_Accession acc, " +
                "ACC_Accession acc2 " +
-               "WHERE bc.jnumID = '"+jNumber+"' " +
-               "AND aacv._Allele_key = a._Allele_key " + 
+               "WHERE aacv._Allele_key = a._Allele_key " + 
                "AND ra._Refs_key = bc._Refs_key " +
                "AND ra._Object_key = a._Allele_key " +
                "and ra._RefAssocType_key = rat._RefAssocType_key " +

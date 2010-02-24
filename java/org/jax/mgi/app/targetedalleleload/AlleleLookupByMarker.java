@@ -11,11 +11,13 @@ import org.jax.mgi.shr.cache.FullCachedLookup;
 import org.jax.mgi.shr.cache.KeyNotFoundException;
 import org.jax.mgi.shr.cache.KeyValue;
 import org.jax.mgi.shr.config.ConfigException;
+import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
 import org.jax.mgi.shr.dbutils.DBException;
 import org.jax.mgi.shr.dbutils.MultiRowInterpreter;
 import org.jax.mgi.shr.dbutils.RowDataInterpreter;
 import org.jax.mgi.shr.dbutils.RowReference;
 import org.jax.mgi.shr.dbutils.SQLDataManagerFactory;
+import org.jax.mgi.shr.dla.log.DLALoggingException;
 
 /**
  *
@@ -32,23 +34,23 @@ public class AlleleLookupByMarker extends FullCachedLookup
 
     private static AlleleLookupByMarker _instance;
 
-    public static AlleleLookupByMarker getInstance(Integer logicalDb)
+    public static AlleleLookupByMarker getInstance()
     throws ConfigException, DBException, CacheException
     {
         if (_instance==null) {
-            _instance = new AlleleLookupByMarker(logicalDb);
+            _instance = new AlleleLookupByMarker();
         }
         return _instance;
     }
 
-
-    private Integer logicalDb;
 
     // provide a static cache so that all instances share one cache
     private static HashMap cache = new HashMap();
 
     // indicator of whether or not the cache has been initialized
     private static boolean hasBeenInitialized = false;
+
+    private TargetedAlleleLoadCfg cfg = null;
 
     /**
      * constructor
@@ -58,16 +60,22 @@ public class AlleleLookupByMarker extends FullCachedLookup
      * @throws CacheException thrown if there is an error accessing the
      * cache
      */
-    public AlleleLookupByMarker(Integer logicalDb)
+    public AlleleLookupByMarker()
     throws ConfigException, DBException, CacheException
     {
         super(SQLDataManagerFactory.getShared(SchemaConstants.MGD));
 
-        this.logicalDb = logicalDb;
-
         // since cache is static make sure you do not reinit
         if (!hasBeenInitialized)
         {
+            try
+            {
+                cfg = new TargetedAlleleLoadCfg();
+            }
+            catch (DLALoggingException e)
+            {
+                System.out.println("KnockoutAlleleLookup DLALoggingException exception");
+            }
             initCache(cache);
             hasBeenInitialized = true;
         }
@@ -108,9 +116,19 @@ public class AlleleLookupByMarker extends FullCachedLookup
      */
     public String getFullInitQuery()
     {
+        String provider = null;
+        try
+        {
+            provider = cfg.getProvider();
+        }
+        catch( ConfigException e)
+        {
+            System.out.println("Config Exception retrieving JNUMBER");
+        }
+        
         return "SELECT av._allele_key 'alleleKey', av.markerSymbol 'markerSymbol' " +
         "FROM ACC_Accession acc,  ALL_Allele_View av " +
-        "WHERE acc._logicaldb_key = " + this.logicalDb.toString() + " " +
+        "WHERE av.symbol like '%<tm%"+provider+">'" +
         "AND acc._object_key = av._Allele_key " +
         "ORDER BY markerSymbol";
     }

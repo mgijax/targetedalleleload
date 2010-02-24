@@ -59,7 +59,7 @@ extends DLALoader
 
 	// Lookups
 	private KOMutantCellLineLookup koMutantCellLineLookup = null;
-	private KnockoutAlleleLookup koAlleleLookup = null;
+	private AlleleLookupByKey alleleLookupByKey = null;
 	private AlleleLookupByProjectId alleleLookupByProjectId = null;
 	private AlleleLookupByMarker alleleLookupByMarker = null;
 	private DerivationLookupByVectorCreatorParent derivationLookup = null;
@@ -96,9 +96,9 @@ extends DLALoader
 		// These lookups implement a Singleton pattern because 
 		// they're shared across objects so updates in one object
 		// should be reflected in the other objects
-		koAlleleLookup = KnockoutAlleleLookup.getInstance();
+		alleleLookupByKey = AlleleLookupByKey.getInstance();
 		alleleLookupByProjectId = AlleleLookupByProjectId.getInstance(projectLogicalDB);
-		alleleLookupByMarker = AlleleLookupByMarker.getInstance(projectLogicalDB);
+		alleleLookupByMarker = AlleleLookupByMarker.getInstance();
 
 		alleleLookupByCellLine = new AlleleLookupByCellLine();
 		alleleLookupByCellLine.initCache();
@@ -630,7 +630,7 @@ extends DLALoader
 		alleleLookupByProjectId.addToCache(in.getProjectId(), alleles);
 
 		// Finally, add the newly created allele to the cache
-		koAlleleLookup.addToCache(constructed.getKey(), constructed);
+		alleleLookupByKey.addToCache(constructed.getKey(), constructed);
 
 		Marker mrk = markerLookup.lookup(in.getGeneId());
 		String markerSymbol = mrk.getSymbol();
