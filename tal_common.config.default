@@ -93,6 +93,9 @@ export MAIL_LOADNAME MAIL_LOG_PROC
 INSTALLDIR=${TARGETEDALLELELOAD}
 export INSTALLDIR
 
+BASEDIR=/data/loads/targetedallele
+INPUTDIR=${BASEDIR}/input
+
 #
 # Allele types created by these loads include:
 #

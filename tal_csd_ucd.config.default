@@ -8,13 +8,25 @@
 ###########################################################################
 
 # Full path the the logs, reports, and archive directories
-FILEDIR=/data/loads/targetedallele/csd_load_ucd
+FILEDIR=${BASEDIR}/csd_load_ucd
 LOGDIR=${FILEDIR}/logs
 RPTDIR=${FILEDIR}/reports
 ARCHIVEDIR=${FILEDIR}/archive
 OUTPUTDIR=${FILEDIR}/output
+INPUTDIR=${FILEDIR}/input
 
 export FILEDIR LOGDIR RPTDIR ARCHIVEDIR OUTPUTDIR
+
+#  Complete path name of the log files
+LOG_PROC=${LOGDIR}/csd_tal.proc.log
+LOG_DIAG=${LOGDIR}/csd_tal.diag.log
+LOG_CUR=${LOGDIR}/csd_tal.cur.log
+LOG_VAL=${LOGDIR}/csd_tal.val.log
+
+DOWNLOADILE_NAME=/data/downloads/www.sanger.ac.uk/htgt/mgi_allele_report.csv.gz
+INFILE_NAME=${INPUTDIR}/mgi_allele_report.csv
+
+export INFILE_NAME DOWNLOADFILE_NAME
 
 ###########################################################################
 #
@@ -37,17 +49,6 @@ export MGD_BCP_OK_TO_OVERWRITE
 
 #  Java applications
 INTERPRETER=org.jax.mgi.app.targetedalleleload.SangerInterpreter
-
-INPUT_DIR=/data/komp/static
-INFILE_NAME=${INPUT_DIR}/allele_report.csv
-
-export INFILE_NAME
-
-#  Complete path name of the log files
-LOG_PROC=${LOGDIR}/csd_tal.proc.log
-LOG_DIAG=${LOGDIR}/csd_tal.diag.log
-LOG_CUR=${LOGDIR}/csd_tal.cur.log
-LOG_VAL=${LOGDIR}/csd_tal.val.log
 
 
 #
