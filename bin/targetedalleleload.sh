@@ -115,6 +115,18 @@ then
 fi
 
 #
+# Copy the input file into place
+#
+DOWNLOAD=${DOWNLOADFILE_PATH}/${DOWNLOADFILE_NAME}
+INPUT=${INPUTDIR}/${DOWNLOADFILE_NAME}
+cp ${DOWNLOAD} ${INPUTDIR}
+
+if [ `echo ${DOWNLOAD} | awk -F"." '{ print $NF }'` = "gz" ]
+then
+    gunzip -f ${INPUT}
+fi
+
+#
 #  Perform pre-load tasks.
 #
 #preload ${OUTPUTDIR}
