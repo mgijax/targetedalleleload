@@ -112,20 +112,20 @@ extends DLALoader
 		alleleFactory = KnockoutAlleleFactory.getFactory();
 		alleleProjectIdUpdated = new TreeSet();
 		databaseProjectIds = new HashSet(alleleLookupByProjectId.getKeySet());
-		databaseCellLines = new HashSet(alleleLookupByCellLine.getKeySet());
+		databaseCellLines = new HashSet();
 
-		// Remove all the cell lines not appropriate for this project from the
-		// QC pool (cell lines for other pipeline don't need QC for this 
-		// pipeline)
-		Iterator iterator = databaseCellLines.iterator();
+		// Add only cell lines appropriate for this pipeline and provider
+		// to the QC pool (cell lines for other pipeline don't need QC
+		// during this run)
+		Iterator iterator = alleleLookupByCellLine.getKeySet().iterator();
 		while (iterator.hasNext())
 		{   
 			String label = (String)iterator.next();
 			KnockoutAllele a = alleleLookupByCellLine.lookup(label);
 			String pipeline = cfg.getPipeline()+">";
-			if (a.getSymbol().indexOf(pipeline)<0)
+			if (a.getSymbol().indexOf(pipeline)>=0)
 			{
-				databaseCellLines.remove(label);
+				databaseCellLines.add(label);
 			}
 		}
 
