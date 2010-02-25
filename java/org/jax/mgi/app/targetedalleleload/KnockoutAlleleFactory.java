@@ -22,16 +22,26 @@ abstract class KnockoutAlleleFactory
         }
         else if (jNumber.equals("J:148605"))
         {
-            // CSD
+            // CSD Wtsi
+            return new SangerFactory();
+        }
+        else if (jNumber.equals("J:157064"))
+        {
+            // CSD Ucd
             return new SangerFactory();
         }
         else if (jNumber.equals("J:155845"))
         {
-            // EUCOMM
+            // EUCOMM Wtsi
+            return new SangerFactory();
+        }
+        else if (jNumber.equals("J:157065"))
+        {
+            // EUCOMM Hmgu
             return new SangerFactory();
         }
 
-    return null;
+        throw new MGIException("Factory not found. Check Jnumber in cfg");
     }
     
     public abstract KnockoutAlleleInterpreter getInterpreter() throws MGIException;
