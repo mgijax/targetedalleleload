@@ -114,6 +114,21 @@ extends DLALoader
 		databaseProjectIds = new HashSet(alleleLookupByProjectId.getKeySet());
 		databaseCellLines = new HashSet(alleleLookupByCellLine.getKeySet());
 
+		// Remove all the cell lines not appropriate for this project from the
+		// QC pool (cell lines for other pipeline don't need QC for this 
+		// pipeline)
+		Iterator iterator = databaseCellLines.iterator();
+		while (iterator.hasNext())
+		{   
+			String label = (String)iterator.next();
+			KnockoutAllele a = alleleLookupByCellLine.lookup(label);
+			String pipeline = cfg.getPipeline()+">";
+			if (a.getSymbol().indexOf(pipeline)<0)
+			{
+				databaseCellLines.remove(label);
+			}
+		}
+
 	}
 
 	/**

@@ -36,15 +36,13 @@ extends FullCachedLookup
     private static AlleleLookupByKey _instance;
 
     public static AlleleLookupByKey getInstance()
-    throws ConfigException, DBException, CacheException
+    throws MGIException
     {
         if (_instance==null) {
             _instance = new AlleleLookupByKey();
         }
         return _instance;
     }
-
-
 
     private TargetedAlleleLoadCfg cfg = null;
     private MarkerLookupByMGIID markerLookup = null;
@@ -58,18 +56,20 @@ extends FullCachedLookup
      * cache
      */
     public AlleleLookupByKey() 
-    throws CacheException,ConfigException,DBException
+    throws MGIException
     {
         super(SQLDataManagerFactory.getShared(SchemaConstants.MGD));
+
+        markerLookup = new MarkerLookupByMGIID();
+        markerLookup.initCache();
+
         try
         {
             cfg = new TargetedAlleleLoadCfg();
-            markerLookup = new MarkerLookupByMGIID();
-            markerLookup.initCache();
         }
         catch (DLALoggingException e)
         {
-            System.out.println("KnockoutAlleleLookup DLALoggingException exception");
+        	throw new MGIException("KnockoutAlleleLookup DLALoggingException exception");
         }
     }
 

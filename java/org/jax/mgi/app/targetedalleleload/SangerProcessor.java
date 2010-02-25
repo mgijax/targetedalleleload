@@ -77,8 +77,7 @@ public class SangerProcessor extends KnockoutAlleleProcessor
      * @throws TranslationException 
      */
     public SangerProcessor ()
-    throws ConfigException,DLALoggingException,
-    DBException,CacheException,TranslationException
+    throws MGIException
     {
         cfg = new TargetedAlleleLoadCfg();
         

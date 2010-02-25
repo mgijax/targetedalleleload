@@ -9,6 +9,7 @@ import org.jax.mgi.shr.cache.CacheException;
 import org.jax.mgi.shr.cache.FullCachedLookup;
 import org.jax.mgi.shr.cache.KeyValue;
 import org.jax.mgi.shr.config.ConfigException;
+import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
 import org.jax.mgi.shr.dbutils.DBException;
 import org.jax.mgi.shr.dbutils.MultiRowInterpreter;
 import org.jax.mgi.shr.dbutils.RowDataInterpreter;
@@ -34,6 +35,7 @@ extends FullCachedLookup
 {
 
     private MarkerLookupByMGIID markerLookup = null;
+    private TargetedAlleleLoadCfg cfg = null;
 
     /**
      * constructor
@@ -44,11 +46,20 @@ extends FullCachedLookup
      * cache
      */
     public AlleleLookupByCellLine() 
-    throws CacheException,ConfigException,DBException
+    throws MGIException
     {
         super(SQLDataManagerFactory.getShared(SchemaConstants.MGD));
         markerLookup = new MarkerLookupByMGIID();
         markerLookup.initCache();
+
+        try
+        {
+            cfg = new TargetedAlleleLoadCfg();
+        }
+        catch (DLALoggingException e)
+        {
+        	throw new MGIException("KnockoutAlleleLookup DLALoggingException exception");
+        }
     }
 
     /**
@@ -101,7 +112,15 @@ extends FullCachedLookup
      */
     public String getFullInitQuery()
     {
-
+        String provider = null;
+        try
+        {
+            provider = cfg.getProvider();
+        }
+        catch( ConfigException e)
+        {
+            System.out.println("Config Exception retrieving JNUMBER");
+        }
         return "SELECT alleleKey=a._Allele_key, alleleName=a.name, " +
                "alleleSymbol=a.symbol, alleleType=a._Allele_Type_key, " +
                "geneSymbol=mrk.symbol, chr=mrk.chromosome, " +
@@ -117,7 +136,8 @@ extends FullCachedLookup
                "MRK_Marker mrk, ALL_Allele_CellLine_View aacv, " +
                "MGI_Note n, MGI_NoteChunk nc, ACC_Accession acc, " +
                "ACC_Accession acc2 " +
-               "WHERE aacv._Allele_key = a._Allele_key " + 
+               "WHERE a.symbol like '%<tm%"+provider+">' " +
+               "AND aacv._Allele_key = a._Allele_key " + 
                "AND ra._Refs_key = bc._Refs_key " +
                "AND ra._Object_key = a._Allele_key " +
                "and ra._RefAssocType_key = rat._RefAssocType_key " +
