@@ -122,8 +122,9 @@ extends DLALoader
 		{   
 			String label = (String)iterator.next();
 			HashMap a = alleleLookupByProjectId.lookup(label);
+			HashMap b = (HashMap)a.values().toArray()[0];
 			String s = "("+cfg.getPipeline()+")"+cfg.getProvider();
-			if (((String)a.get("symbol")).indexOf(s) >= 0)
+			if (((String)b.get("symbol")).indexOf(s) >= 0)
 			{
 				databaseCellLines.add(label);
 			}
