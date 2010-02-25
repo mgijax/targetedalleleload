@@ -122,12 +122,13 @@ extends DLALoader
 		{   
 			String label = (String)iterator.next();
 			KnockoutAllele a = alleleLookupByCellLine.lookup(label);
-			String pipeline = cfg.getPipeline()+">";
-			if (a.getSymbol().indexOf(pipeline)>=0)
+			String s = "("+cfg.getPipeline()+")"+cfg.getProvider();
+			if (a.getSymbol().indexOf(s) >= 0)
 			{
 				databaseCellLines.add(label);
 			}
 		}
+		System.out.println(databaseCellLines.size());
 
 	}
 
