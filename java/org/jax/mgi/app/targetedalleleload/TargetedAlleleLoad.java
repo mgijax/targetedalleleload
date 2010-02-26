@@ -126,7 +126,7 @@ extends DLALoader
 			String s = "("+cfg.getPipeline()+")"+cfg.getProvider();
 			if (((String)b.get("symbol")).indexOf(s) >= 0)
 			{
-				databaseCellLines.add(label);
+				databaseProjectIds.add(label);
 			}
 		}
 
