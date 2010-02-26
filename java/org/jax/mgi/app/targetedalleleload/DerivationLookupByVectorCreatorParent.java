@@ -74,7 +74,7 @@ public class DerivationLookupByVectorCreatorParent extends FullCachedLookup
     public String getFullInitQuery()
     {
         return "SELECT _Derivation_key, _Vector_key 'vectorkey', " +
-        "_ParentCellLine_key 'parentalkey', _Creator_key 'creatorkey' " +
+        "_ParentCellLine_key 'parentalkey', _Creator_key 'creatorkey', " +
         "_DerivationType_key 'typekey' " +
         "FROM ALL_CellLine_Derivation ";
     }
