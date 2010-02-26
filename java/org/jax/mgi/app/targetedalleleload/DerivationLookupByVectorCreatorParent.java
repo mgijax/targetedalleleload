@@ -75,6 +75,7 @@ public class DerivationLookupByVectorCreatorParent extends FullCachedLookup
     {
         return "SELECT _Derivation_key, _Vector_key 'vectorkey', " +
         "_ParentCellLine_key 'parentalkey', _Creator_key 'creatorkey' " +
+        "_DerivationType_key 'typekey' " +
         "FROM ALL_CellLine_Derivation ";
     }
 
@@ -94,10 +95,10 @@ public class DerivationLookupByVectorCreatorParent extends FullCachedLookup
         public Object interpret(RowReference row)
         throws DBException
         {
-            String vectorkey = row.getString("vectorkey");
-            String parentkey = row.getString("parentalkey");
-            String creatorkey = row.getString("creatorkey");
-            String lookupkey = vectorkey + "|" + creatorkey + "|" + parentkey;
+            String lookupkey = row.getString("vectorkey");
+            lookupkey += "|" + row.getString("creatorkey");
+            lookupkey += "|" + row.getString("parentalkey");
+            lookupkey += "|" + row.getString("typekey");
 
             return new KeyValue(lookupkey, row.getInt("_Derivation_key"));
         }

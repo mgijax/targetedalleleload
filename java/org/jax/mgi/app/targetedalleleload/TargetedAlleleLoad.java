@@ -410,6 +410,20 @@ extends DLALoader
 					continue;
 				}
 
+				// Check the derivation (this implicitly checks the 
+				// parental cell line, the creator, the vector and the allele
+				// type)
+				if(!esCell.getDerivationKey().equals(getDerivationKey(in)))
+				{
+					String noteMsg = "\nDERIVATION CHANGED\n";
+					noteMsg += "Mutant Cell line: " + in.getMutantCellLine();
+					noteMsg += "\nOld derivation key: " + esCell.getDerivationKey();
+					noteMsg += "\nNew derivation key: " + getDerivationKey(in);
+					noteMsg += "\n";
+					logger.logcInfo(noteMsg, false);
+					qcStatistics.record("SUMMARY", "Number of cell lines that changed derivation");					
+				}
+
 				// Only check the note content if the allele type and marker 
 				// hasn't changed.  If the type changed, then by definition 
 				// the note changed because different types use different 
@@ -485,7 +499,7 @@ extends DLALoader
 				} catch (MGIException e)
 				{
 					qcStatistics.record("ERROR", "Number of mutant cell lines that were not able to be constructed");
-					String m = "Mutant cell line creation error, skipping record: ";
+					String m = "Exception creating mutant cell line, skipping record: ";
 					m += in.getMutantCellLine() + "\n";
 					m += in + "\n";
 					m += e.getMessage();
@@ -495,7 +509,7 @@ extends DLALoader
 				if(mclKey == null)
 				{
 					qcStatistics.record("ERROR", "Number of mutant cell lines that were not able to be constructed");
-					String m = "Mutant cell line creation error, skipping record: ";
+					String m = "Mutant cell line not created, skipping record: ";
 					m += in.getMutantCellLine() + "\n";
 					m += in + "\n";
 					logger.logdInfo(m, false);
@@ -533,21 +547,20 @@ extends DLALoader
 		return;
 	}
 
-	protected Integer createMutantCellLine(KnockoutAlleleInput in)
+	protected Integer getDerivationKey(KnockoutAlleleInput in)
 	throws MGIException
 	{
 
-
 		// Find the derivation key for this ES Cell
 		String cassette = in.getCassette();
-		String dCompoundKey = vectorLookup.lookup(cassette) + "|";
+		String dCompoundKey = vectorLookup.lookup(cassette);
 
-		dCompoundKey += cfg.getCreatorKey() + "|";
+		dCompoundKey +=  "|" + cfg.getCreatorKey();
 
 		try
 		{
 			String parent = in.getParentCellLine();
-			dCompoundKey += cfg.getParentalKey(parent);
+			dCompoundKey +=  "|" + cfg.getParentalKey(parent);
 		}
 		catch (ConfigException e)
 		{
@@ -558,6 +571,9 @@ extends DLALoader
 			throw new MGIException("Cannot find parental cell line key for "+in.getParentCellLine());
 		}
 
+		String aType = in.getMutationType();
+		dCompoundKey += "|" + Constants.MUTATION_TYPE_KEYS.get(aType);
+		
 		Integer derivationKey = derivationLookup.lookup(dCompoundKey);
 
 		if (derivationKey == null)
@@ -572,6 +588,13 @@ extends DLALoader
 			throw new MGIException("Cannot find derivation for "+in.getMutantCellLine());
 		}
 
+		return derivationKey;
+	}
+
+	protected Integer createMutantCellLine(KnockoutAlleleInput in)
+	throws MGIException
+	{
+		Integer derivationKey = getDerivationKey(in);
 		
 		// Create the mutant cell line
 		MutantCellLine mcl = new MutantCellLine();

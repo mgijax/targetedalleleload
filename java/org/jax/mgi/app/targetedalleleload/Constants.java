@@ -1,5 +1,7 @@
 package org.jax.mgi.app.targetedalleleload;
 
+import java.util.HashMap;
+
 /**
  * Constants defined for the TargetedAlleleLoad
  * @has constant definitions
@@ -77,5 +79,15 @@ public class Constants
      * VOC_Term key for Marker-Allele Association Status "Curated"
      */
     public static final int MKR_ASSOC_STAT_CURATED_KEY = 4268545;
+
+    /*
+     * VOC_Term key for Marker-Allele Association Status "Curated"
+     */
+    public static final HashMap MUTATION_TYPE_KEYS = new HashMap();
+    static {
+    	MUTATION_TYPE_KEYS.put("Deletion", "847116");
+    	MUTATION_TYPE_KEYS.put("Conditional", "847118");
+    	MUTATION_TYPE_KEYS.put("Targeted non-conditional", "847119");
+    }
 
 }

@@ -73,6 +73,9 @@ public class RegeneronAlleleInput implements KnockoutAlleleInput
     public String getBuild() { return build; }
     public String getCassette() { return cassette; }
 
+    // All Regeneron alleles are of type Deletion
+    public String getMutationType() { return "Deletion"; } 
+
 	public void setESCellName(String esCellName)
 	{
 		this.esCellName = esCellName;
