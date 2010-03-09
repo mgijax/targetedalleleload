@@ -69,26 +69,6 @@ else
     installFailed
 fi
 
-# Make sure config file exists and source it
-if [ -r ${REGENERON_CONFIG} ]
-then
-    echo "Source ${REGENERON_CONFIG}"
-    . ${REGENERON_CONFIG}
-else
-    echo "Cannot source configuration file: ${REGENERON_CONFIG}"
-    installFailed
-fi
-
-
-#
-# run DLAInstall for each configuration file
-#
-echo 'running DLAINSTALL'
-. ${COMMON_CONFIG}
-${DLAINSTALL} ${DEV} ${DO_BUILD}
-
-
-. ${COMMON_CONFIG}
 #
 # Create the input diretory
 #
@@ -114,11 +94,24 @@ else
 fi
 
 
+# Make sure config file exists and source it
+if [ -r ${REGENERON_CONFIG} ]
+then
+    echo "Source ${REGENERON_CONFIG}"
+    . ${REGENERON_CONFIG}
+else
+    echo "Cannot source configuration file: ${REGENERON_CONFIG}"
+    installFailed
+fi
+
+
 #
 # run DLAInstall for each configuration file
 #
 echo 'running DLAINSTALL'
+. ${COMMON_CONFIG}
 ${DLAINSTALL} ${DEV} ${DO_BUILD}
+
 
 # Make sure config file exists and source it
 if [ -r ${CSD_WTSI_CONFIG} ]
