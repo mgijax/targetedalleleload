@@ -1,3 +1,21 @@
+TAG: targetedalleleload-4-3-2-4
+DATE: 3/09/2010
+STAFF: jmason
+CHANGES:
+1) Streamline the Install script
+
+TAG: targetedalleleload-4-3-2-3
+DATE: 3/03/2010
+STAFF: jmason
+CHANGES:
+1) Change CSD and EUCOMM processor and interpreter to Sanger processer
+   and interpreter
+2) Update sequence generation  to count all alleles per labcode when
+   calculating the next default allele sequence number
+3) New jnumbers for each provider
+4) Load is run by provider now, not pipeline
+5) 
+
 TAG: targetedalleleload-4-3-2-2
 DATE: 1/28/2010
 STAFF: jmason
