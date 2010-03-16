@@ -82,7 +82,9 @@ extends FullCachedLookup
 
     /**
     * get the full initialization query which is called by the CacheStrategy
-    * class when performing cache initialization
+    * class when performing cache initialization. This query restricts
+    * celllines to the logical databases for KOMP-Regeneron, KOMP-CSD,
+    * EUCOMM, and NorCOMM (108,109,137,142)
     * @return the full initialization query
     */
     public String getFullInitQuery() {
@@ -101,7 +103,7 @@ extends FullCachedLookup
             "AND c._CellLine_Type_key = v._Term_key " +
             "AND c._Strain_key = s._Strain_key " +
             "AND c._Derivation_key != null " +
-            "AND a._LogicalDB_Key = " + cellLineLogicalDB);
+            "AND a._LogicalDB_Key in (108,109,137,142)");
     }
   
     /**
