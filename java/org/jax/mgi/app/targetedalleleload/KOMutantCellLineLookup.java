@@ -29,15 +29,7 @@ import org.jax.mgi.shr.dla.log.DLALoggingException;
 public class KOMutantCellLineLookup 
 extends FullCachedLookup
 {
-    // provide a static cache so that all instances share one cache
-//    private static HashMap cache = new HashMap();
 
-    // indicator of whether or not the cache has been initialized
-//    private static boolean hasBeenInitialized = false;
-
-    // Which provider of cells is restricted by the logicalDB
-    private Integer cellLineLogicalDB = null;
-  
     /**
     * constructor
     * @throws CacheException thrown if there is an error with the cache
@@ -49,15 +41,7 @@ extends FullCachedLookup
     throws CacheException, DBException, ConfigException
     {
         super(SQLDataManagerFactory.getShared(SchemaConstants.MGD));
-
-        this.cellLineLogicalDB = cellLineLogicalDB;
-
-        // since cache is static make sure you do not reinit
-//        if (!hasBeenInitialized) {
-            initCache(cache);
-//        }
-//        hasBeenInitialized = true;
-
+        initCache(cache);
     }
 
     /**
