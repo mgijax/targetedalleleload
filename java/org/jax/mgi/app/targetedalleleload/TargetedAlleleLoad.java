@@ -62,7 +62,7 @@ extends DLALoader
 	private AlleleLookupByKey alleleLookupByKey = null;
 	private AlleleLookupByProjectId alleleLookupByProjectId = null;
 	private AlleleLookupByMarker alleleLookupByMarker = null;
-	private DerivationLookupByVectorCreatorParent derivationLookup = null;
+	private DerivationLookupByVectorCreatorParentType derivationLookup = null;
 	private VectorLookup vectorLookup = null;
 	private MarkerLookupByMGIID markerLookup = null;
 	private ParentStrainLookupByParentKey parentStrainLookupByParentKey = null;
@@ -105,7 +105,7 @@ extends DLALoader
 
 		parentStrainLookupByParentKey = new ParentStrainLookupByParentKey();
 		strainKeyLookup = new StrainKeyLookup();
-		derivationLookup = new DerivationLookupByVectorCreatorParent();
+		derivationLookup = new DerivationLookupByVectorCreatorParentType();
 		vectorLookup = new VectorLookup();
 		markerLookup = new MarkerLookupByMGIID();
 
