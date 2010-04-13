@@ -39,7 +39,7 @@ import mgi_utils
 import loadlib
 
 db.useOneConnection(1)
-print '%s' % mgi_utils.date()
+#print '%s' % mgi_utils.date()
 
 outFilePath = os.environ['RPTDIR'] + "/AbandonedAllele.rpt"
 outFilePathHTML = os.environ['RPTDIR'] + "/AbandonedAllele.html"
@@ -110,5 +110,5 @@ outFileHTML.write("</table>\n")
 
 outFile.close()
 
-print '%s' % mgi_utils.date()
+#print '%s' % mgi_utils.date()
 db.useOneConnection(0)
