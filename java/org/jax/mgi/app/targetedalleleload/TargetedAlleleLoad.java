@@ -9,6 +9,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.jax.mgi.dbs.SchemaConstants;
 import org.jax.mgi.dbs.mgd.AccessionLib;
@@ -78,6 +80,10 @@ extends DLALoader
 
 	protected QualityControlStatistics qcStatistics = 
 		new QualityControlStatistics();
+	
+	protected Pattern pipelinePattern = null;
+    private Matcher regexMatcher = null;
+
 
 	/**
 	 * constructor
@@ -112,6 +118,14 @@ extends DLALoader
 		derivationLookup = new DerivationLookupByVectorCreatorParentType();
 		vectorLookup = new VectorLookup();
 		markerLookup = new MarkerLookupByMGIID();
+		
+		// Regex pattern to determine the IKMC project that produced
+		// the allele. Examples: 
+		//  0610009D07Rik<tm1a(EUCOMM)Wtsi> = EUCOMM
+		//  Dullard<tm1(KOMP)Vlcg> = KOMP
+		pipelinePattern = 
+			Pattern.compile(".*tm\\d{1,2}[ae]{0,1}\\((.*)\\).*");
+
 
 		alleleFactory = KnockoutAlleleFactory.getFactory();
 		alleleProjectIdUpdated = new TreeSet();
@@ -368,6 +382,48 @@ extends DLALoader
 					continue;
 				}
 
+				
+				//////////////////////////////////////////////////////////
+				//////////////////////////////////////////////////////////
+				//////////////////////////////////////////////////////////
+				// Add check for PIPELiNE change
+				// (from xx<tm1a(KOMP)Wtsi> to xx<tm1a(EUCOMM)Wtsi> or etc.)
+                String existingIkmcGroup = null;
+                String constructedIkmcGroup = null;
+
+                regexMatcher = pipelinePattern.matcher(existing.getSymbol());
+                if (regexMatcher.find())
+                {
+                	existingIkmcGroup = regexMatcher.group(1);
+                }
+                regexMatcher = pipelinePattern.matcher(constructed.getSymbol());
+                if (regexMatcher.find())
+                {
+                	constructedIkmcGroup = regexMatcher.group(1);
+                }
+                
+                if (!existingIkmcGroup.equals(constructedIkmcGroup))
+                {
+                	// The input file says that this allele changed which
+                	// IKMC group produced it
+					String noteMsg = "\nIKMC GROUP CHANGED\n";
+					noteMsg += "Mutant Cell line: " + in.getMutantCellLine();
+					noteMsg += "\nOld allele: " + existing.getSymbol();
+					noteMsg += "\nNew allele: " + constructed.getSymbol();
+					noteMsg += "\n";
+
+					// Change the allele this cellline is currently attached to
+					changeMutantCellLineAssociation(
+							in, esCell, existing, constructed);
+
+					logger.logcInfo(noteMsg, false);
+					qcStatistics.record("SUMMARY", "Number of cell lines that changed IKMC groups");
+                	continue;
+                }
+				//////////////////////////////////////////////////////////
+				//////////////////////////////////////////////////////////
+				//////////////////////////////////////////////////////////
+
 				// If the marker hasn't changed, then check if the symbol
 				// changed at all... if it did, that means the type changed
 				// This check should never catch Regeneron alleles because
@@ -380,45 +436,13 @@ extends DLALoader
 					noteMsg += "\nOld allele: " + existing.getSymbol();
 					noteMsg += "\nNew allele: " + constructed.getSymbol();
 					noteMsg += "\n";
+
+					// Change the allele this cellline is currently attached to
+					changeMutantCellLineAssociation(
+							in, esCell, existing, constructed);
+
 					logger.logcInfo(noteMsg, false);
 					qcStatistics.record("SUMMARY", "Number of cell lines that changed type");
-
-					// Change the allele this MCL is currently attached to
-					String query = "DELETE FROM ALL_Allele_Cellline";
-					query += " WHERE _Allele_key = ";
-					query += existing.getKey();
-					query += " AND _MutantCellLine_key = ";
-					query += esCell.getMCLKey();
-					sqlDBMgr.executeUpdate(query);
-
-					// lookup existing alleles for this project
-					String projectId = in.getProjectId();
-					HashMap alleles = alleleLookupByProjectId.lookup(
-							projectId);
-
-					if(alleles != null)
-					{
-						// Try to get the allele identified by the 
-						// constructed symbol
-						HashMap allele = (HashMap)alleles.get(
-								constructed.getSymbol());
-
-						// If we found the allele, attach the MCL to it
-						if (allele != null)
-						{
-							// Found an allele with this same symbol
-							Integer alleleKey = (Integer)allele.get("key");
-							associateCellLineToAllele(alleleKey, 
-									esCell.getMCLKey());
-							continue;
-						}
-					}
-
-					// The MCL Didn't match any alleles, create an allele and
-					// attach the MCL to it.
-					createAllele(constructed, in, alleles);
-					associateCellLineToAllele(constructed.getKey(), 
-							esCell.getMCLKey());
 
 					// This mutant cell line has had a major change, 
 					// don't bother QC checking the rest of the values
@@ -611,6 +635,48 @@ extends DLALoader
 		return derivationKey;
 	}
 
+	protected void changeMutantCellLineAssociation(KnockoutAlleleInput in, 
+			MutantCellLine esCell,
+			KnockoutAllele oldAllele, 
+			KnockoutAllele newAllele)
+	throws MGIException
+	{
+		// Remove the association existing allele <-> cellline association
+		// from the database
+		String query = "DELETE FROM ALL_Allele_Cellline";
+		query += " WHERE _Allele_key = ";
+		query += oldAllele.getKey();
+		query += " AND _MutantCellLine_key = ";
+		query += esCell.getMCLKey();
+		sqlDBMgr.executeUpdate(query);
+
+		// Lookup existing alleles for this project
+		String projectId = in.getProjectId();
+		HashMap alleles = alleleLookupByProjectId.lookup(projectId);
+
+		// If there are any alleles for this project, see if one of the
+		// existing alleles is the correct one
+		if(alleles != null)
+		{
+			// Try to get the allele identified by the new allele symbol
+			HashMap allele = (HashMap)alleles.get(newAllele.getSymbol());
+
+			// If we found the new allele, attach the MCL to it and return
+			if (allele != null)
+			{
+				// Found an allele with this same symbol
+				Integer alleleKey = (Integer)allele.get("key");
+				associateCellLineToAllele(alleleKey, esCell.getMCLKey());
+				return;
+			}
+		}
+
+		// Otherwise, the cellline Didn't match any alleles, create the new 
+		// allele and association the cellline with the new allele
+		createAllele(newAllele, in, alleles);
+		associateCellLineToAllele(newAllele.getKey(), esCell.getMCLKey());		
+	}
+
 	protected Integer createMutantCellLine(KnockoutAlleleInput in)
 	throws MGIException
 	{
@@ -704,14 +770,14 @@ extends DLALoader
 			alleles = new HashMap();
 		}
 
-		// add the new allele to the map
+		// Include the new allele in the cached allelesByProjectID map
 		alleles.put(constructed.getSymbol(), allele);
-
 		alleleLookupByProjectId.addToCache(in.getProjectId(), alleles);
 
-		// Finally, add the newly created allele to the cache
+		// add the newly created allele to the allele cache
 		alleleLookupByKey.addToCache(constructed.getKey(), constructed);
 
+		// add the newly created allele to the alleleByMarker cache
 		Marker mrk = markerLookup.lookup(in.getGeneId());
 		String markerSymbol = mrk.getSymbol();
 

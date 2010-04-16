@@ -98,7 +98,6 @@ public class SangerProcessor extends KnockoutAlleleProcessor
 
 		
 		alleleSequencePattern = Pattern.compile(".*tm(\\d){1,2}[ae]{0,1}.*");
-		Pattern.compile(".*tm\\d{1,2}([ae]){0,1}.*");
     }
 
     /**
