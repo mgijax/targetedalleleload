@@ -173,13 +173,13 @@ extends DLALoader
 	protected void initialize()
 	throws MGIException
 	{
-		logger.logInfo("Reading input files");
-
 		sqlDBMgr.setLogger(logger);
 		logger.logdDebug("TargetedAlleleLoader sqlDBMgr.server " + 
 				sqlDBMgr.getServer());
 		logger.logdDebug("TargetedAlleleLoader sqlDBMgr.database " + 
 				sqlDBMgr.getDatabase());
+
+		logger.logInfo("Reading input files");
 
 		InputDataFile inputFile = new InputDataFile(cfg);
 
@@ -206,6 +206,8 @@ extends DLALoader
 	protected void preprocess()
 	throws MGIException
 	{
+		// Initialize the statistics for alleles and cell lines created
+		// by the load so far
 		qcStatistics.record("SUMMARY", "Number of alleles created", 0);
 		qcStatistics.record("SUMMARY", "Number of mutant cell lines created", 0);
 		return;
@@ -322,7 +324,7 @@ extends DLALoader
 					currentCellLine);
 			if (esCell != null)
 			{
-				// Mutant ES Cell found in database, check the alleles
+				// Mutant ES Cell found in database, check the allele
 
 				// QC check the allele the MCL is attached to
 				KnockoutAllele existing = alleleLookupByCellLine.lookup(
@@ -337,7 +339,9 @@ extends DLALoader
 					continue;
 				}
 
-				// Compare the notes to see if anything changed.
+				// Gather the values to be compared between the existing
+				// allele and the allele that was constructed from the 
+				// input record
 				String existingNote = existing.getNote();
 				existingNote = existingNote.replaceAll("\\n", "");
 				existingNote = existingNote.replaceAll(" ", "");
@@ -366,9 +370,9 @@ extends DLALoader
 					continue;
 				}
 
-				// Check the es cell project ID versus the allele project ID
-				// If the project changed, likely the allele type needs to
-				// change as well. That condition is handled below
+				// Check the es cell project ID versus the 
+				// existing allele project ID
+				// If the project changed, report it for manual curation
 				if (!existing.getProjectId().equals(constructed.getProjectId()))
 				{
 					// This mutant cell line had a project ID change
@@ -383,10 +387,7 @@ extends DLALoader
 				}
 
 				
-				//////////////////////////////////////////////////////////
-				//////////////////////////////////////////////////////////
-				//////////////////////////////////////////////////////////
-				// Add check for PIPELiNE change
+				// Check if  IKMC pipeline changed
 				// (from xx<tm1a(KOMP)Wtsi> to xx<tm1a(EUCOMM)Wtsi> or etc.)
                 String existingIkmcGroup = null;
                 String constructedIkmcGroup = null;
@@ -396,12 +397,15 @@ extends DLALoader
                 {
                 	existingIkmcGroup = regexMatcher.group(1);
                 }
+                
                 regexMatcher = pipelinePattern.matcher(constructed.getSymbol());
                 if (regexMatcher.find())
                 {
                 	constructedIkmcGroup = regexMatcher.group(1);
                 }
                 
+                // If the mutatnt cell line changed groups, go ahead and 
+                // change the association, but report it for manual review
                 if (!existingIkmcGroup.equals(constructedIkmcGroup))
                 {
                 	// The input file says that this allele changed which
@@ -420,9 +424,6 @@ extends DLALoader
 					qcStatistics.record("SUMMARY", "Number of cell lines that changed IKMC groups");
                 	continue;
                 }
-				//////////////////////////////////////////////////////////
-				//////////////////////////////////////////////////////////
-				//////////////////////////////////////////////////////////
 
 				// If the marker hasn't changed, then check if the symbol
 				// changed at all... if it did, that means the type changed
