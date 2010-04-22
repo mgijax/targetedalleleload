@@ -461,7 +461,7 @@ extends DLALoader
 					noteMsg += "\nNew derivation key: " + getDerivationKey(in);
 					noteMsg += "\n";
 					logger.logcInfo(noteMsg, false);
-					qcStatistics.record("SUMMARY", "Number of cell lines that changed derivation");					
+					qcStatistics.record("SUMMARY", "Number of cell lines that changed derivation");
 				}
 
 				// Only check the note content if the allele type and marker 
@@ -593,6 +593,11 @@ extends DLALoader
 	{
 
 		// Find the derivation key for this ES Cell
+		// The correct derivation is found by combining:
+		//  * cassette
+		//  * parental cell line
+		//  * mutation type
+		//  * creator
 		String cassette = in.getCassette();
 		String dCompoundKey = vectorLookup.lookup(cassette);
 
@@ -629,8 +634,7 @@ extends DLALoader
 			logger.logdInfo(s, true);
 			qcStatistics.record("ERROR", "Number of derivations not found");
 			throw new MGIException(
-					"Cannot find derivation for "+
-					in.getMutantCellLine());
+					"Cannot find derivation for " + in.getMutantCellLine());
 		}
 
 		return derivationKey;
@@ -869,11 +873,11 @@ extends DLALoader
 
 		if (databaseCellLines.size() > 0 || databaseProjectIds.size() > 0 || alleleProjectIdUpdated.size() > 0)
 		{
-			logger.logdInfo("Number of project IDs that exist in DB but not in file: " + databaseProjectIds.size(), false);
-			logger.logpInfo("Number of project IDs that exist in DB but not in file: " + databaseProjectIds.size(), false);
+			logger.logdInfo("Number of project IDs that exist in the MGI database, but not in file: " + databaseProjectIds.size(), false);
+			logger.logpInfo("Number of project IDs that exist in the MGI database, but not in file: " + databaseProjectIds.size(), false);
 
-			logger.logdInfo("Number of celllines that exist in DB but not in file: " + databaseCellLines.size(), false);
-			logger.logpInfo("Number of celllines that exist in DB but not in file: " + databaseCellLines.size(), false);
+			logger.logdInfo("Number of celllines that exist in the MGI database, but not in file: " + databaseCellLines.size(), false);
+			logger.logpInfo("Number of celllines that exist in the MGI database, but not in file: " + databaseCellLines.size(), false);
 
 			logger.logdInfo("Number of alleles that changed project IDs: " + alleleProjectIdUpdated.size(), false);
 			logger.logpInfo("Number of alleles that changed project IDs: " + alleleProjectIdUpdated.size(), false);
@@ -884,8 +888,8 @@ extends DLALoader
 
 		if (databaseCellLines.size() > 0)
 		{
-			logger.logdInfo("\nCelllines that exist in the database, but not in the input file: " + databaseCellLines.size(), false);
-			logger.logcInfo("\nCelllines that exist in the database, but not in the input file: " + databaseCellLines.size(), false);
+			logger.logdInfo("\nCelllines that exist in the MGI database, but not in the input file: " + databaseCellLines.size(), false);
+			logger.logcInfo("\nCelllines that exist in the MGI database, but not in the input file: " + databaseCellLines.size(), false);
 
 			logger.logdInfo("\nAllele\tExisting Project\tES Cell Line", false);
 			logger.logcInfo("\nAllele\tExisting Project\tES Cell Line", false);
@@ -910,8 +914,8 @@ extends DLALoader
 
 		if (databaseProjectIds.size() > 0)
 		{
-			logger.logdInfo("\nProject IDs that exist in MGI, but not in the input file: "+databaseProjectIds.size(), false);
-			logger.logcInfo("\nProject IDs that exist in MGI, but not in the input file: "+databaseProjectIds.size(), false);
+			logger.logdInfo("\nProject IDs that exist in the MGI database, but not in the input file: "+databaseProjectIds.size(), false);
+			logger.logcInfo("\nProject IDs that exist in the MGI database, but not in the input file: "+databaseProjectIds.size(), false);
 
 			logger.logdInfo("\nAllele\tExisting Project", false);
 			logger.logcInfo("\nAllele\tExisting Project", false);
