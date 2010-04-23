@@ -455,12 +455,12 @@ extends DLALoader
 				// type)
 				if(!esCell.getDerivationKey().equals(getDerivationKey(in)))
 				{
-					String noteMsg = "\nDERIVATION CHANGED\n";
-					noteMsg += "Mutant Cell line: " + in.getMutantCellLine();
-					noteMsg += "\nOld derivation key: " + esCell.getDerivationKey();
-					noteMsg += "\nNew derivation key: " + getDerivationKey(in);
-					noteMsg += "\n";
-					logger.logcInfo(noteMsg, false);
+//					String noteMsg = "\nDERIVATION CHANGED\n";
+//					noteMsg += "Mutant Cell line: " + in.getMutantCellLine();
+//					noteMsg += "\nOld derivation key: " + esCell.getDerivationKey();
+//					noteMsg += "\nNew derivation key: " + getDerivationKey(in);
+//					noteMsg += "\n";
+//					logger.logdInfo(noteMsg, false);
 					qcStatistics.record("SUMMARY", "Number of cell lines that changed derivation");
 				}
 
