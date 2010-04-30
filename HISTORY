@@ -1,8 +1,8 @@
-TAG: targetedalleleload-4-3-2-4
-DATE: 3/09/2010
+TAG: targetedalleleload-4-3-3-1
+DATE: 4/30/2010
 STAFF: jmason
 CHANGES:
-1) Streamline the Install script
+1) Add processing for new cell line and derivation checking
 
 TAG: targetedalleleload-4-3-2-3
 DATE: 3/03/2010
