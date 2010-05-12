@@ -404,7 +404,7 @@ extends DLALoader
                 	constructedIkmcGroup = regexMatcher.group(1);
                 }
                 
-                // If the mutatnt cell line changed groups, go ahead and 
+                // If the mutant cell line changed groups, go ahead and 
                 // change the association, but report it for manual review
                 if (!existingIkmcGroup.equals(constructedIkmcGroup))
                 {
