@@ -260,7 +260,7 @@ extends DLALoader
 				alreadyProcessed.add(in.getMutantCellLine());
 			}
 
-			if (in.getParentCellLine().replaceAll(" ", "").equals("") || in.getParentCellLine().replaceAll(" ", "").equals("-")) {
+			if (in.getParentCellLine().replaceAll(" ", "").replaceAll("\n", "").equals("") || in.getParentCellLine().replaceAll(" ", "").replaceAll("\n", "").equals("-")) {
 				qcStatistics.record("ERROR", "Number of input records missing parental cell line");
 
 				String m = "Missing parental cell line, skipping record: ";
