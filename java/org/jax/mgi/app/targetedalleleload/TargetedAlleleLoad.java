@@ -260,6 +260,14 @@ extends DLALoader
 				alreadyProcessed.add(in.getMutantCellLine());
 			}
 
+			if (in.getParentCellLine().equals("")) {
+				qcStatistics.record("ERROR", "Number of input records missing parental cell line");
+
+				String m = "Missing parental cell line, skipping record: ";
+				m += in.getMutantCellLine() + "\n";
+				logger.logdInfo(m, false);
+				continue;
+			}
 			// Keep track of the projects and mutant cell lines we've already 
 			// seen
 			databaseProjectIds.remove(in.getProjectId().toLowerCase());
@@ -278,7 +286,6 @@ extends DLALoader
 
 				String m = "Allele creation error, check: ";
 				m += in.getMutantCellLine() + "\n";
-				m += e.getMessage();
 				logger.logdInfo(m, false);
 				m = "An error occured while processing the input record for: ";
 				m += in.getMutantCellLine() + "\n";
@@ -294,7 +301,6 @@ extends DLALoader
 
 				String m = "General error, skipping record: ";
 				m += in.getMutantCellLine() + "\n";
-				m += in + "\n";
 				m += e.getMessage();
 				logger.logdInfo(m, false);
 				continue;                
