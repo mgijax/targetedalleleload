@@ -1,3 +1,9 @@
+TAG: targetedalleleload-4-3-4-2
+DATE: 5/14/2010
+STAFF: jmason
+CHANGES:
+1) Remove bogus parental cell lines before they are looked up (more stack trace removal)
+
 TAG: targetedalleleload-4-3-4-1
 DATE: 5/14/2010
 STAFF: jmason
