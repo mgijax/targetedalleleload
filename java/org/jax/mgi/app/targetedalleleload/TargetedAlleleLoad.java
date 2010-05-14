@@ -180,6 +180,7 @@ extends DLALoader
 				sqlDBMgr.getDatabase());
 
 		logger.logInfo("Reading input files");
+		logger.logpInfo("Processing "+cfg.getPipeline(), false);
 
 		InputDataFile inputFile = new InputDataFile(cfg);
 
@@ -260,7 +261,10 @@ extends DLALoader
 				alreadyProcessed.add(in.getMutantCellLine());
 			}
 
-			if (in.getParentCellLine().equals("") || in.getParentCellLine().equals("-")) {
+			if (in.getParentCellLine().equals("") || 
+					in.getParentCellLine().equals("-") ||
+					in.getParentCellLine().equals("[ENTERYOURDATAVALUE]")
+				) {
 				qcStatistics.record("ERROR", "Number of input records missing parental cell line");
 
 				String m = "Missing parental cell line, skipping record: ";
