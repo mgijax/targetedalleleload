@@ -1,3 +1,9 @@
+TAG: targetedalleleload-4-3-4-1
+DATE: 5/14/2010
+STAFF: jmason
+CHANGES:
+1) Update error handling to remove stack trackes from diag log
+
 TAG: targetedalleleload-4-3-3-1
 DATE: 4/30/2010
 STAFF: jmason
