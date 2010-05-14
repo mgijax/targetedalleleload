@@ -87,6 +87,8 @@ public class SangerAlleleInput implements KnockoutAlleleInput
 		    .replaceAll("\\)", "")
 		    .replaceAll("/", "")
 		    .replaceAll("\\?", "")
+		    .replaceAll("\\n", "")
+		    .replaceAll(" ", "")
 		    .replaceAll("\\.","");
 	}
 
