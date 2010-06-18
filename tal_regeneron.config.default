@@ -7,6 +7,10 @@
 #
 ###########################################################################
 
+#  The name of the load for the subject of an email notification
+MAIL_LOADNAME="TargetedAllele Load (KOMP-Regeneron Vlcg)"
+export MAIL_LOADNAME 
+
 # Full path of the logs, reports, and archive directories
 FILEDIR=${BASEDIR}/regeneron_load
 LOGDIR=${FILEDIR}/logs

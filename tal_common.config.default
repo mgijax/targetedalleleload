@@ -82,12 +82,13 @@ export CACHE_DEBUG LOG_FACTORY
 #
 ###########################################################################
 #  The name of the load for the subject of an email notification
-MAIL_LOADNAME="TargetedAllele Load"
+#MAIL_LOADNAME="TargetedAllele Load"
 
 #  Recipient list for mailing the log files (comma-separated)
 MAIL_LOG_PROC="mgiadmin"
 
-export MAIL_LOADNAME MAIL_LOG_PROC
+#export MAIL_LOADNAME MAIL_LOG_PROC
+export MAIL_LOG_PROC
 
 #  Installation directory
 INSTALLDIR=${TARGETEDALLELELOAD}
