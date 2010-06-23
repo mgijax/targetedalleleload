@@ -8,7 +8,7 @@
 ###########################################################################
 
 #  The name of the load for the subject of an email notification
-MAIL_LOADNAME="TargetedAllele Load (CSD Ucd)"
+MAIL_LOADNAME="TargetedAllele Load (KOMP-CSD Ucd)"
 export MAIL_LOADNAME
 
 # Full path of the logs, reports, and archive directories
