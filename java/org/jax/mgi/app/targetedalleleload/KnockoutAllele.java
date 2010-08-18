@@ -216,8 +216,7 @@ public class KnockoutAllele implements Comparable
 
 
 
-
-    // Builting overrides for toString and compareTo
+	// @Override
     public String toString()
     {
         return "Allele key: " + this.key+"\n"+
@@ -227,6 +226,7 @@ public class KnockoutAllele implements Comparable
             "J Number: "+this.jNumber+"\n";
     }
 
+	// @Override
     public int compareTo(Object that) throws ClassCastException
     {
         if (!(that instanceof KnockoutAllele))
@@ -235,14 +235,13 @@ public class KnockoutAllele implements Comparable
         }
         
         String thatSymbol = ((KnockoutAllele) that).getSymbol();
-//        String thatNote = ((KnockoutAllele) that).getNote();
         return this.getSymbol().compareTo(thatSymbol);
     }
 
 
 
     /**
-     * Insert this molucular note object into the stream to create the 
+     * Insert this molecular note object into the stream to create the 
      * required bcp records.
      * @assumes There is no existing molecular note (either deleted, or
      *          never created
