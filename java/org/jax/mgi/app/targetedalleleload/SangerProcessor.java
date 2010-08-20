@@ -97,7 +97,7 @@ public class SangerProcessor extends KnockoutAlleleProcessor
         alleleLookupByKey = AlleleLookupByKey.getInstance();
 
 		
-		alleleSequencePattern = Pattern.compile(".*tm(\\d){1,2}[ae]{0,1}.*");
+		alleleSequencePattern = Pattern.compile(".*tm(\\d{1,2})[ae]{0,1}.*");
     }
 
     /**
