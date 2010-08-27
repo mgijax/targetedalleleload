@@ -90,7 +90,7 @@ public class TargetedAlleleLoad extends DLALoader {
 	private StrainKeyLookup strainKeyLookup;
 	private AlleleLookupByCellLine alleleLookupByCellLine;
 
-	// 
+	//
 	private Set alleleProjectIdUpdated;
 	private Set databaseProjectIds;
 	private Set databaseCellLines;
@@ -430,8 +430,8 @@ public class TargetedAlleleLoad extends DLALoader {
 					// getDerivationKey(in);
 					// noteMsg += "\n";
 					// logger.logdInfo(noteMsg, false);
-					
-					// A change in cellline derivation _usually_ means the 
+
+					// A change in cellline derivation _usually_ means the
 					// associated allele must change as well.
 					Integer derivationKey = getDerivationKey(in);
 					logger.logcInfo(

@@ -9,28 +9,26 @@ import org.jax.mgi.shr.exception.MGIException;
 import org.jax.mgi.shr.ioutils.RecordFormatException;
 
 /**
- * @is An abstract object that knows how to create KOMP Clone objects from 
- * an input file.  Each input file must have a class that overrides this
- * method and provides specific handling for that file.
- * @has
- *   <UL>
- *   <LI> KOMP Clone object.
- *   </UL>
- * @does
- *   <UL>
- *   <LI> Parses a KnockoutAlleleInput record into a KnockoutAllele object
- *   <LI>
- *   </UL>
+ * @is An abstract object that knows how to create KOMP Clone objects from an
+ *     input file. Each input file must have a class that overrides this method
+ *     and provides specific handling for that file.
+ * @has <UL>
+ *      <LI>KOMP Clone object.
+ *      </UL>
+ * @does <UL>
+ *       <LI>Parses a KnockoutAlleleInput record into a KnockoutAllele object
+ *       <LI>
+ *       </UL>
  * @company The Jackson Laboratory
  * @author jmason
  */
 
-abstract class KnockoutAlleleProcessor
-{
-    public abstract KnockoutAllele process(KnockoutAlleleInput in)
-    throws RecordFormatException,ConfigException,KeyNotFoundException,
-    DBException,CacheException,TranslationException,MGIException;
+abstract class KnockoutAlleleProcessor {
+	public abstract KnockoutAllele process(KnockoutAlleleInput in)
+			throws RecordFormatException, ConfigException,
+			KeyNotFoundException, DBException, CacheException,
+			TranslationException, MGIException;
 
-    protected QualityControlStatistics qcStatistics = new QualityControlStatistics();
+	protected QualityControlStatistics qcStatistics = new QualityControlStatistics();
 
 }

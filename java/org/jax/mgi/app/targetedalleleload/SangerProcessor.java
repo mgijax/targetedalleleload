@@ -234,8 +234,7 @@ public class SangerProcessor extends KnockoutAlleleProcessor {
 				String allSymbol = existingKoAllele.getSymbol();
 
 				// Get the map version of the allele
-				Map alleles = alleleLookupByProjectId.lookup(in
-						.getProjectId());
+				Map alleles = alleleLookupByProjectId.lookup(in.getProjectId());
 				Map allele = null;
 
 				if (alleles != null) {
@@ -252,7 +251,7 @@ public class SangerProcessor extends KnockoutAlleleProcessor {
 					}
 
 					if (allele != null) {
-						// Check if the project ID and the parental is the 
+						// Check if the project ID and the parental is the
 						// same as the allele being constructed
 						if (existingKoAllele.getProjectId().equals(
 								in.getProjectId())

@@ -32,7 +32,8 @@ class QualityControlStatistics {
 	 */
 	protected void record(String levelName, String qcParameter, int qty) {
 		Map statLevel = (Map) stats.get(levelName);
-		if (stats == null) {
+
+		if (statLevel == null) {
 			// First time seeing this level
 			statLevel = new TreeMap();
 		}
