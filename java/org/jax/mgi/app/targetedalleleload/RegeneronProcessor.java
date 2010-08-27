@@ -1,7 +1,5 @@
 package org.jax.mgi.app.targetedalleleload;
 
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -123,7 +121,7 @@ public class RegeneronProcessor extends KnockoutAlleleProcessor {
 		// the sum of CURRENT KOMP ALELLES attached to this marker BY THIS
 		// PROVIDER
 		int seq = 1; // Default to the first project
-		HashSet allProj = projectLookupByMarker.lookup(marker.getSymbol());
+		Set allProj = projectLookupByMarker.lookup(marker.getSymbol());
 		if (allProj != null && !allProj.contains(in.getProjectId())) {
 			// There is already a project (or projects) associated to this
 			// marker, and it is not tHIS project. Increment the count
@@ -131,7 +129,7 @@ public class RegeneronProcessor extends KnockoutAlleleProcessor {
 			seq = (allProj.size()) + 1;
 		}
 
-		HashMap alleles = alleleLookpuByProjectId.lookup(in.getProjectId());
+		Map alleles = alleleLookpuByProjectId.lookup(in.getProjectId());
 		if (alleles != null && alleles.size() > 0) {
 			Boolean alleleFound = Boolean.FALSE;
 			Set entries = alleles.entrySet();
@@ -139,7 +137,7 @@ public class RegeneronProcessor extends KnockoutAlleleProcessor {
 
 			while (it.hasNext() && alleleFound != Boolean.TRUE) {
 				Map.Entry entry = (Map.Entry) it.next();
-				HashMap allele = (HashMap) entry.getValue();
+				Map allele = (Map) entry.getValue();
 
 				// The first allele with a matching project ID because there
 				// should only be one project ID per allele for Regeneron
