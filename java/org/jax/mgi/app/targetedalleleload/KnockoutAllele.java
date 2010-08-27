@@ -364,7 +364,7 @@ public class KnockoutAllele implements Comparable
             stream.insert(amDAO);
         }
 
-        // Create the associations btwn the Allele and the reference
+        // Create the associations between the Allele and the reference
         // Original and Molecular
         for (int i=0; i<Constants.REFERENCE_ASSOC.length; i++)
         {

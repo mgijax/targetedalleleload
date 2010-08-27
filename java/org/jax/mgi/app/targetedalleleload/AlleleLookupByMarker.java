@@ -3,6 +3,7 @@ package org.jax.mgi.app.targetedalleleload;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.Vector;
 
 import org.jax.mgi.dbs.SchemaConstants;
@@ -142,7 +143,7 @@ public class AlleleLookupByMarker extends FullCachedLookup
      * @throws DBException thrown if there is an error with the database
      * @throws CacheException thrown if there is an error with the cache
      */
-    protected void addToCache(String symbol, HashSet alleles)
+    protected void addToCache(String symbol, Set alleles)
     throws DBException, CacheException
     {
         // Replace the current value if it exists
@@ -175,7 +176,7 @@ public class AlleleLookupByMarker extends FullCachedLookup
             {
                 RowData rd = (RowData)v.get(0);
                 String markerSymbol = rd.markerSymbol;
-                HashSet alleles = new HashSet();
+                Set alleles = new HashSet();
                 for (Iterator it = v.iterator(); it.hasNext();)
                 {
                     rd = (RowData)it.next();
