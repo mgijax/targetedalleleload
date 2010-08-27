@@ -2,6 +2,7 @@ package org.jax.mgi.app.targetedalleleload;
 
 import java.util.Iterator;
 import java.util.Vector;
+import java.lang.StringBuilder;
 
 import org.jax.mgi.dbs.SchemaConstants;
 import org.jax.mgi.shr.cache.CacheException;
