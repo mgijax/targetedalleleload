@@ -129,7 +129,7 @@ fi
 #
 #  Perform pre-load tasks.
 #
-preload ${OUTPUTDIR}
+preload ${OUTPUTDIR} ${INPUTDIR} ${LOGDIR}
 #preload
 
 #
