@@ -68,6 +68,9 @@ public class TargetedAlleleLoad extends DLALoader {
 	private static final String NUM_ALLELES_CREATED = "Number of alleles created";
 	private static final String NUM_DUPLICATE_INPUT_REC = "Number of duplicate cell line records in input file";
 	private static final String NUM_BAD_INPUT_REC = "Number of input records that were unable to be processed";
+	private static final String NUM_MCL_CHANGED_DERIVATION = "Number of mutant cell lines that changed derivations";
+	private static final String NUM_MCL_CHANGED_ALLELE = "Number of mutant cell lines that changed allele associations";
+
 
 	// Standard DLA required classes
 	private RecordDataIterator iter;
@@ -630,6 +633,7 @@ public class TargetedAlleleLoad extends DLALoader {
 		query += "_derivation_key = " + newDerivationKey;
 		query += " WHERE _cellline_key = " + esCell.getMCLKey();
 		sqlDBMgr.executeUpdate(query);
+		qcStats.record("WARNING", NUM_MCL_CHANGED_DERIVATION);
 	}
 
 	private void changeMutantCellLineAssociation(KnockoutAlleleInput in,
@@ -667,6 +671,7 @@ public class TargetedAlleleLoad extends DLALoader {
 		// allele and association the cellline with the new allele
 		createAllele(newAllele, in, alleles);
 		associateCellLineToAllele(newAllele.getKey(), esCell.getMCLKey());
+		qcStats.record("WARNING", NUM_MCL_CHANGED_ALLELE);
 	}
 
 	private Integer createMutantCellLine(KnockoutAlleleInput in)
