@@ -20,6 +20,12 @@ import org.jax.mgi.shr.ioutils.RecordFormatException;
 
 public class SangerInterpreter extends KnockoutAlleleInterpreter {
 
+	// QC string constants
+	private static final String NUM_SUCCESS = "Successfully interpreted input record(s)";
+	private static final String NUM_UNKNOWN_MUTATION = "Input record(s) with unknown mutation type skipped";
+	private static final String NUM_UNKNOWN_PARENT = "Input record(s) with unknown parental cell line skipped";
+	private static final String NUM_NOT_APPRORIATE = "Input record(s) not approriate for this provider, skipped";
+
 	// The minimum length of a valid input record (including NL character).
 	private static final int MIN_REC_LENGTH = 50;
 	public static final String CSV_PATTERN = "\"([^\"]+?)\",?|([^,]+),?|,";
@@ -163,6 +169,31 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 		List list = parse(rec);
 		String[] parts = (String[]) list.toArray(new String[0]);
 
+		if (parts[0].equals("MGI ACCESSION ID")) {
+			// Ignore header line
+			return false;
+		}
+		if (parts[0].substring(0, 1).equals("#")) {
+			// Ignore any comment lines which start with a "#" character
+			return false;
+		}
+		if (!parts[3].replaceAll("\"", "").matches(pipeline)) {
+			// Wrong project
+			qcStatistics.record("SUMMARY", NUM_NOT_APPRORIATE);
+			return false;
+		}
+		if (parts[6].indexOf(",") != -1) {
+			// strangely formatted ES Cell (parental)
+			qcStatistics.record("WARNING", NUM_UNKNOWN_PARENT);
+			return false;
+		}
+		if (!parts[8].replaceAll("\"", "").matches(
+				"Conditional|Targeted non-conditional|Deletion")) {
+			// unknown mutation type
+			qcStatistics.record("WARNING", NUM_UNKNOWN_MUTATION);
+			return false;
+		}
+
 		// The first letter of the cell line ID indicates what lab created it
 		String firstLetter = parts[5].substring(0, 1);
 
@@ -176,43 +207,12 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 		}
 		if (!allowedCelllines.contains(firstLetter)) {
 			// This cell line is not appropriate for this provider
-			qcStatistics
-					.record("SUMMARY",
-							"Input record(s) not approriate for this provider, skipped");
-			return false;
-		}
-		if (parts[0].equals("MGI ACCESSION ID")) {
-			// Ignore header line
-			return false;
-		}
-		if (parts[0].substring(0, 1).equals("#")) {
-			// Ignore any comment lines which start with a "#" character
-			return false;
-		}
-		if (!parts[3].replaceAll("\"", "").matches(pipeline)) {
-			// Wrong project
-			qcStatistics
-					.record("SUMMARY",
-							"Input record(s) not approriate for this provider, skipped");
-			return false;
-		}
-		if (parts[6].indexOf(",") != -1) {
-			// strangely formatted ES Cell (parental)
-			qcStatistics.record("WARNING",
-					"Input record(s) with unknown parental cell line skipped");
-			return false;
-		}
-		if (!parts[8].replaceAll("\"", "").matches(
-				"Conditional|Targeted non-conditional|Deletion")) {
-			// unknown mutation type
-			qcStatistics.record("WARNING",
-					"Input record(s) with unknown mutation type skipped");
+			qcStatistics.record("SUMMARY", NUM_NOT_APPRORIATE);
 			return false;
 		}
 
 		// Default action is to indicate this record as valid
-		qcStatistics.record("SUMMARY",
-				"Successfully interpreted input record(s)");
+		qcStatistics.record("SUMMARY", NUM_SUCCESS);
 		return true;
 	}
 }
