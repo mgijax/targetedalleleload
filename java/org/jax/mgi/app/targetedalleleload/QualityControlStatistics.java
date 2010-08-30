@@ -9,8 +9,7 @@ import java.util.TreeMap;
  *     that gets updated throughout the load process
  * @has nothing
  * @does <UL>
- *       <LI>Maintains a list of
- *       <LI>
+ *       <LI>Maintains a list of quality control strings, and associated counts
  *       </UL>
  * @company The Jackson Laboratory
  * @author jmason
