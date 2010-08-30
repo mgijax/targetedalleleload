@@ -88,7 +88,7 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 	 * @assumes Nothing
 	 * @effects Loads the clone object.
 	 * @param rec
-	 *            A record from the Regeneron allele input file
+	 *            A record from the Sanger allele input file
 	 * @return An RegeneronAlleleInput object
 	 * @throws RecordFormatException
 	 */
