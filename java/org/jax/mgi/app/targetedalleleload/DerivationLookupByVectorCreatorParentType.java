@@ -46,7 +46,7 @@ public class DerivationLookupByVectorCreatorParentType extends FullCachedLookup 
 	 * @throws CacheException
 	 *             thrown if there is an error accessing the cache
 	 */
-	public DerivationLookupByVectorCreatorParentType() throws ConfigException,
+	private DerivationLookupByVectorCreatorParentType() throws ConfigException,
 			DBException, CacheException {
 		super(SQLDataManagerFactory.getShared(SchemaConstants.MGD));
 		initCache(cache);

@@ -129,7 +129,7 @@ public class TargetedAlleleLoad extends DLALoader {
 
 		parentStrainLookupByParentKey = new ParentStrainLookupByParentKey();
 		strainKeyLookup = new StrainKeyLookup();
-		derivationLookup = new DerivationLookupByVectorCreatorParentType();
+		derivationLookup = DerivationLookupByVectorCreatorParentType.getInstance();
 		vectorLookup = new VectorLookup();
 		markerLookup = new MarkerLookupByMGIID();
 		vocTermLookup = new VocabTermLookup();
