@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -21,7 +20,6 @@ import org.jax.mgi.dbs.mgd.dao.ALL_Allele_CellLineState;
 import org.jax.mgi.dbs.mgd.dao.ALL_CellLineDAO;
 import org.jax.mgi.dbs.mgd.loads.Alo.MutantCellLine;
 import org.jax.mgi.dbs.mgd.lookup.CellLineNameLookupByKey;
-import org.jax.mgi.dbs.mgd.lookup.CellLineStrainKeyLookupByCellLineKey;
 import org.jax.mgi.dbs.mgd.lookup.ParentStrainLookupByParentKey;
 import org.jax.mgi.dbs.mgd.lookup.StrainKeyLookup;
 import org.jax.mgi.dbs.mgd.lookup.StrainNameLookup;
