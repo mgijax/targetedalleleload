@@ -102,7 +102,7 @@ public class DerivationLookupByVectorCreatorParentType extends FullCachedLookup 
 		value += "|" + d.getParentCellLineKey();
 		value += "|" + d.getDerivationTypeKey();
 
-		super.cache.put(d, d.getDerivationKey());
+		super.cache.put(value, d.getDerivationKey());
 	}
 
 	/**
