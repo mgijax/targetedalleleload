@@ -42,9 +42,9 @@ public class AccessionId {
 	 *            the object key that this accession ID to which this ID is
 	 *            associated
 	 * @param mgiTypeKey
-	 *            the mgi type of the accession ID
+	 *            the MGI type of the accession ID
 	 * @param privateVal
-	 *            if tge accession ID is private
+	 *            if the accession ID is private
 	 * @param preferred
 	 *            if the accession ID is the preferred one
 	 */
@@ -79,9 +79,9 @@ public class AccessionId {
 	 *            the object key that this accession ID to which this ID is
 	 *            associated
 	 * @param mgiTypeKey
-	 *            the mgi type of the accession ID
+	 *            the MGI type of the accession ID
 	 * @param privateVal
-	 *            if tge accession ID is private
+	 *            if the accession ID is private
 	 * @param preferred
 	 *            if the accession ID is the preferred one
 	 */
@@ -168,7 +168,7 @@ public class AccessionId {
 		ACC_AccessionDAO accDAO = new ACC_AccessionDAO(accState);
 		stream.insert(accDAO);
 
-		// Store the key that gets gerenated when this object is instered
+		// Store the key that gets generated when this object is instead
 		// into the database
 		this.key = accDAO.getKey().getKey().intValue();
 	}

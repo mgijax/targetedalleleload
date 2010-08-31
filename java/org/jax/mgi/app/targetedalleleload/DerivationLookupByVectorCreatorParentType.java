@@ -10,12 +10,13 @@ import org.jax.mgi.shr.dbutils.DBException;
 import org.jax.mgi.shr.dbutils.RowDataInterpreter;
 import org.jax.mgi.shr.dbutils.RowReference;
 import org.jax.mgi.shr.dbutils.SQLDataManagerFactory;
+import org.jax.mgi.shr.exception.MGIException;
 
 /**
  * 
  * is a FullCachedLookup storing alleles to project id
  * 
- * @has internal cache of hashset objects indexed by project id
+ * @has internal cache of set objects indexed by project id
  * @does provides a lookup for accessing the cache
  * @company Jackson Laboratory
  * @author jmason
@@ -23,6 +24,17 @@ import org.jax.mgi.shr.dbutils.SQLDataManagerFactory;
  */
 
 public class DerivationLookupByVectorCreatorParentType extends FullCachedLookup {
+
+	// Singleton pattern implementation
+	private static DerivationLookupByVectorCreatorParentType _instance;
+
+	public static DerivationLookupByVectorCreatorParentType getInstance()
+			throws MGIException {
+		if (_instance == null) {
+			_instance = new DerivationLookupByVectorCreatorParentType();
+		}
+		return _instance;
+	}
 
 	/**
 	 * constructor
@@ -37,6 +49,7 @@ public class DerivationLookupByVectorCreatorParentType extends FullCachedLookup 
 	public DerivationLookupByVectorCreatorParentType() throws ConfigException,
 			DBException, CacheException {
 		super(SQLDataManagerFactory.getShared(SchemaConstants.MGD));
+		initCache(cache);
 	}
 
 	/**
@@ -68,6 +81,30 @@ public class DerivationLookupByVectorCreatorParentType extends FullCachedLookup 
 	public Integer lookupExisting(String identifier) throws DBException,
 			CacheException, KeyNotFoundException {
 		return (Integer) super.lookup(identifier);
+	}
+
+	/**
+	 * add a new map to the cache
+	 * 
+	 * @assumes nothing
+	 * @effects the value identified by 'key' will be added or replaced
+	 * @param cellLine
+	 *            the cellLine name
+	 * @param koAllele
+	 *            the knockout allele
+	 * @throws DBException
+	 *             thrown if there is an error with the database
+	 * @throws CacheException
+	 *             thrown if there is an error with the cache
+	 */
+	protected void addToCache(Derivation d) throws MGIException {
+		// Replace the current value if it exists
+		String value = d.getVectorKey().toString();
+		value += "|" + d.getCreatorKey();
+		value += "|" + d.getParentCellLineKey();
+		value += "|" + d.getDerivationTypeKey();
+
+		super.cache.put(d, d.getDerivationKey());
 	}
 
 	/**

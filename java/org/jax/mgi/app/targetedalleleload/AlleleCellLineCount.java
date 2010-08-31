@@ -26,8 +26,6 @@ import org.jax.mgi.shr.dbutils.SQLDataManagerFactory;
 
 public class AlleleCellLineCount extends FullCachedLookup {
 
-	// Provides access to the required configuration variables
-
 	// Singleton pattern implementation
 	private static AlleleCellLineCount _instance;
 

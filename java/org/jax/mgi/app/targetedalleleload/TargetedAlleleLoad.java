@@ -20,8 +20,12 @@ import org.jax.mgi.dbs.mgd.dao.ALL_Allele_CellLineDAO;
 import org.jax.mgi.dbs.mgd.dao.ALL_Allele_CellLineState;
 import org.jax.mgi.dbs.mgd.dao.ALL_CellLineDAO;
 import org.jax.mgi.dbs.mgd.loads.Alo.MutantCellLine;
+import org.jax.mgi.dbs.mgd.lookup.CellLineNameLookupByKey;
+import org.jax.mgi.dbs.mgd.lookup.CellLineStrainKeyLookupByCellLineKey;
 import org.jax.mgi.dbs.mgd.lookup.ParentStrainLookupByParentKey;
 import org.jax.mgi.dbs.mgd.lookup.StrainKeyLookup;
+import org.jax.mgi.dbs.mgd.lookup.StrainNameLookup;
+import org.jax.mgi.dbs.mgd.lookup.VocabTermLookup;
 import org.jax.mgi.shr.cache.KeyNotFoundException;
 import org.jax.mgi.shr.config.ConfigException;
 import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
@@ -71,7 +75,6 @@ public class TargetedAlleleLoad extends DLALoader {
 	private static final String NUM_MCL_CHANGED_DERIVATION = "Number of mutant cell lines that changed derivations";
 	private static final String NUM_MCL_CHANGED_ALLELE = "Number of mutant cell lines that changed allele associations";
 
-
 	// Standard DLA required classes
 	private RecordDataIterator iter;
 	private KnockoutAlleleProcessor processor;
@@ -92,6 +95,10 @@ public class TargetedAlleleLoad extends DLALoader {
 	private ParentStrainLookupByParentKey parentStrainLookupByParentKey;
 	private StrainKeyLookup strainKeyLookup;
 	private AlleleLookupByCellLine alleleLookupByCellLine;
+	private VocabTermLookup vocTermLookup;
+	private CellLineNameLookupByKey cellLineNameLookupByKey;
+	private CellLineStrainKeyLookupByCellLineKey cellLineStrainKeyLookupByCellLineKey;
+	private StrainNameLookup strainNameLookup;
 
 	//
 	private Set alleleProjectIdUpdated;
@@ -127,6 +134,10 @@ public class TargetedAlleleLoad extends DLALoader {
 		derivationLookup = new DerivationLookupByVectorCreatorParentType();
 		vectorLookup = new VectorLookup();
 		markerLookup = new MarkerLookupByMGIID();
+		vocTermLookup = new VocabTermLookup();
+		cellLineNameLookupByKey = new CellLineNameLookupByKey();
+		cellLineStrainKeyLookupByCellLineKey = new CellLineStrainKeyLookupByCellLineKey();
+		strainNameLookup = new StrainNameLookup();
 
 		alleleFactory = KnockoutAlleleFactory.getFactory();
 		alleleProjectIdUpdated = new TreeSet();
@@ -590,13 +601,14 @@ public class TargetedAlleleLoad extends DLALoader {
 		// * mutation type
 		// * creator
 		String cassette = in.getCassette();
-		String dCompoundKey = vectorLookup.lookup(cassette);
+		String parent = in.getParentCellLine();
+		String aType = in.getMutationType();
 
-		dCompoundKey += "|" + cfg.getCreatorKey();
-
+		Integer vectorKey = new Integer(vectorLookup.lookup(cassette));
+		Integer creatorKey = new Integer(cfg.getCreatorKey());
+		Integer parentKey;
 		try {
-			String parent = in.getParentCellLine();
-			dCompoundKey += "|" + cfg.getParentalKey(parent);
+			parentKey = cfg.getParentalKey(parent);
 		} catch (ConfigException e) {
 			String s = in.getParentCellLine();
 			s += " Does not exist in CFG file! Skipping record";
@@ -605,22 +617,59 @@ public class TargetedAlleleLoad extends DLALoader {
 			throw new MGIException("Cannot find parental cell line key for "
 					+ in.getParentCellLine());
 		}
+		Integer typeKey = new Integer(
+				(String) Constants.MUTATION_TYPE_KEYS.get(aType));
 
-		String aType = in.getMutationType();
-		dCompoundKey += "|" + Constants.MUTATION_TYPE_KEYS.get(aType);
+		String dCompoundKey = vectorKey.toString();
+		dCompoundKey += "|" + creatorKey;
+		dCompoundKey += "|" + parentKey;
+		dCompoundKey += "|" + typeKey;
 
 		Integer derivationKey = derivationLookup.lookup(dCompoundKey);
 
 		if (derivationKey == null) {
-			String s = "Skipping record. Cannot find derivation for:";
-			s += "\n Vector: " + cassette;
-			s += "\n Creator Key: " + cfg.getCreatorKey();
-			s += "\n Parental: " + in.getParentCellLine();
-			s += "\n";
+			// String s = "Skipping record. Cannot find derivation for:";
+			// s += "\n Vector: " + cassette;
+			// s += "\n Creator Key: " + cfg.getCreatorKey();
+			// s += "\n Parental: " + in.getParentCellLine();
+			// s += "\n";
+			// logger.logdInfo(s, true);
+			// qcStats.record("ERROR", NUM_DERIVATIONS_NOT_FOUND);
+			// throw new MGIException("Cannot find derivation for "
+			// + in.getMutantCellLine());
+
+			// CREATE THE NEW DERIVATION AND INSERT IT
+			Derivation d = new Derivation();
+
+			String creatorName = vocTermLookup.lookup(creatorKey);
+			String typeName = vocTermLookup.lookup(typeKey);
+			String parentName = cellLineNameLookupByKey.lookup(parentKey);
+			String strainName = strainNameLookup
+					.lookup(cellLineStrainKeyLookupByCellLineKey
+							.lookup(parentKey));
+
+			// Derivation name is Creator+Type+Parental+Strain+Vector
+			String name = creatorName + " " + typeName + " " + parentName + " "
+					+ strainName + " " + cassette;
+
+			d.setName(name);
+			d.setDescription(null);
+			d.setVectorKey(vectorKey);
+			d.setVectorTypeKey(new Integer(Constants.VECTOR_TYPE_KEY));
+			d.setParentCellLineKey(parentKey);
+			d.setDerivationTypeKey(typeKey);
+			d.setCreatorKey(creatorKey);
+			d.setRefsKey(null);
+
+			// Inserting a new derivation automatically adds it to the
+			// singleton derivation lookup cache
+			d.insert(loadStream);
+
+			derivationKey = d.getDerivationKey();
+
+			String s = "Creating derivation for " + name;
+			qcStats.record("WARNING", s);
 			logger.logdInfo(s, true);
-			qcStats.record("ERROR", NUM_DERIVATIONS_NOT_FOUND);
-			throw new MGIException("Cannot find derivation for "
-					+ in.getMutantCellLine());
 		}
 
 		return derivationKey;
