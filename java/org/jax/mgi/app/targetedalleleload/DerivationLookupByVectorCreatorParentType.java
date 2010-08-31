@@ -88,10 +88,8 @@ public class DerivationLookupByVectorCreatorParentType extends FullCachedLookup 
 	 * 
 	 * @assumes nothing
 	 * @effects the value identified by 'key' will be added or replaced
-	 * @param cellLine
-	 *            the cellLine name
-	 * @param koAllele
-	 *            the knockout allele
+	 * @param d
+	 *            the derivation to add
 	 * @throws DBException
 	 *             thrown if there is an error with the database
 	 * @throws CacheException

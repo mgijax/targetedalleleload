@@ -106,7 +106,7 @@ public class AlleleCellLineCount extends FullCachedLookup {
 	 * 
 	 * @assumes nothing
 	 * @effects the value identified by symbol will be decremented by 1
-	 * @param allele
+	 * @param symbol
 	 *            the allele symbol
 	 * @throws DBException
 	 *             thrown if there is an error with the database
@@ -135,7 +135,7 @@ public class AlleleCellLineCount extends FullCachedLookup {
 	 * 
 	 * @assumes nothing
 	 * @effects the value identified by symbol will be incremented by 1
-	 * @param allele
+	 * @param symbol
 	 *            the allele symbol
 	 * @throws DBException
 	 *             thrown if there is an error with the database
@@ -157,7 +157,7 @@ public class AlleleCellLineCount extends FullCachedLookup {
 	 * 
 	 * @assumes nothing
 	 * @effects the value identified by 'projectId' will be added or replaced
-	 * @param allele
+	 * @param symbol
 	 *            the allele symbol
 	 * @param count
 	 *            the count of cell lines associated to the allele
