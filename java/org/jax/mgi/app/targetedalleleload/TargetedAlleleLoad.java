@@ -98,6 +98,7 @@ public class TargetedAlleleLoad extends DLALoader {
 	private CellLineStrainKeyLookupByCellLineKey cellLineStrainKeyLookupByCellLineKey;
 	private StrainNameLookup strainNameLookup;
 	private AlleleCellLineCount alleleCellLineCount;
+	private Map alleleProjects;
 
 	//
 	private Set alleleProjectIdUpdated;
@@ -144,6 +145,7 @@ public class TargetedAlleleLoad extends DLALoader {
 		alleleProjectIdUpdated = new TreeSet();
 		databaseProjectIds = new HashSet();
 		databaseCellLines = new HashSet();
+		alleleProjects = new HashMap();
 
 		// This contains the combination of pipeline and provider
 		// that this load is currently loading.
@@ -414,6 +416,15 @@ public class TargetedAlleleLoad extends DLALoader {
 							+ existing.getProjectId() + "\t"
 							+ constructed.getProjectId() + "\t"
 							+ in.getMutantCellLine();
+
+					if (alleleProjects.get(existing.getSymbol()) == null) {
+						alleleProjects.put(existing.getSymbol(), new HashSet());
+					}
+					
+					// Record the updated project ID for this allele symbol
+					Set projSet = (Set)alleleProjects.get(existing.getSymbol());
+					projSet.add(constructed.getProjectId());
+					alleleProjects.put(existing.getSymbol(), projSet);
 
 					alleleProjectIdUpdated.add(m);
 					continue;
@@ -863,6 +874,21 @@ public class TargetedAlleleLoad extends DLALoader {
 
 		TreeMap qc = null;
 		Iterator iterator = null;
+
+		
+		// These alleles can have their project ID updated
+		Set entries = alleleProjects.entrySet();
+		Iterator aIt = entries.iterator();
+		while (aIt.hasNext()) {
+			Map.Entry entry = (Map.Entry) aIt.next();
+			String alleleSymbol = (String) entry.getKey();
+			Set alleleProjects = (Set) entry.getValue();
+			if (alleleProjects.size()==1) {
+				System.out.println("Allele "+alleleSymbol+" could be updated automatically");
+			} else {
+				System.out.println("Allele "+alleleSymbol+" COULD NOT BE updated automatically. One (or more) of the MCLs have the old Project ID");
+			}
+		}
 
 		// Print out the error statistics
 		qc = (TreeMap) qcStats.getStatistics().get("ERROR");
