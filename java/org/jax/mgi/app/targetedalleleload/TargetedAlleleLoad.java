@@ -877,8 +877,8 @@ public class TargetedAlleleLoad extends DLALoader {
 
 		
 		// These alleles can have their project ID updated
-		Set entries = alleleProjects.entrySet();
-		Iterator aIt = entries.iterator();
+		Set alleleEntries = alleleProjects.entrySet();
+		Iterator aIt = alleleEntries.iterator();
 		while (aIt.hasNext()) {
 			Map.Entry entry = (Map.Entry) aIt.next();
 			String alleleSymbol = (String) entry.getKey();
