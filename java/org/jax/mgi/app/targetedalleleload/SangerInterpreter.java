@@ -181,8 +181,8 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 			// Wrong project
 			qcStatistics.record("SUMMARY", NUM_NOT_APPRORIATE);
 			
-			// If this is not fatal
-			return false;
+			// this is not fatal
+			//return false;
 		}
 		if (parts[6].indexOf(",") != -1) {
 			// strangely formatted ES Cell (parental)
