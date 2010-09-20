@@ -1,5 +1,7 @@
 package org.jax.mgi.app.targetedalleleload;
 
+import org.jax.mgi.shr.config.ConfigException;
+import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
 import org.jax.mgi.shr.dla.log.DLALogger;
 import org.jax.mgi.shr.dla.log.DLALoggingException;
 import org.jax.mgi.shr.exception.MGIException;
@@ -25,14 +27,19 @@ public class RegeneronInterpreter extends KnockoutAlleleInterpreter {
 	//
 	private static final int MIN_REC_LENGTH = 50;
 	private DLALogger logger = null;
+	private TargetedAlleleLoadCfg cfg = null;
+
 
 	/**
 	 * Constructs a Regeneron specific interpreter object
+	 * @throws DLALoggingException 
+	 * @throws ConfigException 
 	 * 
 	 * @assumes Nothing
 	 * @effects Nothing
 	 */
-	public RegeneronInterpreter() {
+	public RegeneronInterpreter() throws ConfigException, DLALoggingException {
+		cfg = new TargetedAlleleLoadCfg();
 		try {
 			logger = DLALogger.getInstance();
 		} catch (DLALoggingException e) {
@@ -84,6 +91,10 @@ public class RegeneronInterpreter extends KnockoutAlleleInterpreter {
 		// 9 - Genome Build
 		// 10 - Cassette
 		//
+
+		// The only pipeline that uses the regeneron file is regeneron
+		// get the pipeline name from the cfg file
+		inputData.setInputPipeline(cfg.getPipeline());
 
 		inputData.setESCellName(fields[0].trim());
 		inputData.setParentalESCellName(fields[1].trim());

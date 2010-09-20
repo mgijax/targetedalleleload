@@ -26,4 +26,6 @@ interface KnockoutAlleleInput {
 	String getParentCellLine();
 
 	String getMutationType();
+	
+	String getInputPipeline();
 }

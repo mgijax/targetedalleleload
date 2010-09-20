@@ -23,17 +23,19 @@ public class SangerAlleleInput implements KnockoutAlleleInput {
 	// 0 - Gene ID
 	// 1 - Genome Build
 	// 2 - Cassette
-	// 3 - Project ID
-	// 4 - Mutant ES cell line ID
-	// 5 - Parent ES cell line name
-	// 6 - Mutation type
-	// 7 - Insertion point 1
-	// 8 - Insertion point 2
+	// 3 - Pipeline
+	// 4 - Project ID
+	// 5 - Mutant ES cell line ID
+	// 6 - Parent ES cell line name
+	// 8 - Mutation type
+	// 9 - Insertion point 1
+	// 10 - Insertion point 2
 
 	// From file
 	private String geneId = null;
 	private String build = null;
 	private String cassette = null;
+	private String inputPipeline = null;
 	private String projectId = null;
 	private String esCellName = null;
 	private String parentESCellName = null;
@@ -127,6 +129,14 @@ public class SangerAlleleInput implements KnockoutAlleleInput {
 
 	public void setCassette(String cassette) {
 		this.cassette = cassette;
+	}
+
+	public void setInputPipeline(String inputPipeline) {
+		this.inputPipeline = inputPipeline;
+	}
+
+	public String getInputPipeline() {
+		return inputPipeline;
 	}
 
 }

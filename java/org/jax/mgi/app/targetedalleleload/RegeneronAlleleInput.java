@@ -45,6 +45,7 @@ public class RegeneronAlleleInput implements KnockoutAlleleInput {
 	private Integer delSize = new Integer(0);
 	private String build = null;
 	private String cassette = null;
+	private String inputPipeline;
 
 	/**
 	 * Constructs a Knockout Allele Input object
@@ -146,6 +147,14 @@ public class RegeneronAlleleInput implements KnockoutAlleleInput {
 
 	public void setCassette(String cassette) {
 		this.cassette = cassette;
+	}
+
+	public void setInputPipeline(String inputPipeline) {
+		this.inputPipeline = inputPipeline;
+	}
+
+	public String getInputPipeline() {
+		return inputPipeline;
 	}
 
 }

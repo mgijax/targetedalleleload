@@ -97,6 +97,7 @@ public class TargetedAlleleLoad extends DLALoader {
 	private CellLineNameLookupByKey cellLineNameLookupByKey;
 	private CellLineStrainKeyLookupByCellLineKey cellLineStrainKeyLookupByCellLineKey;
 	private StrainNameLookup strainNameLookup;
+	private AlleleCellLineCount alleleCellLineCount;
 
 	//
 	private Set alleleProjectIdUpdated;
@@ -123,6 +124,7 @@ public class TargetedAlleleLoad extends DLALoader {
 		alleleLookupByKey = AlleleLookupByKey.getInstance();
 		alleleLookupByProjectId = AlleleLookupByProjectId.getInstance();
 		alleleLookupByMarker = AlleleLookupByMarker.getInstance();
+		alleleCellLineCount = AlleleCellLineCount.getInstance();
 
 		alleleLookupByCellLine = new AlleleLookupByCellLine();
 		alleleLookupByCellLine.initCache();
@@ -155,7 +157,7 @@ public class TargetedAlleleLoad extends DLALoader {
 			String label = (String) iterator.next();
 			Map a = alleleLookupByProjectId.lookup(label);
 
-			// All alleles in the project belong to the same pipelie/provider
+			// All alleles in the project belong to the same pipeline/provider
 			// combination, so it's ok to just look at the first one.
 			Map b = (Map) a.values().toArray()[0];
 
@@ -267,6 +269,13 @@ public class TargetedAlleleLoad extends DLALoader {
 			databaseProjectIds.remove(in.getProjectId().toLowerCase());
 			databaseCellLines.remove(in.getMutantCellLine().toLowerCase());
 
+			// If this record is not appropriate to be handled by this
+			// processor, skip it.  The only reason we included it in the
+			// first place was to assist in the QC of all cell lines
+			if (!in.getInputPipeline().equals(cfg.getPipeline())) {
+				continue;
+			}
+
 			if (alreadyProcessed.contains(in.getMutantCellLine())) {
 				String m = "Multiple input records for: ";
 				m += in.getMutantCellLine() + "\n";
@@ -340,7 +349,7 @@ public class TargetedAlleleLoad extends DLALoader {
 						.lookup(currentCellLine);
 
 				// If the associated allele can't be found, there's a major
-				// problem. The caches are out of synch, of the cell line to
+				// problem. The caches are out of synch, or the cell line to
 				// allele association is missing. Regardless, we can't
 				// process this record further, report the error and continue
 				if (existing == null) {
@@ -364,6 +373,20 @@ public class TargetedAlleleLoad extends DLALoader {
 
 				Integer existingGeneKey = existing.getMarkerKey();
 				Integer constructedGeneKey = constructed.getMarkerKey();
+
+				String existingIkmcGroup = null;
+				String constructedIkmcGroup = null;
+
+				Matcher regexMatcher = pipelinePattern.matcher(existing
+						.getSymbol());
+				if (regexMatcher.find()) {
+					existingIkmcGroup = regexMatcher.group(1);
+				}
+
+				regexMatcher = pipelinePattern.matcher(constructed.getSymbol());
+				if (regexMatcher.find()) {
+					constructedIkmcGroup = regexMatcher.group(1);
+				}
 
 				// Check the allele to marker association, if it has changed,
 				// report to the log for manual curation.
@@ -398,20 +421,6 @@ public class TargetedAlleleLoad extends DLALoader {
 
 				// Check if IKMC pipeline changed
 				// (from xx<tm1a(KOMP)Wtsi> to xx<tm1a(EUCOMM)Wtsi> or etc.)
-				String existingIkmcGroup = null;
-				String constructedIkmcGroup = null;
-
-				Matcher regexMatcher = pipelinePattern.matcher(existing
-						.getSymbol());
-				if (regexMatcher.find()) {
-					existingIkmcGroup = regexMatcher.group(1);
-				}
-
-				regexMatcher = pipelinePattern.matcher(constructed.getSymbol());
-				if (regexMatcher.find()) {
-					constructedIkmcGroup = regexMatcher.group(1);
-				}
-
 				// If the mutant cell line changed groups, go ahead and
 				// change the association, but report it for manual review
 				if (!existingIkmcGroup.equals(constructedIkmcGroup)) {

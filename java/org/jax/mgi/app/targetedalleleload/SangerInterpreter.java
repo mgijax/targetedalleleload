@@ -130,9 +130,9 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 		inputData.setBuild(fields[1]);
 		inputData.setCassette(fields[2]);
 
-		// field 3 defines which pipeline created the MCL
-		// we filter out all the other pipelines using field 3
-		// in the isValid check.
+		// Return all fields from the file, but include the pipeline
+		// so the app can filter out the inappropriate ones
+		inputData.setInputPipeline(fields[3]);
 
 		inputData.setProjectId(fields[4]);
 		inputData.setESCellName(fields[5]);
@@ -180,6 +180,8 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 		if (!parts[3].replaceAll("\"", "").matches(pipeline)) {
 			// Wrong project
 			qcStatistics.record("SUMMARY", NUM_NOT_APPRORIATE);
+			
+			// If this is not fatal
 			return false;
 		}
 		if (parts[6].indexOf(",") != -1) {
