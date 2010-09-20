@@ -4,7 +4,7 @@ import org.jax.mgi.shr.exception.MGIException;
 
 public class RegeneronFactory extends KnockoutAlleleFactory {
 
-	public KnockoutAlleleInterpreter getInterpreter() {
+	public KnockoutAlleleInterpreter getInterpreter() throws MGIException {
 		return new RegeneronInterpreter();
 	}
 

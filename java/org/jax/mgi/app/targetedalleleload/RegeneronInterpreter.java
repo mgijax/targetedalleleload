@@ -1,9 +1,6 @@
 package org.jax.mgi.app.targetedalleleload;
 
-import org.jax.mgi.shr.config.ConfigException;
 import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
-import org.jax.mgi.shr.dla.log.DLALogger;
-import org.jax.mgi.shr.dla.log.DLALoggingException;
 import org.jax.mgi.shr.exception.MGIException;
 import org.jax.mgi.shr.ioutils.RecordFormatException;
 
@@ -26,25 +23,17 @@ public class RegeneronInterpreter extends KnockoutAlleleInterpreter {
 	// The minimum length of a valid input record (including NL character).
 	//
 	private static final int MIN_REC_LENGTH = 50;
-	private DLALogger logger = null;
 	private TargetedAlleleLoadCfg cfg = null;
 
 
 	/**
 	 * Constructs a Regeneron specific interpreter object
-	 * @throws DLALoggingException 
-	 * @throws ConfigException 
 	 * 
 	 * @assumes Nothing
 	 * @effects Nothing
 	 */
-	public RegeneronInterpreter() throws ConfigException, DLALoggingException {
+	public RegeneronInterpreter() throws MGIException {
 		cfg = new TargetedAlleleLoadCfg();
-		try {
-			logger = DLALogger.getInstance();
-		} catch (DLALoggingException e) {
-			logger.logdInfo(e.getMessage(), true);
-		}
 	}
 
 	/**
