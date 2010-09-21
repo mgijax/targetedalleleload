@@ -417,17 +417,18 @@ public class TargetedAlleleLoad extends DLALoader {
 							+ constructed.getProjectId() + "\t"
 							+ in.getMutantCellLine();
 
-					if (alleleProjects.get(existing.getSymbol()) == null) {
-						alleleProjects.put(existing.getSymbol(), new HashSet());
+					String k = existing.getSymbol() + " (" + existing.getProjectId() +")";
+					if (alleleProjects.get(k) == null) {
+						alleleProjects.put(k, new HashSet());
 					}
 					
 					// Record the updated project ID for this allele symbol
-					Set projSet = (Set)alleleProjects.get(existing.getSymbol());
+					Set projSet = (Set)alleleProjects.get(k);
 					projSet.add(constructed.getProjectId());
-					alleleProjects.put(existing.getSymbol(), projSet);
+					alleleProjects.put(k, projSet);
 
 					alleleProjectIdUpdated.add(m);
-					continue;
+					//continue;
 				}
 
 				// Check if IKMC pipeline changed
@@ -448,7 +449,7 @@ public class TargetedAlleleLoad extends DLALoader {
 
 					logger.logcInfo(noteMsg, false);
 					qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_PIPELINE);
-					continue;
+					//continue;
 				}
 
 				// Check the derivation (this implicitly checks the
@@ -477,7 +478,7 @@ public class TargetedAlleleLoad extends DLALoader {
 					changeMutantCellLineAssociation(in, esCell, existing,
 							constructed);
 					qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_DERIVATION);
-					continue;
+					//continue;
 				}
 
 				// If the marker hasn't changed, then check if the symbol
@@ -500,7 +501,7 @@ public class TargetedAlleleLoad extends DLALoader {
 
 					// This mutant cell line has had a major change,
 					// don't bother QC checking the rest of the values
-					continue;
+					//continue;
 				}
 
 				// Only check the note content if the allele type and marker
@@ -647,16 +648,6 @@ public class TargetedAlleleLoad extends DLALoader {
 		Integer derivationKey = derivationLookup.lookup(dCompoundKey);
 
 		if (derivationKey == null) {
-			// String s = "Skipping record. Cannot find derivation for:";
-			// s += "\n Vector: " + cassette;
-			// s += "\n Creator Key: " + cfg.getCreatorKey();
-			// s += "\n Parental: " + in.getParentCellLine();
-			// s += "\n";
-			// logger.logdInfo(s, true);
-			// qcStats.record("ERROR", NUM_DERIVATIONS_NOT_FOUND);
-			// throw new MGIException("Cannot find derivation for "
-			// + in.getMutantCellLine());
-
 			// CREATE THE NEW DERIVATION AND INSERT IT
 			Derivation d = new Derivation();
 
@@ -878,13 +869,13 @@ public class TargetedAlleleLoad extends DLALoader {
 		
 		// These alleles can have their project ID updated
 		Set alleleEntries = alleleProjects.entrySet();
-		Iterator aIt = alleleEntries.iterator();
-		while (aIt.hasNext()) {
-			Map.Entry entry = (Map.Entry) aIt.next();
+		Iterator alleleIt = alleleEntries.iterator();
+		while (alleleIt.hasNext()) {
+			Map.Entry entry = (Map.Entry) alleleIt.next();
 			String alleleSymbol = (String) entry.getKey();
 			Set alleleProjects = (Set) entry.getValue();
 			if (alleleProjects.size()==1) {
-				System.out.println("Allele "+alleleSymbol+" could be updated automatically");
+				System.out.println("Allele "+alleleSymbol+" could be updated automatically to project "+alleleProjects);
 			} else {
 				System.out.println("Allele "+alleleSymbol+" COULD NOT BE updated automatically. One (or more) of the MCLs have the old Project ID");
 			}
