@@ -670,8 +670,8 @@ public class TargetedAlleleLoad extends DLALoader {
 	 * included in the allele symbol and is a strong pattern 
 	 * to find (alleleCreatorPattern)
 	 * 
-	 * This method short circuits with false if it cannot find creator for 
-	 * either of the alleles
+	 * This method short circuits with true (changed) if it cannot find 
+	 * creator for either of the alleles
 	 * 
 	 * Example:
 	 *    Xyz&lt;tm1a(KOMP)Wtsi&lt; 
@@ -690,21 +690,23 @@ public class TargetedAlleleLoad extends DLALoader {
 		if (regexMatcher.find()) {
 			firstCreator = regexMatcher.group(1);
 		} else {
-			return false;
+			return true;
 		}
 
 		regexMatcher = alleleCreatorPattern.matcher(second.getSymbol());
 		if (regexMatcher.find()) {
 			secondCreator = regexMatcher.group(1);
 		} else {
-			return false;
-		}
-
-		if (firstCreator.equals(secondCreator)) {
 			return true;
 		}
 
-		return false;
+		if (firstCreator.equals(secondCreator)) {
+			// is not different
+			return false;
+		}
+
+		// is different
+		return true;
 	}
 
 
@@ -714,8 +716,8 @@ public class TargetedAlleleLoad extends DLALoader {
 	 * included in the allele symbol as an integer and is a strong pattern 
 	 * to find (alleleSequencePattern)
 	 * 
-	 * This method short circuits with false if it cannot find sequence for 
-	 * either of the alleles
+	 * This method short circuits with true (changed) if it cannot find  
+	 * sequence for either of the alleles
 	 * 
 	 * Example:
 	 *    Xyz&lt;tm1a(KOMP)Wtsi&lt; 
@@ -734,21 +736,23 @@ public class TargetedAlleleLoad extends DLALoader {
 		if (regexMatcher.find()) {
 			firstNumber = regexMatcher.group(1);
 		} else {
-			return false;
+			return true;
 		}
 
 		regexMatcher = alleleSequencePattern.matcher(second.getSymbol());
 		if (regexMatcher.find()) {
 			secondNumber = regexMatcher.group(1);
 		} else {
-			return false;
-		}
-
-		if (firstNumber.equals(secondNumber)) {
 			return true;
 		}
 
-		return false;
+		if (firstNumber.equals(secondNumber)) {
+			// is not different
+			return false;
+		}
+
+		// is different
+		return true;
 	}
 
 	/**
@@ -756,9 +760,6 @@ public class TargetedAlleleLoad extends DLALoader {
 	 * based on a substring of the symbols.  The type has been included
 	 * in the allele symbol as a letter code (or lacking a letter)  and
 	 * is a strong pattern to find (alleleTypePattern)
-	 * 
-	 * This method short circuits with false if it cannot find an type for 
-	 * either of the alleles
 	 * 
 	 * Example:
 	 *    Xyz&lt;tm1a(KOMP)Wtsi&lt; 
@@ -788,10 +789,12 @@ public class TargetedAlleleLoad extends DLALoader {
 		}
 
 		if (firstType.equals(secondType)) {
-			return true;
+			// is not different
+			return false;
 		}
 
-		return false;
+		// is different
+		return true;
 	}
 
 
@@ -801,8 +804,8 @@ public class TargetedAlleleLoad extends DLALoader {
 	 * in the allele symbol in parenthesis and there is a strong pattern
 	 * to find it (pipelinePattern)
 	 * 
-	 * This method short circuits with false if it cannot find an IKMC 
-	 * group for either of the alleles
+	 * This method short circuits with true (changed) if it cannot find an  
+	 * IKMC group for either of the alleles
 	 * 
 	 * Example:
 	 *   Xyz&lt;tm1a(KOMP)Wtsi&gt; 
@@ -821,21 +824,23 @@ public class TargetedAlleleLoad extends DLALoader {
 		if (regexMatcher.find()) {
 			firstIkmcGroup = regexMatcher.group(1);
 		} else {
-			return false;
+			return true;
 		}
 
 		regexMatcher = pipelinePattern.matcher(second.getSymbol());
 		if (regexMatcher.find()) {
 			secondIkmcGroup = regexMatcher.group(1);
 		} else {
-			return false;
-		}
-
-		if (firstIkmcGroup.equals(secondIkmcGroup)) {
 			return true;
 		}
 
-		return false;
+		if (firstIkmcGroup.equals(secondIkmcGroup)) {
+			// is not different
+			return false;
+		}
+
+		// is different
+		return true;
 	}
 
 	/**
