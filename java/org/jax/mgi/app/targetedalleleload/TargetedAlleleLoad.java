@@ -679,7 +679,7 @@ public class TargetedAlleleLoad extends DLALoader {
 	 *    Xyz&lt;tm1a(KOMP)Ucd&gt;
 	 * @param first
 	 * @param second
-	 * @return
+	 * @return true if both alleles have the same creator, false otherwise
 	 */
 	private boolean iscreatorChange(KnockoutAllele first, KnockoutAllele second) {
 		Matcher regexMatcher;
@@ -723,7 +723,7 @@ public class TargetedAlleleLoad extends DLALoader {
 	 *    Xyz&lt;tm2a(KOMP)Wtsi&gt;
 	 * @param first
 	 * @param second
-	 * @return
+	 * @return true if both alleles have the same sequence, false otherwise
 	 */
 	private boolean isNumberChange(KnockoutAllele first, KnockoutAllele second) {
 		Matcher regexMatcher;
@@ -766,7 +766,7 @@ public class TargetedAlleleLoad extends DLALoader {
 	 *    Xyz&lt;tm1e(KOMP)Wtsi&gt;
 	 * @param first
 	 * @param second
-	 * @return
+	 * @return true if both alleles have the same type, false otherwise
 	 */
 	private boolean isTypeChange(KnockoutAllele first, KnockoutAllele second) {
 		Matcher regexMatcher;
@@ -810,7 +810,7 @@ public class TargetedAlleleLoad extends DLALoader {
 	 *   Xyz&lt;tm1a(EUCOMM)Wtsi&gt;
 	 * @param first
 	 * @param second
-	 * @return
+	 * @return true if both alleles have the same IKMC group, false otherwise
 	 */
 	private boolean isGroupChange(KnockoutAllele first, KnockoutAllele second) {
 		String firstIkmcGroup;
@@ -841,14 +841,14 @@ public class TargetedAlleleLoad extends DLALoader {
 	/**
 	 * Checks if two KnockoutAllele objects belong to the same gene.
 	 * The gene is identified by gene_key
-	 * @param knockoutAllele1
-	 * @param knockoutAllele2
+	 * @param first
+	 * @param second
 	 * @return
 	 */
 	private boolean isMatchingGene( KnockoutAllele first, KnockoutAllele second) {
 		Integer existingGeneKey = first.getMarkerKey();
 		Integer constructedGeneKey = second.getMarkerKey();
-		if (!existingGeneKey.equals(constructedGeneKey)) {
+		if (existingGeneKey.equals(constructedGeneKey)) {
 			return true;
 		}
 		return false;
