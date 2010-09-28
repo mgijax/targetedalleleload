@@ -386,7 +386,7 @@ public class TargetedAlleleLoad extends DLALoader {
 				if (existing == null) {
 					// Report this to the diagnostic log
 					String m = LOG_ALLELE_NOT_FOUND
-						.replace("{{INPUT_MCL}}", in.getMutantCellLine());					
+						.replaceAll("{{INPUT_MCL}}", in.getMutantCellLine());					
 					logger.logdInfo(m, true);
 					qcStats.record("ERROR", NUM_CELLINES_MISSING_ALLELE);
 					continue;
@@ -398,9 +398,9 @@ public class TargetedAlleleLoad extends DLALoader {
 				if (!matchingGene) {
 					// Report this to the curator log
 					String m = LOG_MARKER_CHANGED
-						.replace("{{INPUT_MCL}}", in.getMutantCellLine())
-						.replace("{{EXISTING_MARKER}}", existing.getSymbol())
-						.replace("{{INPUT_MARKER}}", constructed.getSymbol());
+						.replaceAll("{{INPUT_MCL}}", in.getMutantCellLine())
+						.replaceAll("{{EXISTING_MARKER}}", existing.getSymbol())
+						.replaceAll("{{INPUT_MARKER}}", constructed.getSymbol());
 
 					logger.logcInfo(m, false);
 					qcStats.record("SUMMARY", NUM_CELLINES_CHANGED_MARKER);
@@ -425,36 +425,36 @@ public class TargetedAlleleLoad extends DLALoader {
 					
 					if (typeChange) {
 						String m = LOG_CELLLINE_TYPE_CHANGED
-							.replace("{{INPUT_MCL}}",  in.getMutantCellLine())
-							.replace("{{EXISTING_SYMBOL}}", existing.getSymbol())
-							.replace("{{INPUT_SYMBOL}}", constructed.getSymbol());
+							.replaceAll("{{INPUT_MCL}}",  in.getMutantCellLine())
+							.replaceAll("{{EXISTING_SYMBOL}}", existing.getSymbol())
+							.replaceAll("{{INPUT_SYMBOL}}", constructed.getSymbol());
 						logger.logcInfo(m, false);
 						qcStats.record("SUMMARY", NUM_CELLLINES_CHANGE_TYPE);
 					}
 
 					if (groupChange) {
 						String m = LOG_CELLLINE_GROUP_CHANGED
-							.replace("{{INPUT_MCL}}",  in.getMutantCellLine())
-							.replace("{{EXISTING_SYMBOL}}", existing.getSymbol())
-							.replace("{{INPUT_SYMBOL}}", constructed.getSymbol());
+							.replaceAll("{{INPUT_MCL}}",  in.getMutantCellLine())
+							.replaceAll("{{EXISTING_SYMBOL}}", existing.getSymbol())
+							.replaceAll("{{INPUT_SYMBOL}}", constructed.getSymbol());
 						logger.logcInfo(m, false);
 						qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_PIPELINE);
 					}
 
 					if (creatorChange) {
 						String m = LOG_CELLLINE_CREATOR_CHANGED
-							.replace("{{INPUT_MCL}}",  in.getMutantCellLine())
-							.replace("{{EXISTING_SYMBOL}}", existing.getSymbol())
-							.replace("{{INPUT_SYMBOL}}", constructed.getSymbol());
+							.replaceAll("{{INPUT_MCL}}",  in.getMutantCellLine())
+							.replaceAll("{{EXISTING_SYMBOL}}", existing.getSymbol())
+							.replaceAll("{{INPUT_SYMBOL}}", constructed.getSymbol());
 						logger.logcInfo(m, false);
 						qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_CREATOR);
 					}
 
 					if (numberChange) {
 						String m = LOG_CELLLINE_NUMBER_CHANGED
-							.replace("{{INPUT_MCL}}",  in.getMutantCellLine())
-							.replace("{{EXISTING_SYMBOL}}", existing.getSymbol())
-							.replace("{{INPUT_SYMBOL}}", constructed.getSymbol());
+							.replaceAll("{{INPUT_MCL}}",  in.getMutantCellLine())
+							.replaceAll("{{EXISTING_SYMBOL}}", existing.getSymbol())
+							.replaceAll("{{INPUT_SYMBOL}}", constructed.getSymbol());
 						logger.logcInfo(m, false);
 						qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_NUMBER);
 					}
@@ -467,11 +467,11 @@ public class TargetedAlleleLoad extends DLALoader {
 					changeMutantCellLineAssociation(in, esCell, existing,
 							constructed);
 					String m = LOG_CELLLINE_ALLELE_CHANGED
-						.replace("{{INPUT_MCL}}",  in.getMutantCellLine())
-						.replace("{{EXISTING_SYMBOL}}", existing.getSymbol())
-						.replace("{{INPUT_SYMBOL}}", existing.getSymbol())
-						.replace("{{EXISTING_DERIVATION}}", esCell.getDerivationKey().toString())
-						.replace("{{INPUT_DERIVATION}}", getDerivationKey(in).toString());
+						.replaceAll("{{INPUT_MCL}}",  in.getMutantCellLine())
+						.replaceAll("{{EXISTING_SYMBOL}}", existing.getSymbol())
+						.replaceAll("{{INPUT_SYMBOL}}", existing.getSymbol())
+						.replaceAll("{{EXISTING_DERIVATION}}", esCell.getDerivationKey().toString())
+						.replaceAll("{{INPUT_DERIVATION}}", getDerivationKey(in).toString());
 					logger.logcInfo(m, false);
 					qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_DERIVATION);
 					qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_ALLELE);
@@ -490,10 +490,10 @@ public class TargetedAlleleLoad extends DLALoader {
 				// type)
 				if (!esCell.getDerivationKey().equals(getDerivationKey(in))) {
 					String m = LOG_CELLLINE_DERIVATION_CHANGED
-						.replace("{{INPUT_MCL}}",  in.getMutantCellLine())
-						.replace("{{EXISTING_SYMBOL}}", existing.getSymbol())
-						.replace("{{EXISTING_DERIVATION}}", esCell.getDerivationKey().toString())
-						.replace("{{INPUT_DERIVATION}}", getDerivationKey(in).toString());
+						.replaceAll("{{INPUT_MCL}}",  in.getMutantCellLine())
+						.replaceAll("{{EXISTING_SYMBOL}}", existing.getSymbol())
+						.replaceAll("{{EXISTING_DERIVATION}}", esCell.getDerivationKey().toString())
+						.replaceAll("{{INPUT_DERIVATION}}", getDerivationKey(in).toString());
 					logger.logcInfo(m, false);
 
 					changeDerivationKey(getDerivationKey(in), esCell);
