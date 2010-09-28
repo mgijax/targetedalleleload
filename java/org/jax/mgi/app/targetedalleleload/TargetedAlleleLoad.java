@@ -459,6 +459,16 @@ public class TargetedAlleleLoad extends DLALoader {
 						qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_NUMBER);
 					}
 
+					String m = LOG_CELLLINE_ALLELE_CHANGED
+						.replaceAll("~~INPUT_MCL~~",  in.getMutantCellLine())
+						.replaceAll("~~EXISTING_SYMBOL~~", existing.getSymbol())
+						.replaceAll("~~INPUT_SYMBOL~~", constructed.getSymbol())
+						.replaceAll("~~EXISTING_DERIVATION~~", esCell.getDerivationKey().toString())
+						.replaceAll("~~INPUT_DERIVATION~~", getDerivationKey(in).toString());
+					logger.logcInfo(m, false);
+					qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_DERIVATION);
+					qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_ALLELE);
+
 					// The change of any of these attributes requires a
 					// derivation change
 					changeDerivationKey(getDerivationKey(in), esCell);
@@ -466,15 +476,6 @@ public class TargetedAlleleLoad extends DLALoader {
 					// Change the allele association
 					changeMutantCellLineAssociation(in, esCell, existing,
 							constructed);
-					String m = LOG_CELLLINE_ALLELE_CHANGED
-						.replaceAll("~~INPUT_MCL~~",  in.getMutantCellLine())
-						.replaceAll("~~EXISTING_SYMBOL~~", existing.getSymbol())
-						.replaceAll("~~INPUT_SYMBOL~~", existing.getSymbol())
-						.replaceAll("~~EXISTING_DERIVATION~~", esCell.getDerivationKey().toString())
-						.replaceAll("~~INPUT_DERIVATION~~", getDerivationKey(in).toString());
-					logger.logcInfo(m, false);
-					qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_DERIVATION);
-					qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_ALLELE);
 
 					// This record has changed substantially, any further
 					// QC checks would be incorrect, so skip to the next 
