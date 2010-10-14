@@ -85,9 +85,9 @@ public class Constants {
 	 */
 	public static final Map MUTATION_TYPE_KEYS = new HashMap();
 	static {
-		MUTATION_TYPE_KEYS.put("Deletion", "847116");
-		MUTATION_TYPE_KEYS.put("Conditional", "847118");
-		MUTATION_TYPE_KEYS.put("Targeted non-conditional", "847119");
+		MUTATION_TYPE_KEYS.put("Deletion", new Integer(847116));
+		MUTATION_TYPE_KEYS.put("Conditional", new Integer(847118));
+		MUTATION_TYPE_KEYS.put("Targeted non-conditional", new Integer(847119));
 	}
 	
 	public static final int VECTOR_TYPE_KEY = 3982979;

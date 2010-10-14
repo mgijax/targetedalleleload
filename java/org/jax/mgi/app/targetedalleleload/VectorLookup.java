@@ -49,8 +49,8 @@ public class VectorLookup extends FullCachedLookup {
 	 * @throws CacheException
 	 *             thrown if there is an error accessing the configuration
 	 */
-	public String lookup(String vectorName) throws DBException, CacheException {
-		return (String) super.lookupNullsOk(vectorName);
+	public Integer lookup(String vectorName) throws DBException, CacheException {
+		return (Integer) super.lookupNullsOk(vectorName);
 	}
 
 	/**
@@ -92,7 +92,7 @@ public class VectorLookup extends FullCachedLookup {
 
 		public Object interpret(RowReference row) throws DBException {
 			return new KeyValue(row.getString("term"),
-					row.getString("_term_key"));
+					row.getInt("_term_key"));
 		}
 	}
 

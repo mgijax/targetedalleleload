@@ -77,7 +77,7 @@ public class TargetedAlleleLoad extends DLALoader {
 	private static final String NUM_CELLLINES_CHANGED_ALLELE = "Number of cell lines that changed allele associations";
 
 	// String constants for Log messages
-	private static final String LOG_ALLELE_NOT_FOUND = "Cell line ~~INPUT_MCL~~ found in database, but cannot find associated allele\n"; 
+	private static final String LOG_ALLELE_NOT_FOUND = "Cell line ~~INPUT_MCL~~ found in database, but cannot find associated allele\n";
 	private static final String LOG_MARKER_CHANGED = "MUTANT ES CELL CHANGED MARKER\nMutant Cell line: ~~INPUT_MCL~~\nExisting Marker: ~~EXISTING_MARKER~~\nChanged to: ~~INPUT_MARKER~~\n";
 	private static final String LOG_CELLLINE_TYPE_CHANGED = "MUTANT ES CELL CHANGED TYPE\nMutant Cell line: ~~INPUT_MCL~~\nExisting allele symbol: ~~EXISTING_SYMBOL~~\nNew allele symbol: ~~INPUT_SYMBOL~~\n";
 	private static final String LOG_CELLLINE_GROUP_CHANGED = "MUTANT ES CELL CHANGED GROUP\nMutant Cell line: ~~INPUT_MCL~~\nExisting allele symbol: ~~EXISTING_SYMBOL~~\nNew allele symbol: ~~INPUT_SYMBOL~~\n";
@@ -87,10 +87,14 @@ public class TargetedAlleleLoad extends DLALoader {
 	private static final String LOG_CELLLINE_ALLELE_CHANGED = "MUTANT ES CELL CHANGED ALLELE\nMutant Cell line: ~~INPUT_MCL~~\nOld allele symbol: ~~EXISTING_SYMBOL~~\nNew allele symbol: ~~INPUT_SYMBOL~~\nDeriavation changed from ~~EXISTING_DERIVATION~~ to ~~INPUT_DERIVATION~~\n";
 
 	// Constant Regular expression patterns
-	private static final Pattern pipelinePattern = Pattern.compile(".*<tm\\d{1,2}[ae]{0,1}\\((.*)\\).*>");
-	private static final Pattern alleleSequencePattern = Pattern.compile(".*<tm(\\d{1,2})[ae]{0,1}.*>");
-	private static final Pattern alleleTypePattern = Pattern.compile(".*<tm\\d{1,2}([ae]{0,1}).*>");
-	private static final Pattern alleleCreatorPattern = Pattern.compile(".*<tm\\d{1,2}[ae]{0,1}\\(.*\\)(.*)>");
+	private static final Pattern pipelinePattern = Pattern
+			.compile(".*<tm\\d{1,2}[ae]{0,1}\\((.*)\\).*>");
+	private static final Pattern alleleSequencePattern = Pattern
+			.compile(".*<tm(\\d{1,2})[ae]{0,1}.*>");
+	private static final Pattern alleleTypePattern = Pattern
+			.compile(".*<tm\\d{1,2}([ae]{0,1}).*>");
+	private static final Pattern alleleCreatorPattern = Pattern
+			.compile(".*<tm\\d{1,2}[ae]{0,1}\\(.*\\)(.*)>");
 
 	// Standard DLA required classes
 	private RecordDataIterator iter;
@@ -148,7 +152,7 @@ public class TargetedAlleleLoad extends DLALoader {
 		alleleLookupByMarker = AlleleLookupByMarker.getInstance();
 		alleleCellLineCount = AlleleCellLineCount.getInstance();
 		derivationLookup = DerivationLookupByVectorCreatorParentType
-		.getInstance();
+				.getInstance();
 
 		alleleLookupByCellLine = new AlleleLookupByCellLine();
 		alleleLookupByCellLine.initCache();
@@ -167,22 +171,27 @@ public class TargetedAlleleLoad extends DLALoader {
 		// This contains the combination of pipeline and provider
 		// that this load is currently loading.
 		String loadProvider = "(" + cfg.getPipeline() + ")" + cfg.getProvider();
-	
+
 		filterProjectIds(databaseProjectIds, loadProvider);
 		filterCellLines(databaseCellLines, loadProvider);
 
 	}
 
 	/**
-	 * Filter out inappropriate project IDs based on pipeline and provider. 
+	 * Filter out inappropriate project IDs based on pipeline and provider.
 	 * Projects for other pipeline don't get QCed during this execution
-	 * @param databaseProjectIds set of all project IDs to be QCed 
-	 * @param loadProvider string to identify the appropriate projects
-	 * @throws DBException if the lookup fails
-	 * @throws CacheException if the lookup fails
+	 * 
+	 * @param databaseProjectIds
+	 *            set of all project IDs to be QCed
+	 * @param loadProvider
+	 *            string to identify the appropriate projects
+	 * @throws DBException
+	 *             if the lookup fails
+	 * @throws CacheException
+	 *             if the lookup fails
 	 */
-	private void filterProjectIds(Set databaseProjectIds, String loadProvider) 
-	throws DBException, CacheException {
+	private void filterProjectIds(Set databaseProjectIds, String loadProvider)
+			throws DBException, CacheException {
 		Iterator it = alleleLookupByProjectId.getKeySet().iterator();
 		while (it.hasNext()) {
 			String label = (String) it.next();
@@ -201,15 +210,20 @@ public class TargetedAlleleLoad extends DLALoader {
 	}
 
 	/**
-	 * Filter out inappropriate cell lines based on pipeline and provider. 
+	 * Filter out inappropriate cell lines based on pipeline and provider.
 	 * Projects for other pipeline don't get QCed during this execution
-	 * @param databaseCellLines set of all cell lines to be QCed 
-	 * @param loadProvider string to identify the appropriate projects
-	 * @throws DBException if the lookup fails
-	 * @throws CacheException if the lookup fails
+	 * 
+	 * @param databaseCellLines
+	 *            set of all cell lines to be QCed
+	 * @param loadProvider
+	 *            string to identify the appropriate projects
+	 * @throws DBException
+	 *             if the lookup fails
+	 * @throws CacheException
+	 *             if the lookup fails
 	 */
 	private void filterCellLines(Set databaseCellLines, String loadProvider)
-	throws DBException, CacheException {
+			throws DBException, CacheException {
 		// Add only cell lines appropriate for this pipeline and provider
 		// to the QC pool (cell lines for other pipeline don't need QC
 		// during this run)
@@ -223,7 +237,7 @@ public class TargetedAlleleLoad extends DLALoader {
 		}
 
 	}
-	
+
 	/**
 	 * initialize the internal structures used by this class
 	 * 
@@ -305,7 +319,7 @@ public class TargetedAlleleLoad extends DLALoader {
 			databaseCellLines.remove(in.getMutantCellLine().toLowerCase());
 
 			// If this record is not appropriate to be handled by this
-			// processor, skip it.  The only reason we included it in the
+			// processor, skip it. The only reason we included it in the
 			// first place was to assist in the QC of all cell lines
 			if (!in.getInputPipeline().equals(cfg.getPipeline())) {
 				continue;
@@ -370,14 +384,14 @@ public class TargetedAlleleLoad extends DLALoader {
 
 			// Does the Mutant Cell Line record exist in the
 			// cache (database or recently created)?
-			MutantCellLine esCell = koMutantCellLineLookup
-					.lookup(in.getMutantCellLine());
+			MutantCellLine esCell = koMutantCellLineLookup.lookup(in
+					.getMutantCellLine());
 			if (esCell != null) {
 				// Mutant ES Cell found in MGI, check the associated allele
 
 				// Find the existing associated allele
-				KnockoutAllele existing = alleleLookupByCellLine
-						.lookup(in.getMutantCellLine());
+				KnockoutAllele existing = alleleLookupByCellLine.lookup(in
+						.getMutantCellLine());
 
 				// If the associated allele can't be found, there's a major
 				// problem. The caches are out of synch, or the cell line to
@@ -385,8 +399,8 @@ public class TargetedAlleleLoad extends DLALoader {
 				// process this record further, report the error and continue
 				if (existing == null) {
 					// Report this to the diagnostic log
-					String m = LOG_ALLELE_NOT_FOUND
-						.replaceAll("~~INPUT_MCL~~", in.getMutantCellLine());					
+					String m = LOG_ALLELE_NOT_FOUND.replaceAll("~~INPUT_MCL~~",
+							in.getMutantCellLine());
 					logger.logdInfo(m, true);
 					qcStats.record("ERROR", NUM_CELLINES_MISSING_ALLELE);
 					continue;
@@ -398,9 +412,11 @@ public class TargetedAlleleLoad extends DLALoader {
 				if (!matchingGene) {
 					// Report this to the curator log
 					String m = LOG_MARKER_CHANGED
-						.replaceAll("~~INPUT_MCL~~", in.getMutantCellLine())
-						.replaceAll("~~EXISTING_MARKER~~", existing.getSymbol())
-						.replaceAll("~~INPUT_MARKER~~", constructed.getSymbol());
+							.replaceAll("~~INPUT_MCL~~", in.getMutantCellLine())
+							.replaceAll("~~EXISTING_MARKER~~",
+									existing.getSymbol())
+							.replaceAll("~~INPUT_MARKER~~",
+									constructed.getSymbol());
 
 					logger.logcInfo(m, false);
 					qcStats.record("SUMMARY", NUM_CELLINES_CHANGED_MARKER);
@@ -417,54 +433,72 @@ public class TargetedAlleleLoad extends DLALoader {
 					// 2- Type
 					// 3- IKMC group
 					// 4- Creator
-					
+
 					boolean typeChange = isTypeChange(existing, constructed);
 					boolean groupChange = isGroupChange(existing, constructed);
-					boolean creatorChange = iscreatorChange(existing, constructed);
+					boolean creatorChange = iscreatorChange(existing,
+							constructed);
 					boolean numberChange = isNumberChange(existing, constructed);
-					
+
 					if (typeChange) {
 						String m = LOG_CELLLINE_TYPE_CHANGED
-							.replaceAll("~~INPUT_MCL~~",  in.getMutantCellLine())
-							.replaceAll("~~EXISTING_SYMBOL~~", existing.getSymbol())
-							.replaceAll("~~INPUT_SYMBOL~~", constructed.getSymbol());
+								.replaceAll("~~INPUT_MCL~~",
+										in.getMutantCellLine())
+								.replaceAll("~~EXISTING_SYMBOL~~",
+										existing.getSymbol())
+								.replaceAll("~~INPUT_SYMBOL~~",
+										constructed.getSymbol());
 						logger.logcInfo(m, false);
 						qcStats.record("SUMMARY", NUM_CELLLINES_CHANGE_TYPE);
 					}
 
 					if (groupChange) {
 						String m = LOG_CELLLINE_GROUP_CHANGED
-							.replaceAll("~~INPUT_MCL~~",  in.getMutantCellLine())
-							.replaceAll("~~EXISTING_SYMBOL~~", existing.getSymbol())
-							.replaceAll("~~INPUT_SYMBOL~~", constructed.getSymbol());
+								.replaceAll("~~INPUT_MCL~~",
+										in.getMutantCellLine())
+								.replaceAll("~~EXISTING_SYMBOL~~",
+										existing.getSymbol())
+								.replaceAll("~~INPUT_SYMBOL~~",
+										constructed.getSymbol());
 						logger.logcInfo(m, false);
-						qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_PIPELINE);
+						qcStats.record("SUMMARY",
+								NUM_CELLLINES_CHANGED_PIPELINE);
 					}
 
 					if (creatorChange) {
 						String m = LOG_CELLLINE_CREATOR_CHANGED
-							.replaceAll("~~INPUT_MCL~~",  in.getMutantCellLine())
-							.replaceAll("~~EXISTING_SYMBOL~~", existing.getSymbol())
-							.replaceAll("~~INPUT_SYMBOL~~", constructed.getSymbol());
+								.replaceAll("~~INPUT_MCL~~",
+										in.getMutantCellLine())
+								.replaceAll("~~EXISTING_SYMBOL~~",
+										existing.getSymbol())
+								.replaceAll("~~INPUT_SYMBOL~~",
+										constructed.getSymbol());
 						logger.logcInfo(m, false);
 						qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_CREATOR);
 					}
 
 					if (numberChange) {
 						String m = LOG_CELLLINE_NUMBER_CHANGED
-							.replaceAll("~~INPUT_MCL~~",  in.getMutantCellLine())
-							.replaceAll("~~EXISTING_SYMBOL~~", existing.getSymbol())
-							.replaceAll("~~INPUT_SYMBOL~~", constructed.getSymbol());
+								.replaceAll("~~INPUT_MCL~~",
+										in.getMutantCellLine())
+								.replaceAll("~~EXISTING_SYMBOL~~",
+										existing.getSymbol())
+								.replaceAll("~~INPUT_SYMBOL~~",
+										constructed.getSymbol());
 						logger.logcInfo(m, false);
 						qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_NUMBER);
 					}
 
 					String m = LOG_CELLLINE_ALLELE_CHANGED
-						.replaceAll("~~INPUT_MCL~~",  in.getMutantCellLine())
-						.replaceAll("~~EXISTING_SYMBOL~~", existing.getSymbol())
-						.replaceAll("~~INPUT_SYMBOL~~", constructed.getSymbol())
-						.replaceAll("~~EXISTING_DERIVATION~~", esCell.getDerivationKey().toString())
-						.replaceAll("~~INPUT_DERIVATION~~", getDerivationKey(in).toString());
+							.replaceAll("~~INPUT_MCL~~", in.getMutantCellLine())
+							.replaceAll("~~EXISTING_SYMBOL~~",
+									existing.getSymbol())
+							.replaceAll("~~INPUT_SYMBOL~~",
+									constructed.getSymbol())
+							.replaceAll("~~EXISTING_DERIVATION~~",
+									esCell.getDerivationKey().toString())
+							.replaceAll("~~INPUT_DERIVATION~~",
+									getDerivationKey(in).toString());
 					logger.logcInfo(m, false);
 					qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_DERIVATION);
 					qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_ALLELE);
@@ -472,29 +506,29 @@ public class TargetedAlleleLoad extends DLALoader {
 					// The change of any of these attributes requires a
 					// derivation change
 					changeDerivationKey(getDerivationKey(in), esCell);
-					
+
 					// Change the allele association
 					changeMutantCellLineAssociation(in, esCell, existing,
 							constructed);
 
 					// This record has changed substantially, any further
-					// QC checks would be incorrect, so skip to the next 
+					// QC checks would be incorrect, so skip to the next
 					// input record
 					continue;
 				}
-
-
-
 
 				// Check the derivation (this implicitly checks the
 				// parental cell line, the creator, the vector and the allele
 				// type)
 				if (!esCell.getDerivationKey().equals(getDerivationKey(in))) {
 					String m = LOG_CELLLINE_DERIVATION_CHANGED
-						.replaceAll("~~INPUT_MCL~~",  in.getMutantCellLine())
-						.replaceAll("~~EXISTING_SYMBOL~~", existing.getSymbol())
-						.replaceAll("~~EXISTING_DERIVATION~~", esCell.getDerivationKey().toString())
-						.replaceAll("~~INPUT_DERIVATION~~", getDerivationKey(in).toString());
+							.replaceAll("~~INPUT_MCL~~", in.getMutantCellLine())
+							.replaceAll("~~EXISTING_SYMBOL~~",
+									existing.getSymbol())
+							.replaceAll("~~EXISTING_DERIVATION~~",
+									esCell.getDerivationKey().toString())
+							.replaceAll("~~INPUT_DERIVATION~~",
+									getDerivationKey(in).toString());
 					logger.logcInfo(m, false);
 
 					changeDerivationKey(getDerivationKey(in), esCell);
@@ -513,13 +547,14 @@ public class TargetedAlleleLoad extends DLALoader {
 							+ constructed.getProjectId() + "\t"
 							+ in.getMutantCellLine();
 
-					String k = existing.getSymbol() + " (" + existing.getProjectId() +")";
+					String k = existing.getSymbol() + " ("
+							+ existing.getProjectId() + ")";
 					if (alleleProjects.get(k) == null) {
 						alleleProjects.put(k, new HashSet());
 					}
-					
+
 					// Record the updated project ID for this allele symbol
-					Set projSet = (Set)alleleProjects.get(k);
+					Set projSet = (Set) alleleProjects.get(k);
 					projSet.add(constructed.getProjectId());
 					alleleProjects.put(k, projSet);
 
@@ -528,32 +563,31 @@ public class TargetedAlleleLoad extends DLALoader {
 
 				// Compress the note fields to discount any extra spaces that
 				// might have snuck in
-				String existingNote = existing.getNote()
-					.replaceAll("\\n", "")
-					.replaceAll(" ", "");
+				String existingNote = existing.getNote().replaceAll("\\n", "")
+						.replaceAll(" ", "");
 				String constructedNote = constructed.getNote()
-					.replaceAll("\\n", "")
-					.replaceAll(" ", "");
+						.replaceAll("\\n", "").replaceAll(" ", "");
 
 				// If we get this far in the QC checks, then
-				// we can be sure that the creator, the type, the vector, 
-				// and the parental cell line are all the same.  The only
+				// we can be sure that the creator, the type, the vector,
+				// and the parental cell line are all the same. The only
 				// thing left that could have changed are the coordinates
-				if (!existingNote.equals(constructedNote) || 
-						alleleNotes.get(existing.getSymbol()) != null) {
+				if (!existingNote.equals(constructedNote)
+						|| alleleNotes.get(existing.getSymbol()) != null) {
 					// This mutant cell line is associated with an allele
 					// that has a molecular note change
 					String k = existing.getSymbol();
 					if (alleleNotes.get(k) == null) {
 						alleleNotes.put(k, new HashSet());
 					}
-					
+
 					// Record the updated molecular note for this allele symbol
-					Set notes = (Set)alleleNotes.get(k);
+					Set notes = (Set) alleleNotes.get(k);
 					notes.add(constructed.getNote());
 					alleleNotes.put(k, notes);
 
-					String m = existing.getSymbol() + "\t" + in.getMutantCellLine();
+					String m = existing.getSymbol() + "\t"
+							+ in.getMutantCellLine();
 					alleleNoteUpdated.add(m);
 				}
 
@@ -612,20 +646,17 @@ public class TargetedAlleleLoad extends DLALoader {
 		return;
 	} // end protected void run()
 
-
 	/**
-	 * Checks if two KnockoutAllele objects have the same creator lab code
-	 * based on a substring of the symbols.  The creator lab code has been
-	 * included in the allele symbol and is a strong pattern 
-	 * to find (alleleCreatorPattern)
+	 * Checks if two KnockoutAllele objects have the same creator lab code based
+	 * on a substring of the symbols. The creator lab code has been included in
+	 * the allele symbol and is a strong pattern to find (alleleCreatorPattern)
 	 * 
-	 * This method short circuits with true (changed) if it cannot find 
-	 * creator for either of the alleles
+	 * This method short circuits with true (changed) if it cannot find creator
+	 * for either of the alleles
 	 * 
-	 * Example:
-	 *    Xyz&lt;tm1a(KOMP)Wtsi&lt; 
-	 *    has a type difference from 
-	 *    Xyz&lt;tm1a(KOMP)Ucd&gt;
+	 * Example: Xyz&lt;tm1a(KOMP)Wtsi&lt; has a type difference from
+	 * Xyz&lt;tm1a(KOMP)Ucd&gt;
+	 * 
 	 * @param first
 	 * @param second
 	 * @return true if both alleles have the same creator, false otherwise
@@ -658,20 +689,18 @@ public class TargetedAlleleLoad extends DLALoader {
 		return true;
 	}
 
-
 	/**
-	 * Checks if two KnockoutAllele objects have the same sequence number
-	 * based on a substring of the symbols.  The sequence number  has been
-	 * included in the allele symbol as an integer and is a strong pattern 
-	 * to find (alleleSequencePattern)
+	 * Checks if two KnockoutAllele objects have the same sequence number based
+	 * on a substring of the symbols. The sequence number has been included in
+	 * the allele symbol as an integer and is a strong pattern to find
+	 * (alleleSequencePattern)
 	 * 
-	 * This method short circuits with true (changed) if it cannot find  
-	 * sequence for either of the alleles
+	 * This method short circuits with true (changed) if it cannot find sequence
+	 * for either of the alleles
 	 * 
-	 * Example:
-	 *    Xyz&lt;tm1a(KOMP)Wtsi&lt; 
-	 *    has a type difference from 
-	 *    Xyz&lt;tm2a(KOMP)Wtsi&gt;
+	 * Example: Xyz&lt;tm1a(KOMP)Wtsi&lt; has a type difference from
+	 * Xyz&lt;tm2a(KOMP)Wtsi&gt;
+	 * 
 	 * @param first
 	 * @param second
 	 * @return true if both alleles have the same sequence, false otherwise
@@ -705,15 +734,14 @@ public class TargetedAlleleLoad extends DLALoader {
 	}
 
 	/**
-	 * Checks if two KnockoutAllele objects have the same type
-	 * based on a substring of the symbols.  The type has been included
-	 * in the allele symbol as a letter code (or lacking a letter)  and
-	 * is a strong pattern to find (alleleTypePattern)
+	 * Checks if two KnockoutAllele objects have the same type based on a
+	 * substring of the symbols. The type has been included in the allele symbol
+	 * as a letter code (or lacking a letter) and is a strong pattern to find
+	 * (alleleTypePattern)
 	 * 
-	 * Example:
-	 *    Xyz&lt;tm1a(KOMP)Wtsi&lt; 
-	 *    has a type difference from 
-	 *    Xyz&lt;tm1e(KOMP)Wtsi&gt;
+	 * Example: Xyz&lt;tm1a(KOMP)Wtsi&lt; has a type difference from
+	 * Xyz&lt;tm1e(KOMP)Wtsi&gt;
+	 * 
 	 * @param first
 	 * @param second
 	 * @return true if both alleles have the same type, false otherwise
@@ -746,20 +774,18 @@ public class TargetedAlleleLoad extends DLALoader {
 		return true;
 	}
 
-
 	/**
-	 * Checks if two KnockoutAllele objects have the same IKMC group
-	 * based on a substring of the symbols.  The IKMC group has been included
-	 * in the allele symbol in parenthesis and there is a strong pattern
-	 * to find it (pipelinePattern)
+	 * Checks if two KnockoutAllele objects have the same IKMC group based on a
+	 * substring of the symbols. The IKMC group has been included in the allele
+	 * symbol in parenthesis and there is a strong pattern to find it
+	 * (pipelinePattern)
 	 * 
-	 * This method short circuits with true (changed) if it cannot find an  
-	 * IKMC group for either of the alleles
+	 * This method short circuits with true (changed) if it cannot find an IKMC
+	 * group for either of the alleles
 	 * 
-	 * Example:
-	 *   Xyz&lt;tm1a(KOMP)Wtsi&gt; 
-	 *   has a group difference from 
-	 *   Xyz&lt;tm1a(EUCOMM)Wtsi&gt;
+	 * Example: Xyz&lt;tm1a(KOMP)Wtsi&gt; has a group difference from
+	 * Xyz&lt;tm1a(EUCOMM)Wtsi&gt;
+	 * 
 	 * @param first
 	 * @param second
 	 * @return true if both alleles have the same IKMC group, false otherwise
@@ -793,13 +819,14 @@ public class TargetedAlleleLoad extends DLALoader {
 	}
 
 	/**
-	 * Checks if two KnockoutAllele objects belong to the same gene.
-	 * The gene is identified by gene_key
+	 * Checks if two KnockoutAllele objects belong to the same gene. The gene is
+	 * identified by gene_key
+	 * 
 	 * @param first
 	 * @param second
 	 * @return
 	 */
-	private boolean isMatchingGene( KnockoutAllele first, KnockoutAllele second) {
+	private boolean isMatchingGene(KnockoutAllele first, KnockoutAllele second) {
 		Integer existingGeneKey = first.getMarkerKey();
 		Integer constructedGeneKey = second.getMarkerKey();
 		if (existingGeneKey.equals(constructedGeneKey)) {
@@ -807,7 +834,6 @@ public class TargetedAlleleLoad extends DLALoader {
 		}
 		return false;
 	}
-
 
 	private Integer getDerivationKey(KnockoutAlleleInput in)
 			throws MGIException {
@@ -822,9 +848,16 @@ public class TargetedAlleleLoad extends DLALoader {
 		String parent = in.getParentCellLine();
 		String aType = in.getMutationType();
 
-		Integer vectorKey = new Integer(vectorLookup.lookup(cassette));
+		Integer vectorKey = vectorLookup.lookup(cassette);
+
+		if (vectorKey == null) {
+			throw new MGIException("Cannot find vector for cassette: "
+					+ cassette);
+		}
+
 		Integer creatorKey = new Integer(cfg.getCreatorKey());
 		Integer parentKey;
+
 		try {
 			parentKey = cfg.getParentalKey(parent);
 		} catch (ConfigException e) {
@@ -835,13 +868,12 @@ public class TargetedAlleleLoad extends DLALoader {
 			throw new MGIException("Cannot find parental cell line key for "
 					+ in.getParentCellLine());
 		}
-		Integer typeKey = new Integer(
-				(String) Constants.MUTATION_TYPE_KEYS.get(aType));
+		Integer typeKey = (Integer) Constants.MUTATION_TYPE_KEYS.get(aType);
 
 		String dCompoundKey = vectorKey.toString();
-		dCompoundKey += "|" + creatorKey;
-		dCompoundKey += "|" + parentKey;
-		dCompoundKey += "|" + typeKey;
+		dCompoundKey += "|" + creatorKey.toString();
+		dCompoundKey += "|" + parentKey.toString();
+		dCompoundKey += "|" + typeKey.toString();
 
 		Integer derivationKey = derivationLookup.lookup(dCompoundKey);
 
@@ -1055,7 +1087,6 @@ public class TargetedAlleleLoad extends DLALoader {
 		TreeMap qc = null;
 		Iterator iterator = null;
 
-		
 		// These alleles need to have their project ID updated
 		if (alleleProjects.size() > 0) {
 			Set entries = alleleProjects.entrySet();
@@ -1064,12 +1095,18 @@ public class TargetedAlleleLoad extends DLALoader {
 				Map.Entry entry = (Map.Entry) it.next();
 				String symbol = (String) entry.getKey();
 				Set projects = (Set) entry.getValue();
-				if (projects.size()==1) {
-					System.out.println("Allele "+symbol+" could be updated automatically to project "+projects);
+				if (projects.size() == 1) {
+					System.out.println("Allele " + symbol
+							+ " could be updated automatically to project "
+							+ projects);
 				} else {
-					System.out.println("Allele "+symbol+" COULD NOT BE updated automatically. One (or more) of the MCLs have the old Project ID\n"+projects);
+					System.out
+							.println("Allele "
+									+ symbol
+									+ " COULD NOT BE updated automatically. One (or more) of the MCLs have the old Project ID\n"
+									+ projects);
 				}
-			}			
+			}
 		}
 
 		// These alleles need to have their molecular note updated
@@ -1080,15 +1117,20 @@ public class TargetedAlleleLoad extends DLALoader {
 				Map.Entry entry = (Map.Entry) it.next();
 				String symbol = (String) entry.getKey();
 				Set notes = (Set) entry.getValue();
-				if (notes.size()==1) {
-					System.out.println("Allele note for "+symbol+" could be updated automatically to note:\n"+notes+"\n\n");
+				if (notes.size() == 1) {
+					System.out.println("Allele note for " + symbol
+							+ " could be updated automatically to note:\n"
+							+ notes + "\n\n");
 				} else {
-					System.out.println("Allele note for "+symbol+" COULD NOT BE updated automatically. One (or more) of the MCLs have different notes:\n"+notes+"\n\n");
+					System.out
+							.println("Allele note for "
+									+ symbol
+									+ " COULD NOT BE updated automatically. One (or more) of the MCLs have different notes:\n"
+									+ notes + "\n\n");
 				}
-			}			
+			}
 		}
 
-		
 		// Print out the error statistics
 		qc = (TreeMap) qcStats.getStatistics().get("ERROR");
 
