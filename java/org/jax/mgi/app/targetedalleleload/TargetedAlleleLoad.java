@@ -506,7 +506,6 @@ public class TargetedAlleleLoad extends DLALoader {
 
 				// Check the ES cell project ID versus the
 				// existing allele project ID
-				// If the project changed, report it for manual curation
 				if (!existing.getProjectId().equals(constructed.getProjectId())) {
 					// This mutant cell line had a project ID change
 					String m = existing.getSymbol() + "\t"
@@ -540,7 +539,8 @@ public class TargetedAlleleLoad extends DLALoader {
 				// we can be sure that the creator, the type, the vector, 
 				// and the parental cell line are all the same.  The only
 				// thing left that could have changed are the coordinates
-				if (!existingNote.equals(constructedNote)) {
+				if (!existingNote.equals(constructedNote) || 
+						alleleNotes.get(existing.getSymbol()) != null) {
 					// This mutant cell line is associated with an allele
 					// that has a molecular note change
 					String k = existing.getSymbol();
@@ -556,58 +556,6 @@ public class TargetedAlleleLoad extends DLALoader {
 					String m = existing.getSymbol() + "\t" + in.getMutantCellLine();
 					alleleNoteUpdated.add(m);
 				}
-
-				//				// If we get this far in the QC checks, then
-//				// we can be sure that the creator, the type, the vector, 
-//				// and the parental cell line are all the same.  The only
-//				// thing left that could have changed are the coordinates
-//				if (!existingNote.equals(constructedNote)
-//						&& !alleleNoteUpdated.contains(existing.getSymbol())) {
-//					alleleNoteUpdated.add(existing.getSymbol());
-//					String noteMsg = "\nMOLECULAR NOTE CHANGED\n";
-//
-//					// If the note was entered by this load,
-//					// update the note to reflect the current note,
-//					// otherwise, a curator updated the note, so we
-//					// shouldn't update it.
-//					Integer jobStreamKey = cfg.getJobStreamKey();
-//					Integer noteModifiedBy = existing.getNoteModifiedByKey();
-//					if (noteModifiedBy == null || cfg.getOverwriteNote()
-//							|| (jobStreamKey.compareTo(noteModifiedBy) == 0)) {
-//						noteMsg += "Allele: " + existing.getSymbol() + "\n"
-//								+ "Mutant Cell line: " + in.getMutantCellLine()
-//								+ "\n\nCurrent/New note:\n"
-//								+ existing.getNote() + "\n"
-//								+ constructed.getNote() + "\n";
-//
-//						// If a note exists
-//						// Delete the existing note
-//						if (existing.getNoteKey() != null) {
-//							String query = "DELETE FROM MGI_Note "
-//									+ "WHERE _Note_key = "
-//									+ existing.getNoteKey();
-//
-//							sqlDBMgr.executeUpdate(query);
-//
-//							// Attach the new note to the existing allele
-//							String newNote = constructed.getNote();
-//							existing.updateNote(loadStream, newNote);
-//							qcStats.record("SUMMARY", NUM_ALLELES_NOTE_CHANGE);
-//						} else {
-//							noteMsg += "!!! Could not find existing note key. Not updating\n";
-//						}
-//					} else {
-//						noteMsg += "Allele: " + existing.getSymbol()
-//								+ " (not updating)\n" + "Mutant Cell line: "
-//								+ in.getMutantCellLine() + "\nJobstream: "
-//								+ jobStreamKey + "\nModifiedBy: "
-//								+ noteModifiedBy + "\nCurrent/New note:\n"
-//								+ existing.getNote() + "\n"
-//								+ constructed.getNote() + "\n";
-//						qcStats.record("WARNING", NUM_ALLELES_NEED_NOTE_CHANGE);
-//					}
-//					logger.logcInfo(noteMsg, false);
-//				}
 
 				// Done with QC checks. Go on to the next mutant cell line
 				continue;
@@ -859,6 +807,7 @@ public class TargetedAlleleLoad extends DLALoader {
 		}
 		return false;
 	}
+
 
 	private Integer getDerivationKey(KnockoutAlleleInput in)
 			throws MGIException {
