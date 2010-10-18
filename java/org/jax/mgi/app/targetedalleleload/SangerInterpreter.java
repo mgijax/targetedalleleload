@@ -24,7 +24,7 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 	private static final String NUM_SUCCESS = "Successfully interpreted input record(s)";
 	private static final String NUM_UNKNOWN_MUTATION = "Input record(s) with unknown mutation type skipped";
 	private static final String NUM_UNKNOWN_PARENT = "Input record(s) with unknown parental cell line skipped";
-	private static final String NUM_NOT_APPRORIATE = "Input record(s) not approriate for this provider, skipped";
+	private static final String NUM_NOT_APPROPRIATE = "Input record(s) not appropriate for this provider, skipped";
 
 	// The minimum length of a valid input record (including NL character).
 	private static final int MIN_REC_LENGTH = 50;
@@ -179,7 +179,7 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 		}
 		if (!parts[3].replaceAll("\"", "").matches(pipeline)) {
 			// Wrong project
-			qcStatistics.record("SUMMARY", NUM_NOT_APPRORIATE);
+			qcStatistics.record("SUMMARY", NUM_NOT_APPROPRIATE);
 			
 			// include these records for later QC
 		}
@@ -208,7 +208,7 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 		}
 		if (!allowedCelllines.contains(firstLetter)) {
 			// This cell line is not appropriate for this provider
-			qcStatistics.record("SUMMARY", NUM_NOT_APPRORIATE);
+			qcStatistics.record("SUMMARY", NUM_NOT_APPROPRIATE);
 			return false;
 		}
 

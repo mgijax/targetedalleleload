@@ -542,22 +542,20 @@ public class TargetedAlleleLoad extends DLALoader {
 				// existing allele project ID
 				if (!existing.getProjectId().equals(constructed.getProjectId())) {
 					// This mutant cell line had a project ID change
+					if (alleleProjects.get(existing) == null) {
+						alleleProjects.put(existing, new HashSet());
+					}
+
+					// Record the updated project ID for this allele symbol
+					Set projSet = (Set) alleleProjects.get(existing);
+					projSet.add(constructed.getProjectId());
+					alleleProjects.put(existing, projSet);
+
+					// Log this action
 					String m = existing.getSymbol() + "\t"
 							+ existing.getProjectId() + "\t"
 							+ constructed.getProjectId() + "\t"
 							+ in.getMutantCellLine();
-
-					String k = existing.getSymbol() + " ("
-							+ existing.getProjectId() + ")";
-					if (alleleProjects.get(k) == null) {
-						alleleProjects.put(k, new HashSet());
-					}
-
-					// Record the updated project ID for this allele symbol
-					Set projSet = (Set) alleleProjects.get(k);
-					projSet.add(constructed.getProjectId());
-					alleleProjects.put(k, projSet);
-
 					alleleProjectIdUpdated.add(m);
 				}
 
@@ -1093,17 +1091,34 @@ public class TargetedAlleleLoad extends DLALoader {
 			Iterator it = entries.iterator();
 			while (it.hasNext()) {
 				Map.Entry entry = (Map.Entry) it.next();
-				String symbol = (String) entry.getKey();
+				KnockoutAllele existing = (KnockoutAllele) entry.getKey();
 				Set projects = (Set) entry.getValue();
 				if (projects.size() == 1) {
-					System.out.println("Allele " + symbol
+					System.out.println("Allele " + existing.getSymbol()
 							+ " could be updated automatically to project "
 							+ projects);
+
+					List listProjects = new ArrayList(projects);
+					String newProjectId = (String)listProjects.get(0);
+
+					String query = "UPDATE ACC_Accession" + " SET accID = '"
+							+ newProjectId + "'"
+							+ " WHERE _Object_key = " 
+							+ existing.getKey()
+							+ " AND _LogicalDB_key = "
+							+ cfg.getProjectLogicalDb() 
+							+ " AND _MGIType_key = "
+							+ Constants.ALLELE_MGI_TYPE
+							+ " AND accID = '"
+							+ existing.getProjectId() + "'";
+					System.out.println("WOULD HAVE RUN:\n" + query);
+					// sqlDBMgr.executeUpdate(query);
+
 				} else {
 					System.out
 							.println("Allele "
-									+ symbol
-									+ " COULD NOT BE updated automatically. One (or more) of the MCLs have the old Project ID\n"
+									+ existing.getSymbol()
+									+ " COULD NOT BE updated automatically. One (or more) of the associated MCLs have different Project ID\n"
 									+ projects);
 				}
 			}
