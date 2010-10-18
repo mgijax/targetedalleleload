@@ -1086,6 +1086,7 @@ public class TargetedAlleleLoad extends DLALoader {
 		Iterator iterator = null;
 
 		// These alleles need to have their project ID updated
+		System.out.println("Processing project changes");
 		if (alleleProjects.size() > 0) {
 			Set entries = alleleProjects.entrySet();
 			Iterator it = entries.iterator();
@@ -1123,6 +1124,7 @@ public class TargetedAlleleLoad extends DLALoader {
 				}
 			}
 		}
+		System.out.println("Done processing project changes");
 
 		// These alleles need to have their molecular note updated
 		if (alleleNotes.size() > 0) {
