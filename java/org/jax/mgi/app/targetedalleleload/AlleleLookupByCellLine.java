@@ -33,8 +33,9 @@ import org.jax.mgi.shr.exception.MGIException;
 
 public class AlleleLookupByCellLine extends FullCachedLookup {
 
-	private MarkerLookupByMGIID markerLookup = null;
-	private TargetedAlleleLoadCfg cfg = null;
+	private MarkerLookupByMGIID markerLookup;
+	private TargetedAlleleLoadCfg cfg;
+	private DLALogger logger;
 
 	/**
 	 * constructor
@@ -51,11 +52,8 @@ public class AlleleLookupByCellLine extends FullCachedLookup {
 		markerLookup = new MarkerLookupByMGIID();
 		markerLookup.initCache();
 
-		try {
-			cfg = new TargetedAlleleLoadCfg();
-		} catch (DLALoggingException e) {
-			throw new MGIException("AlleleLookupByCellLine DLALoggingException");
-		}
+		logger = DLALogger.getInstance();
+		cfg = new TargetedAlleleLoadCfg();
 	}
 
 	/**
@@ -181,19 +179,12 @@ public class AlleleLookupByCellLine extends FullCachedLookup {
 
 				String completeNote = "";
 
-				DLALogger logger = null;
 				KnockoutAllele koAllele = null;
-
-				try {
-					logger = DLALogger.getInstance();
-				} catch (DLALoggingException e) {
-					// logger.logdInfo(e.getMessage(), true);
-					return null;
-				}
 
 				try {
 					koAllele = new KnockoutAllele();
 				} catch (MGIException e) {
+					System.out.println("error creating new allele");
 					logger.logdInfo(e.getMessage(), true);
 					return null;
 				}
@@ -221,6 +212,7 @@ public class AlleleLookupByCellLine extends FullCachedLookup {
 					koAllele.setMarkerKey(markerLookup.lookup(rd.geneMgiid)
 							.getKey());
 				} catch (MGIException e) {
+					System.out.println("error looking up marker " + rd.geneMgiid);
 					logger.logdInfo(e.getMessage(), true);
 					return null;
 				}

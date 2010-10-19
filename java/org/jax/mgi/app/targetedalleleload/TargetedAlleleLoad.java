@@ -156,6 +156,7 @@ public class TargetedAlleleLoad extends DLALoader {
 
 		alleleLookupByCellLine = new AlleleLookupByCellLine();
 		alleleLookupByCellLine.initCache();
+		alleleLookupByCellLine.printCache(System.out);
 
 		parentStrainLookupByParentKey = new ParentStrainLookupByParentKey();
 		strainKeyLookup = new StrainKeyLookup();
