@@ -919,7 +919,11 @@ public class TargetedAlleleLoad extends DLALoader {
 		String query = "UPDATE ALL_Cellline SET ";
 		query += "_derivation_key = " + newDerivationKey;
 		query += " WHERE _cellline_key = " + esCell.getMCLKey();
-		sqlDBMgr.executeUpdate(query);
+		if (cfg.getPreventBcpExecute()) {
+			logger.logdInfo("SQL prevented by CFG. Would have run: "+query, false);
+		} else {
+			sqlDBMgr.executeUpdate(query);
+		}
 		qcStats.record("WARNING", NUM_CELLLINES_CHANGED_DERIVATION);
 	}
 
@@ -934,7 +938,11 @@ public class TargetedAlleleLoad extends DLALoader {
 		query += " AND _MutantCellLine_key = ";
 		query += esCell.getMCLKey();
 		System.out.println("Running: "+query);
-		sqlDBMgr.executeUpdate(query);
+		if (cfg.getPreventBcpExecute()) {
+			logger.logdInfo("SQL prevented by CFG. Would have run: "+query, false);
+		} else {
+			sqlDBMgr.executeUpdate(query);
+		}
 
 		// Lookup existing alleles for this project
 		String projectId = in.getProjectId();
@@ -1112,8 +1120,11 @@ public class TargetedAlleleLoad extends DLALoader {
 							+ Constants.ALLELE_MGI_TYPE
 							+ " AND accID = '"
 							+ existing.getProjectId() + "'";
-					System.out.println("WOULD HAVE RUN:\n" + query);
-					// sqlDBMgr.executeUpdate(query);
+					if (cfg.getPreventBcpExecute()) {
+						logger.logdInfo("SQL prevented by CFG. Would have run: "+query, false);
+					} else {
+						sqlDBMgr.executeUpdate(query);
+					}
 
 				} else {
 					System.out

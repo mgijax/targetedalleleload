@@ -44,6 +44,21 @@ public class TargetedAlleleLoadCfg extends InputDataCfg {
 	/**
 	 * Is the load allowed to overwrite the molecular notes?
 	 * 
+	 * @assumes The "MGD_BCP_PREVENT_EXECUTE" constant is defined
+	 * @effects Nothing
+	 * @return The configuration value
+	 * @throws ConfigException
+	 *             if the value is not found
+	 */
+	public boolean getPreventBcpExecute() throws ConfigException {
+		return getConfigBoolean("MGD_BCP_PREVENT_EXECUTE").booleanValue();
+	}
+
+	
+
+	/**
+	 * Is the load allowed to overwrite the molecular notes?
+	 * 
 	 * @assumes The "OVERWRITE_NOTE" constant is defined in the config file and
 	 * @effects Nothing
 	 * @return The configuration value
