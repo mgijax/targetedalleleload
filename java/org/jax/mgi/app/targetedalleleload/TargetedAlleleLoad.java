@@ -933,6 +933,7 @@ public class TargetedAlleleLoad extends DLALoader {
 		query += oldAllele.getKey();
 		query += " AND _MutantCellLine_key = ";
 		query += esCell.getMCLKey();
+		System.out.println("Running: "+query);
 		sqlDBMgr.executeUpdate(query);
 
 		// Lookup existing alleles for this project
