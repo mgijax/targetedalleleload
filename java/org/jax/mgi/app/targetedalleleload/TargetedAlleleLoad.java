@@ -937,7 +937,7 @@ public class TargetedAlleleLoad extends DLALoader {
 		query += oldAllele.getKey();
 		query += " AND _MutantCellLine_key = ";
 		query += esCell.getMCLKey();
-		System.out.println("Running: "+query);
+
 		if (cfg.getPreventBcpExecute()) {
 			logger.logdInfo("SQL prevented by CFG. Would have run: "+query, false);
 		} else {
