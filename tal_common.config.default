@@ -81,7 +81,7 @@ export CACHE_DEBUG LOG_FACTORY
 #  BCP MANAGER SETTINGS BY DATABASE
 #
 ###########################################################################
-MGD_BCP_PREVENT_EXECUTE=true
+MGD_BCP_PREVENT_EXECUTE=false
 MGD_BCP_TRUNCATE_LOG=true
 MGD_BCP_DROP_INDEXES=false
 MGD_BCP_RECORD_STAMPING=false
