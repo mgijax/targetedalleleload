@@ -1002,7 +1002,7 @@ public class TargetedAlleleLoad extends DLALoader {
 			KnockoutAllele oldAllele) throws MGIException {
 		SangerAlleleInput input = new SangerAlleleInput();
 
-		input.setESCellName("Not specified");
+		input.setESCellName("Orphaned");
 		input.setMutationType(in.getMutationType());
 		input.setParentESCellName(in.getParentCellLine());
 		input.setProjectId(in.getProjectId());
