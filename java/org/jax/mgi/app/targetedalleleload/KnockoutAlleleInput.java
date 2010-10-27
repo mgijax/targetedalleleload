@@ -28,4 +28,6 @@ interface KnockoutAlleleInput {
 	String getMutationType();
 	
 	String getInputPipeline();
+
+	String getBuild();
 }

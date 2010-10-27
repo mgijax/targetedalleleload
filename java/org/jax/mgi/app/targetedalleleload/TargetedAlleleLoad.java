@@ -503,11 +503,9 @@ public class TargetedAlleleLoad extends DLALoader {
 					qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_DERIVATION);
 					qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_ALLELE);
 
-					// The change of any of these attributes requires a
-					// derivation change
-					changeDerivationKey(getDerivationKey(in), esCell);
-
-					// Change the allele association
+					// Re-associate the allele (it might reassociate to the
+					// same allele, but it doing so, it will adjust the 
+					// derivation)
 					changeMutantCellLineAssociation(in, esCell, existing,
 							constructed);
 
@@ -531,7 +529,6 @@ public class TargetedAlleleLoad extends DLALoader {
 									getDerivationKey(in).toString());
 					logger.logcInfo(m, false);
 
-					changeDerivationKey(getDerivationKey(in), esCell);
 					changeMutantCellLineAssociation(in, esCell, existing,
 							constructed);
 					qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_DERIVATION);
@@ -572,14 +569,14 @@ public class TargetedAlleleLoad extends DLALoader {
 				// thing left that could have changed are the coordinates
 				if (!existingNote.equals(constructedNote)
 						|| alleleNotes.get(existing.getSymbol()) != null) {
-					// This mutant cell line is associated with an allele
+					// This MCL is associated with an allele
 					// that has a molecular note change
 					String k = existing.getSymbol();
 					if (alleleNotes.get(k) == null) {
 						alleleNotes.put(k, new HashSet());
 					}
 
-					// Record the updated molecular note for this allele symbol
+					// save the new molecular note for this allele symbol
 					Set notes = (Set) alleleNotes.get(k);
 					notes.add(constructed.getNote());
 					alleleNotes.put(k, notes);
@@ -589,14 +586,14 @@ public class TargetedAlleleLoad extends DLALoader {
 					alleleNoteUpdated.add(m);
 				}
 
-				// Done with QC checks. Go on to the next mutant cell line
+				// done with QC checks. skip on to the next record
 				continue;
 			} else {
-				// Mutant ES Cell NOT found in database
+				// MCL not found in database
 
 				Integer mclKey = null;
 				try {
-					mclKey = createMutantCellLine(in);
+					mclKey = createMutantCellLine(in, false);
 				} catch (MGIException e) {
 					qcStats.record("ERROR", NUM_BAD_CELLLINE_PROCESSING);
 					String m = "Exception creating mutant cell line, skipping record: ";
@@ -619,25 +616,35 @@ public class TargetedAlleleLoad extends DLALoader {
 				String projectId = in.getProjectId();
 				Map alleles = alleleLookupByProjectId.lookup(projectId);
 
+				Integer alleleKey = null;
 				if (alleles != null) {
-					// Try to get the allele identified by the constructed
+					// try to get the allele identified by the constructed
 					// symbol
 					Map allele = (Map) alleles.get(constructed.getSymbol());
-
-					// If we found the allele, we can attach the MCL to it
 					if (allele != null) {
-						// Found an allele with this same symbol
-						Integer alleleKey = (Integer) allele.get("key");
-
-						associateCellLineToAllele(alleleKey, mclKey);
-						continue;
+						// found an allele with this same symbol
+						alleleKey = (Integer) allele.get("key");
+						break;
 					}
 				}
 
-				// The MCL Didn't match any alleles, create an allele and
-				// attach the MCL to it.
-				createAllele(constructed, in, alleles);
-				associateCellLineToAllele(constructed.getKey(), mclKey);
+				if (alleleKey == null) {
+					// did not find appropriate allele. create a new allele
+					createAllele(constructed, in, alleles);
+					alleleKey = constructed.getKey();
+				}
+
+				// if an appropriate allele cannot be found or created,
+				// report the error and skip on to the next record
+				if (alleleKey == null) {
+					String m = "An error occured creating allele: ";
+					m += constructed + "\n";
+					m += in + "\n";
+					logger.logdInfo(m, false);
+					continue;
+				}
+				
+				associateCellLineToAllele(alleleKey, mclKey);
 			}
 		}
 
@@ -930,6 +937,27 @@ public class TargetedAlleleLoad extends DLALoader {
 	private void changeMutantCellLineAssociation(KnockoutAlleleInput in,
 			MutantCellLine esCell, KnockoutAllele oldAllele,
 			KnockoutAllele newAllele) throws MGIException {
+
+		// Update the count of MCL associated to this allele and create a new
+		// one if the count drops to "none"
+		alleleCellLineCount.decrement(oldAllele.getSymbol());
+		alleleCellLineCount.increment(newAllele.getSymbol());
+		
+		Integer count = alleleCellLineCount.lookup(oldAllele.getSymbol());
+		if(count.intValue() < 1) {
+			// we're removing the *last* MCL associated to the old allele
+			// create an orphaned MCL and associate it to the allele first
+			createOrphanMCL(in, oldAllele);
+			
+			// we just created a "placeholder" MCL to keep the allele 
+			// associated to the correct derivation even though the last 
+			// "real" MCL migrated elsewhere. Anyway, increment the counter
+			alleleCellLineCount.increment(oldAllele.getSymbol());
+		}
+		
+		// Changing the allele requires that the derivation key changes.
+		changeDerivationKey(getDerivationKey(in), esCell);
+
 		// Remove the association existing allele <-> cellline association
 		// from the database
 		String query = "DELETE FROM ALL_Allele_Cellline";
@@ -970,8 +998,28 @@ public class TargetedAlleleLoad extends DLALoader {
 		qcStats.record("WARNING", NUM_CELLLINES_CHANGED_ALLELE);
 	}
 
-	private Integer createMutantCellLine(KnockoutAlleleInput in)
-			throws MGIException {
+	private void createOrphanMCL(KnockoutAlleleInput in, 
+			KnockoutAllele oldAllele) throws MGIException {
+		SangerAlleleInput input = new SangerAlleleInput();
+
+		input.setESCellName("Not specified");
+		input.setMutationType(in.getMutationType());
+		input.setParentESCellName(in.getParentCellLine());
+		input.setProjectId(in.getProjectId());
+		input.setGeneId(in.getGeneId());
+		input.setLocus1("0");
+		input.setLocus2("0");
+		input.setBuild(in.getBuild());
+		input.setCassette(in.getCassette());
+		input.setInputPipeline(in.getInputPipeline());
+		
+		Integer celllineKey = createMutantCellLine(input, true);
+		associateCellLineToAllele(oldAllele.getKey(), celllineKey);
+		
+	}
+
+	private Integer createMutantCellLine(KnockoutAlleleInput in, 
+			boolean orphan) throws MGIException {
 		Integer derivationKey = getDerivationKey(in);
 
 		// Create the mutant cell line
@@ -998,23 +1046,26 @@ public class TargetedAlleleLoad extends DLALoader {
 		ALL_CellLineDAO mclDAO = new ALL_CellLineDAO(mcl.getState());
 		loadStream.insert(mclDAO);
 
-		// Add the recently created cell line to the cache
-		koMutantCellLineLookup.addToCache(in.getMutantCellLine(), mcl);
-
-		// Create the MutantCellLine Accession object
-		// note the missing AccID parameter which indicates this is
-		// an MGI ID
-		AccessionId mclAccId = new AccessionId(in.getMutantCellLine(), // MCL
-																		// name
-				cfg.getEsCellLogicalDb(), // Logical DB
-				mclDAO.getKey().getKey(), // MCL object key
-				new Integer(Constants.ESCELL_MGITYPE_KEY), // MGI type
-				Boolean.FALSE, // Private?
-				Boolean.TRUE // Preferred?
-		);
-		mclAccId.insert(loadStream);
-
-		qcStats.record("SUMMARY", NUM_CELLLINES_CREATED);
+		// Only record the new accession entry and cached version of this
+		// cell line if it is not an orphan MCL
+		if (!orphan) {
+			// Add the recently created cell line to the cache
+			koMutantCellLineLookup.addToCache(in.getMutantCellLine(), mcl);
+	
+			// Create the MutantCellLine Accession object
+			// note the missing AccID parameter which indicates this is
+			// an MGI ID
+			AccessionId mclAccId = new AccessionId(in.getMutantCellLine(), // MCL
+					cfg.getEsCellLogicalDb(), // Logical DB
+					mclDAO.getKey().getKey(), // MCL object key
+					new Integer(Constants.ESCELL_MGITYPE_KEY), // MGI type
+					Boolean.FALSE, // Private?
+					Boolean.TRUE // Preferred?
+			);
+			mclAccId.insert(loadStream);
+	
+			qcStats.record("SUMMARY", NUM_CELLLINES_CREATED);
+		}
 
 		return mclDAO.getKey().getKey();
 	}
