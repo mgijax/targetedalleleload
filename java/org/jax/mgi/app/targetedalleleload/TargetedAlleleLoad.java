@@ -54,12 +54,12 @@ import org.jax.mgi.shr.ioutils.RecordDataIterator;
 
 public class TargetedAlleleLoad extends DLALoader {
 
+
 	private QualityControlStatistics qcStats = new QualityControlStatistics();
 
 	// String constants for QC reporting
 	private static final String NUM_DERIVATIONS_NOT_FOUND = "Number of derivations not found";
 	private static final String NUM_BAD_CELLLINE_PROCESSING = "Number of cell lines that were not able to be constructed";
-	private static final String NUM_ALLELES_NEED_NOTE_CHANGE = "Number of alleles that need to have molecular notes updated by curator";
 	private static final String NUM_ALLELES_NOTE_CHANGE = "Number of alleles that had molecular notes updated";
 	private static final String NUM_CELLLINES_CHANGE_TYPE = "Number of cell lines that changed type";
 	private static final String NUM_CELLLINES_CHANGED_DERIVATION = "Number of cell lines that changed derivation";
@@ -75,6 +75,7 @@ public class TargetedAlleleLoad extends DLALoader {
 	private static final String NUM_BAD_INPUT_REC = "Number of input records that were unable to be processed";
 	private static final String NUM_CELLLINES_CHANGED_CREATOR = "Number of cell lines that changed creator";
 	private static final String NUM_CELLLINES_CHANGED_ALLELE = "Number of cell lines that changed allele associations";
+	private static final String NUM_ORPHANED_ALLELES = "Number of orphaned alleles created";
 
 	// String constants for Log messages
 	private static final String LOG_ALLELE_NOT_FOUND = "Cell line ~~INPUT_MCL~~ found in database, but cannot find associated allele\n";
@@ -1016,6 +1017,8 @@ public class TargetedAlleleLoad extends DLALoader {
 		Integer celllineKey = createMutantCellLine(input, true);
 		associateCellLineToAllele(oldAllele.getKey(), celllineKey);
 		
+		qcStats.record("WARNING", NUM_ORPHANED_ALLELES);
+		
 	}
 
 	private Integer createMutantCellLine(KnockoutAlleleInput in, 
@@ -1199,6 +1202,8 @@ public class TargetedAlleleLoad extends DLALoader {
 					System.out.println("Allele note for " + symbol
 							+ " could be updated automatically to note:\n"
 							+ notes + "\n\n");
+
+					qcStats.record("SUMMARY", NUM_ALLELES_NOTE_CHANGE);
 				} else {
 					System.out
 							.println("Allele note for "
