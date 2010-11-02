@@ -625,7 +625,6 @@ public class TargetedAlleleLoad extends DLALoader {
 					if (allele != null) {
 						// found an allele with this same symbol
 						alleleKey = (Integer) allele.get("key");
-						break;
 					}
 				}
 
