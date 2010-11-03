@@ -54,7 +54,6 @@ import org.jax.mgi.shr.ioutils.RecordDataIterator;
 
 public class TargetedAlleleLoad extends DLALoader {
 
-
 	private QualityControlStatistics qcStats = new QualityControlStatistics();
 
 	// String constants for QC reporting
@@ -424,6 +423,37 @@ public class TargetedAlleleLoad extends DLALoader {
 					continue;
 				}
 
+				// We need to update the Project ID of any alleles first...
+				// before we do any of the other checks.  But we can only
+				// update the project ID once all cell lines for the allele
+				// have been checked.  So, if this gets triggered, we have to
+				// skip the rest of the QC checks for now.  If (when) the
+				// project ID gets updated (in the postprocess method) the
+				// subsequent run of the load will correct anything else that
+				// needs changing.
+
+				// Check the ES cell project ID versus the
+				// existing allele project ID
+				if (!existing.getProjectId().equals(constructed.getProjectId())) {
+					// This mutant cell line had a project ID change
+					if (alleleProjects.get(existing) == null) {
+						alleleProjects.put(existing, new HashSet());
+					}
+
+					// Record the updated project ID for this allele symbol
+					Set projSet = (Set) alleleProjects.get(existing);
+					projSet.add(constructed.getProjectId());
+					alleleProjects.put(existing, projSet);
+
+					// Log this action
+					String m = existing.getSymbol() + "\t"
+							+ existing.getProjectId() + "\t"
+							+ constructed.getProjectId() + "\t"
+							+ in.getMutantCellLine();
+					alleleProjectIdUpdated.add(m);
+					continue;
+				}
+
 				// If the associated allele symbol has changed at all,
 				// then we need to change it and update the derivation
 				if (!existing.getSymbol().equals(constructed.getSymbol())) {
@@ -505,7 +535,7 @@ public class TargetedAlleleLoad extends DLALoader {
 					qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_ALLELE);
 
 					// Re-associate the allele (it might reassociate to the
-					// same allele, but it doing so, it will adjust the 
+					// same allele, but it doing so, it will adjust the
 					// derivation)
 					changeMutantCellLineAssociation(in, esCell, existing,
 							constructed);
@@ -534,27 +564,6 @@ public class TargetedAlleleLoad extends DLALoader {
 							constructed);
 					qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_DERIVATION);
 					continue;
-				}
-
-				// Check the ES cell project ID versus the
-				// existing allele project ID
-				if (!existing.getProjectId().equals(constructed.getProjectId())) {
-					// This mutant cell line had a project ID change
-					if (alleleProjects.get(existing) == null) {
-						alleleProjects.put(existing, new HashSet());
-					}
-
-					// Record the updated project ID for this allele symbol
-					Set projSet = (Set) alleleProjects.get(existing);
-					projSet.add(constructed.getProjectId());
-					alleleProjects.put(existing, projSet);
-
-					// Log this action
-					String m = existing.getSymbol() + "\t"
-							+ existing.getProjectId() + "\t"
-							+ constructed.getProjectId() + "\t"
-							+ in.getMutantCellLine();
-					alleleProjectIdUpdated.add(m);
 				}
 
 				// Compress the note fields to discount any extra spaces that
@@ -643,7 +652,7 @@ public class TargetedAlleleLoad extends DLALoader {
 					logger.logdInfo(m, false);
 					continue;
 				}
-				
+
 				associateCellLineToAllele(alleleKey, mclKey);
 			}
 		}
@@ -927,7 +936,8 @@ public class TargetedAlleleLoad extends DLALoader {
 		query += "_derivation_key = " + newDerivationKey;
 		query += " WHERE _cellline_key = " + esCell.getMCLKey();
 		if (cfg.getPreventBcpExecute()) {
-			logger.logdInfo("SQL prevented by CFG. Would have run: "+query, false);
+			logger.logdInfo("SQL prevented by CFG. Would have run: " + query,
+					false);
 		} else {
 			sqlDBMgr.executeUpdate(query);
 		}
@@ -942,19 +952,19 @@ public class TargetedAlleleLoad extends DLALoader {
 		// one if the count drops to "none"
 		alleleCellLineCount.decrement(oldAllele.getSymbol());
 		alleleCellLineCount.increment(newAllele.getSymbol());
-		
+
 		Integer count = alleleCellLineCount.lookup(oldAllele.getSymbol());
-		if(count.intValue() < 1) {
+		if (count.intValue() < 1) {
 			// we're removing the *last* MCL associated to the old allele
 			// create an orphaned MCL and associate it to the allele first
 			createOrphanMCL(in, oldAllele);
-			
-			// we just created a "placeholder" MCL to keep the allele 
-			// associated to the correct derivation even though the last 
+
+			// we just created a "placeholder" MCL to keep the allele
+			// associated to the correct derivation even though the last
 			// "real" MCL migrated elsewhere. Anyway, increment the counter
 			alleleCellLineCount.increment(oldAllele.getSymbol());
 		}
-		
+
 		// Changing the allele requires that the derivation key changes.
 		changeDerivationKey(getDerivationKey(in), esCell);
 
@@ -967,7 +977,8 @@ public class TargetedAlleleLoad extends DLALoader {
 		query += esCell.getMCLKey();
 
 		if (cfg.getPreventBcpExecute()) {
-			logger.logdInfo("SQL prevented by CFG. Would have run: "+query, false);
+			logger.logdInfo("SQL prevented by CFG. Would have run: " + query,
+					false);
 		} else {
 			sqlDBMgr.executeUpdate(query);
 		}
@@ -995,10 +1006,10 @@ public class TargetedAlleleLoad extends DLALoader {
 		// allele and association the cellline with the new allele
 		createAllele(newAllele, in, alleles);
 		associateCellLineToAllele(newAllele.getKey(), esCell.getMCLKey());
-		qcStats.record("WARNING", NUM_CELLLINES_CHANGED_ALLELE);
+		qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_ALLELE);
 	}
 
-	private void createOrphanMCL(KnockoutAlleleInput in, 
+	private void createOrphanMCL(KnockoutAlleleInput in,
 			KnockoutAllele oldAllele) throws MGIException {
 		SangerAlleleInput input = new SangerAlleleInput();
 
@@ -1012,16 +1023,16 @@ public class TargetedAlleleLoad extends DLALoader {
 		input.setBuild(in.getBuild());
 		input.setCassette(in.getCassette());
 		input.setInputPipeline(in.getInputPipeline());
-		
+
 		Integer celllineKey = createMutantCellLine(input, true);
 		associateCellLineToAllele(oldAllele.getKey(), celllineKey);
-		
+
 		qcStats.record("WARNING", NUM_ORPHANED_ALLELES);
-		
+		logger.logcInfo("Orphaned allele " + oldAllele.getSymbol(), false);
 	}
 
-	private Integer createMutantCellLine(KnockoutAlleleInput in, 
-			boolean orphan) throws MGIException {
+	private Integer createMutantCellLine(KnockoutAlleleInput in, boolean orphan)
+			throws MGIException {
 		Integer derivationKey = getDerivationKey(in);
 
 		// Create the mutant cell line
@@ -1053,7 +1064,7 @@ public class TargetedAlleleLoad extends DLALoader {
 		if (!orphan) {
 			// Add the recently created cell line to the cache
 			koMutantCellLineLookup.addToCache(in.getMutantCellLine(), mcl);
-	
+
 			// Create the MutantCellLine Accession object
 			// note the missing AccID parameter which indicates this is
 			// an MGI ID
@@ -1065,7 +1076,7 @@ public class TargetedAlleleLoad extends DLALoader {
 					Boolean.TRUE // Preferred?
 			);
 			mclAccId.insert(loadStream);
-	
+
 			qcStats.record("SUMMARY", NUM_CELLLINES_CREATED);
 		}
 
@@ -1156,35 +1167,30 @@ public class TargetedAlleleLoad extends DLALoader {
 				KnockoutAllele existing = (KnockoutAllele) entry.getKey();
 				Set projects = (Set) entry.getValue();
 				if (projects.size() == 1) {
-					System.out.println("Allele " + existing.getSymbol()
-							+ " could be updated automatically to project "
-							+ projects);
+					logger.logdInfo("Project for " + existing.getSymbol()
+							+ " updated to " + projects, false);
 
 					List listProjects = new ArrayList(projects);
-					String newProjectId = (String)listProjects.get(0);
+					String newProjectId = (String) listProjects.get(0);
 
 					String query = "UPDATE ACC_Accession" + " SET accID = '"
-							+ newProjectId + "'"
-							+ " WHERE _Object_key = " 
-							+ existing.getKey()
-							+ " AND _LogicalDB_key = "
-							+ cfg.getProjectLogicalDb() 
+							+ newProjectId + "'" + " WHERE _Object_key = "
+							+ existing.getKey() + " AND _LogicalDB_key = "
+							+ cfg.getProjectLogicalDb()
 							+ " AND _MGIType_key = "
-							+ Constants.ALLELE_MGI_TYPE
-							+ " AND accID = '"
+							+ Constants.ALLELE_MGI_TYPE + " AND accID = '"
 							+ existing.getProjectId() + "'";
 					if (cfg.getPreventBcpExecute()) {
-						logger.logdInfo("SQL prevented by CFG. Would have run: "+query, false);
+						logger.logdInfo(
+								"SQL prevented by CFG. Would have run: "
+										+ query, false);
 					} else {
 						sqlDBMgr.executeUpdate(query);
 					}
 
 				} else {
-					System.out
-							.println("Allele "
-									+ existing.getSymbol()
-									+ " COULD NOT BE updated automatically. One (or more) of the associated MCLs have different Project ID\n"
-									+ projects);
+					logger.logdInfo("Project for " + existing.getSymbol()
+							+ " could NOT be updated to " + projects, false);
 				}
 			}
 		}
@@ -1198,17 +1204,15 @@ public class TargetedAlleleLoad extends DLALoader {
 				String symbol = (String) entry.getKey();
 				Set notes = (Set) entry.getValue();
 				if (notes.size() == 1) {
-					System.out.println("Allele note for " + symbol
-							+ " could be updated automatically to note:\n"
-							+ notes + "\n\n");
+					logger.logdInfo("Molecular note for " + symbol
+							+ " updated to:\n"
+							+ notes, false);
 
 					qcStats.record("SUMMARY", NUM_ALLELES_NOTE_CHANGE);
 				} else {
-					System.out
-							.println("Allele note for "
-									+ symbol
-									+ " COULD NOT BE updated automatically. One (or more) of the MCLs have different notes:\n"
-									+ notes + "\n\n");
+					logger.logdInfo("Molecular note for " + symbol
+							+ " could NOT be updated to:\n"
+							+ notes, false);
 				}
 			}
 		}
