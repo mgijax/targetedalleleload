@@ -278,6 +278,14 @@ public class TargetedAlleleLoadCfg extends InputDataCfg {
 		return getConfigString("NOTE_TEMPLATE");
 	}
 
+	public String getNoteTemplateCondDel_BactPneo_FFL() throws ConfigException {
+		return getConfigString("NOTE_TEMPLATE_CONDITIONAL_DELBACTPNEOFFL");
+	}
+
+	public String getNoteTemplateNonCondDel_BactPneo_FFL() throws ConfigException {
+		return getConfigString("NOTE_TEMPLATE_NONCONDITIONAL_DELBACTPNEOFFL");
+	}
+
 	public String getNoteTemplateMissingCoords() throws ConfigException {
 		return getConfigString("MISSINGCOORDS_NOTE_TEMPLATE");
 	}
@@ -486,4 +494,5 @@ public class TargetedAlleleLoadCfg extends InputDataCfg {
 			return new Interpreter();
 		}
 	}
+
 }

@@ -136,8 +136,8 @@ public class SangerProcessor extends KnockoutAlleleProcessor {
 		// Default the allele sequence letter, the allele note, the deletion
 		// size (only used for deletion alleles) and cache the mutation type
 		String let = "";
-		String note = "";
-		int delSize = 0;
+		String note = getNoteTemplate(in);
+		int delSize = getDeletionSize(in); // not used for conditional alleles
 		String mutType = in.getMutationType();
 
 		// Determine the "type" of the allele based on the entry in
@@ -148,64 +148,16 @@ public class SangerProcessor extends KnockoutAlleleProcessor {
 			koAllele.setTypeKey(cfg.getAlleleType("CONDITIONAL"));
 			qcStatistics.record("SUMMARY",
 					"Number of conditional input record(s)");
-
-			// Setup the conditional note template
-			if (in.getCassette().matches(PROMOTER_DRIVEN)) {
-				note = cfg.getNoteTemplateCondPromoter();
-			} else if (in.getCassette().matches(PROMOTER_LESS)) {
-				note = cfg.getNoteTemplateCondPromoterless();
-			} else {
-				qcStatistics.record("ERROR",
-						"Number of records missing cassette in CFG file");
-				throw new MGIException("Missing cassette type in CFG file: "
-						+ in.getCassette());
-			}
 		} else if (mutType.equals("Targeted non-conditional")) {
 			let = "e";
 			koAllele.setTypeKey(cfg.getAlleleType("NONCONDITIONAL"));
 			qcStatistics.record("SUMMARY",
 					"Number of targeted non-conditional input record(s)");
-
-			// Setup the targeted non-conditional note template
-			if (in.getCassette().matches(PROMOTER_DRIVEN)) {
-				note = cfg.getNoteTemplateNonCondPromoter();
-			} else if (in.getCassette().matches(PROMOTER_LESS)) {
-				note = cfg.getNoteTemplateNonCondPromoterless();
-			} else {
-				qcStatistics.record("ERROR",
-						"Number of records missing cassette in CFG file");
-				throw new MGIException("Missing cassette type in CFG file: "
-						+ in.getCassette());
-			}
 		} else if (mutType.equals("Deletion")) {
 			let = ""; // Empty string for Deletion alleles
 			koAllele.setTypeKey(cfg.getAlleleType("DELETION"));
-			qcStatistics
-					.record("SUMMARY", "Number of deletion input record(s)");
-
-			// Setup the deletion note template
-			if (in.getCassette().matches(PROMOTER_DRIVEN)) {
-				note = cfg.getNoteTemplateDeletionPromoter();
-			} else if (in.getCassette().matches(PROMOTER_LESS)) {
-				note = cfg.getNoteTemplateDeletionPromoterless();
-			} else {
-				qcStatistics.record("ERROR",
-						"Number of records missing cassette in CFG file");
-				throw new MGIException("Missing cassette type in CFG file: "
-						+ in.getCassette());
-			}
-
-			// Calculate the deletion size
-			if (in.getLocus1().compareTo("0") != 0
-					&& in.getLocus2().compareTo("0") != 0) {
-				int delStart = Integer.parseInt(in.getLocus1());
-				int delEnd = Integer.parseInt(in.getLocus2());
-				delSize = Math.abs(delEnd - delStart);
-			} else {
-				qcStatistics.record("ERROR",
-						"Number of records missing coordinates");
-				throw new MGIException("Missing coordinates\n" + koAllele);
-			}
+						qcStatistics.record("SUMMARY", 
+					"Number of deletion input record(s)");
 		} else {
 			qcStatistics.record("ERROR",
 					"Number of records with unknown mutation type");
@@ -321,6 +273,72 @@ public class SangerProcessor extends KnockoutAlleleProcessor {
 		// Return the populated clone object.
 		//
 		return koAllele;
+	}
+
+	private int getDeletionSize(SangerAlleleInput in) throws MGIException {
+		int delSize = 0;
+
+		// Calculate the deletion size
+		if (in.getLocus1().compareTo("0") != 0
+				&& in.getLocus2().compareTo("0") != 0) {
+			int delStart = Integer.parseInt(in.getLocus1());
+			int delEnd = Integer.parseInt(in.getLocus2());
+			delSize = Math.abs(delEnd - delStart);
+		} else {
+			qcStatistics.record("ERROR",
+					"Number of records missing coordinates");
+			throw new MGIException("Missing coordinates: "
+					+ in.getMutantCellLine());
+		}
+		return delSize;
+	}
+
+	private String getNoteTemplate(SangerAlleleInput in)
+			throws ConfigException, MGIException {
+		String note = "";
+
+		// There is a special case for L1L2_Del_BactPneo_FFL cassettes
+		// all other cassettes are treated equally
+
+		if (in.getMutationType().equals("Conditional")) {
+			if (in.getCassette().equals("L1L2_Del_BactPneo_FFL")) {
+				note = cfg.getNoteTemplateCondDel_BactPneo_FFL();
+			} else if (in.getCassette().matches(PROMOTER_DRIVEN)) {
+				note = cfg.getNoteTemplateCondPromoter();
+			} else if (in.getCassette().matches(PROMOTER_LESS)) {
+				note = cfg.getNoteTemplateCondPromoterless();
+			} else {
+				qcStatistics.record("ERROR",
+						"Number of records missing cassette in CFG file");
+				throw new MGIException("Missing cassette type in CFG file: "
+						+ in.getCassette());
+			}
+		} else if (in.getMutationType().equals("Targeted non-conditional")) {
+			if (in.getCassette().equals("L1L2_Del_BactPneo_FFL")) {
+				note = cfg.getNoteTemplateNonCondDel_BactPneo_FFL();
+			} else if (in.getCassette().matches(PROMOTER_DRIVEN)) {
+				note = cfg.getNoteTemplateNonCondPromoter();
+			} else if (in.getCassette().matches(PROMOTER_LESS)) {
+				note = cfg.getNoteTemplateNonCondPromoterless();
+			} else {
+				qcStatistics.record("ERROR",
+						"Number of records missing cassette in CFG file");
+				throw new MGIException("Missing cassette type in CFG file: "
+						+ in.getCassette());
+			}
+		} else if (in.getMutationType().equals("Deletion")) {
+			if (in.getCassette().matches(PROMOTER_DRIVEN)) {
+				note = cfg.getNoteTemplateDeletionPromoter();
+			} else if (in.getCassette().matches(PROMOTER_LESS)) {
+				note = cfg.getNoteTemplateDeletionPromoterless();
+			} else {
+				qcStatistics.record("ERROR",
+						"Number of records missing cassette in CFG file");
+				throw new MGIException("Missing cassette type in CFG file: "
+						+ in.getCassette());
+			}
+		}
+		return note;
 	}
 
 }
