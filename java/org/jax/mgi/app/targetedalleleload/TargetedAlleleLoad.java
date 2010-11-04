@@ -432,9 +432,15 @@ public class TargetedAlleleLoad extends DLALoader {
 				// subsequent run of the load will correct anything else that
 				// needs changing.
 
-				// Check the ES cell project ID versus the
-				// existing allele project ID
-				if (!existing.getProjectId().equals(constructed.getProjectId())) {
+				// If the project ID changed, but the type, group, and creator
+				// didn't change, we can just try to update the project ID
+				// in place
+				if (!existing.getProjectId().equals(constructed.getProjectId())
+						&& !isTypeChange(existing, constructed)
+						&& !isGroupChange(existing, constructed)
+						&& !isCreatorChange(existing, constructed)
+						&& !isDerivationChange(esCell, in)
+						) {
 					// This mutant cell line had a project ID change
 					if (alleleProjects.get(existing) == null) {
 						alleleProjects.put(existing, new HashSet());
@@ -467,7 +473,7 @@ public class TargetedAlleleLoad extends DLALoader {
 
 					boolean typeChange = isTypeChange(existing, constructed);
 					boolean groupChange = isGroupChange(existing, constructed);
-					boolean creatorChange = iscreatorChange(existing,
+					boolean creatorChange = isCreatorChange(existing,
 							constructed);
 					boolean numberChange = isNumberChange(existing, constructed);
 
@@ -675,7 +681,7 @@ public class TargetedAlleleLoad extends DLALoader {
 	 * @param second
 	 * @return true if both alleles have the same creator, false otherwise
 	 */
-	private boolean iscreatorChange(KnockoutAllele first, KnockoutAllele second) {
+	private boolean isCreatorChange(KnockoutAllele first, KnockoutAllele second) {
 		Matcher regexMatcher;
 		String firstCreator;
 		String secondCreator;
@@ -802,7 +808,7 @@ public class TargetedAlleleLoad extends DLALoader {
 	 * 
 	 * @param first
 	 * @param second
-	 * @return true if both alleles have the same IKMC group, false otherwise
+	 * @return true if different IKMC groups, false if same group
 	 */
 	private boolean isGroupChange(KnockoutAllele first, KnockoutAllele second) {
 		String firstIkmcGroup;
@@ -828,6 +834,26 @@ public class TargetedAlleleLoad extends DLALoader {
 			return false;
 		}
 
+		// is different
+		return true;
+	}
+
+	/**
+	 * Checks if an input record has the same derivation as an existing
+	 * MutantCellLine object
+	 * 
+	 * @param esCell
+	 * @param in
+	 * @return true if different derivation key, false if same
+	 */
+	private boolean isDerivationChange(MutantCellLine esCell, KnockoutAlleleInput in)
+	throws MGIException {
+		Integer key = esCell.getDerivationKey();
+		Integer newKey = getDerivationKey(in);
+		if (!key.equals(newKey)) {
+			// is not different
+			return false;
+		}
 		// is different
 		return true;
 	}
