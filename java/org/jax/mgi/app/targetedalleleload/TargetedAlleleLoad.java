@@ -126,7 +126,6 @@ public class TargetedAlleleLoad extends DLALoader {
 	private Map alleleProjects = new HashMap();
 	private Map alleleNotes = new HashMap();
 	private Set alleleProjectIdUpdated = new TreeSet();
-	private Set alleleNoteUpdated = new TreeSet();
 	private Set databaseProjectIds = new HashSet();
 	private Set databaseCellLines = new HashSet();
 
@@ -583,22 +582,17 @@ public class TargetedAlleleLoad extends DLALoader {
 				// and the parental cell line are all the same. The only
 				// thing left that could have changed are the coordinates
 				if (!existingNote.equals(constructedNote)
-						|| alleleNotes.get(existing.getSymbol()) != null) {
+						|| alleleNotes.get(existing) != null) {
 					// This MCL is associated with an allele
 					// that has a molecular note change
-					String k = existing.getSymbol();
-					if (alleleNotes.get(k) == null) {
-						alleleNotes.put(k, new HashSet());
+					if (alleleNotes.get(existing) == null) {
+						alleleNotes.put(existing, new HashSet());
 					}
 
 					// save the new molecular note for this allele symbol
-					Set notes = (Set) alleleNotes.get(k);
+					Set notes = (Set) alleleNotes.get(existing);
 					notes.add(constructed.getNote());
-					alleleNotes.put(k, notes);
-
-					String m = existing.getSymbol() + "\t"
-							+ in.getMutantCellLine();
-					alleleNoteUpdated.add(m);
+					alleleNotes.put(existing, notes);
 				}
 
 				// done with QC checks. skip on to the next record
@@ -1226,13 +1220,30 @@ public class TargetedAlleleLoad extends DLALoader {
 			Iterator it = entries.iterator();
 			while (it.hasNext()) {
 				Map.Entry entry = (Map.Entry) it.next();
-				String symbol = (String) entry.getKey();
+				KnockoutAllele a = (KnockoutAllele) entry.getKey();
 				Set notes = (Set) entry.getValue();
 				if (notes.size() == 1) {
-					logger.logdInfo("Molecular note for " + symbol
+					logger.logdInfo("Molecular note for " + a.getSymbol()
 							+ " updated to:\n" + notes, false);
 
-					qcStats.record("SUMMARY", NUM_ALLELES_NOTE_CHANGE);
+                    // If a note exists
+                    // Delete the existing note
+                    if (a.getNoteKey() != null)
+                    {
+                        String query = "DELETE FROM MGI_Note WHERE ";
+                        query += "_Note_key = ";
+                        query += a.getNoteKey();
+
+                        sqlDBMgr.executeUpdate(query);
+
+                        // Attach the new note to the existing allele
+                        a.updateNote(loadStream, (String) notes.toArray()[0]);
+    					qcStats.record("SUMMARY", NUM_ALLELES_NOTE_CHANGE);
+                    } else {
+                    	logger.logdInfo("Note key for " + a.getSymbol()
+    							+ " could NOT be found", false);
+                    }
+
 				} else {
 					logger.logdInfo("Molecular note for " + symbol
 							+ " could NOT be updated to:\n" + notes, false);
