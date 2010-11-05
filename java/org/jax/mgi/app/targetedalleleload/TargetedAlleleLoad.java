@@ -424,10 +424,10 @@ public class TargetedAlleleLoad extends DLALoader {
 				}
 
 				// We need to update the Project ID of any alleles first...
-				// before we do any of the other checks.  But we can only
+				// before we do any of the other checks. But we can only
 				// update the project ID once all cell lines for the allele
-				// have been checked.  So, if this gets triggered, we have to
-				// skip the rest of the QC checks for now.  If (when) the
+				// have been checked. So, if this gets triggered, we have to
+				// skip the rest of the QC checks for now. If (when) the
 				// project ID gets updated (in the postprocess method) the
 				// subsequent run of the load will correct anything else that
 				// needs changing.
@@ -439,8 +439,7 @@ public class TargetedAlleleLoad extends DLALoader {
 						&& !isTypeChange(existing, constructed)
 						&& !isGroupChange(existing, constructed)
 						&& !isCreatorChange(existing, constructed)
-						&& !isDerivationChange(esCell, in)
-						) {
+						&& !isDerivationChange(esCell, in)) {
 					// This mutant cell line had a project ID change
 					if (alleleProjects.get(existing) == null) {
 						alleleProjects.put(existing, new HashSet());
@@ -846,8 +845,8 @@ public class TargetedAlleleLoad extends DLALoader {
 	 * @param in
 	 * @return true if different derivation key, false if same
 	 */
-	private boolean isDerivationChange(MutantCellLine esCell, KnockoutAlleleInput in)
-	throws MGIException {
+	private boolean isDerivationChange(MutantCellLine esCell,
+			KnockoutAlleleInput in) throws MGIException {
 		Integer key = esCell.getDerivationKey();
 		Integer newKey = getDerivationKey(in);
 		if (!key.equals(newKey)) {
@@ -1231,14 +1230,12 @@ public class TargetedAlleleLoad extends DLALoader {
 				Set notes = (Set) entry.getValue();
 				if (notes.size() == 1) {
 					logger.logdInfo("Molecular note for " + symbol
-							+ " updated to:\n"
-							+ notes, false);
+							+ " updated to:\n" + notes, false);
 
 					qcStats.record("SUMMARY", NUM_ALLELES_NOTE_CHANGE);
 				} else {
 					logger.logdInfo("Molecular note for " + symbol
-							+ " could NOT be updated to:\n"
-							+ notes, false);
+							+ " could NOT be updated to:\n" + notes, false);
 				}
 			}
 		}
