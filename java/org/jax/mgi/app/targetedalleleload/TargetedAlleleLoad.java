@@ -709,6 +709,84 @@ public class TargetedAlleleLoad extends DLALoader {
 			}
 		}
 
+
+		// After processing ALL the input records, there is now enough
+		// data to determine if the allele level attributes can be changed.
+
+		// These alleles need to have their project ID updated
+		if (alleleProjects.size() > 0) {
+			Set entries = alleleProjects.entrySet();
+			Iterator it = entries.iterator();
+			while (it.hasNext()) {
+				Map.Entry entry = (Map.Entry) it.next();
+				KnockoutAllele existing = (KnockoutAllele) entry.getKey();
+				Set projects = (Set) entry.getValue();
+				if (projects.size() == 1) {
+					logger.logdInfo("Project for " + existing.getSymbol()
+							+ " updated to " + projects, false);
+
+					List listProjects = new ArrayList(projects);
+					String newProjectId = (String) listProjects.get(0);
+
+					String query = "UPDATE ACC_Accession" + " SET accID = '"
+							+ newProjectId + "'" + " WHERE _Object_key = "
+							+ existing.getKey() + " AND _LogicalDB_key = "
+							+ cfg.getProjectLogicalDb()
+							+ " AND _MGIType_key = "
+							+ Constants.ALLELE_MGI_TYPE + " AND accID = '"
+							+ existing.getProjectId() + "'";
+					if (cfg.getPreventBcpExecute()) {
+						logger.logdInfo(
+								"SQL prevented by CFG. Would have run: "
+										+ query, false);
+					} else {
+						sqlDBMgr.executeUpdate(query);
+					}
+
+				} else {
+					logger.logdInfo("Project for " + existing.getSymbol()
+							+ " could NOT be updated to " + projects, false);
+				}
+			}
+		}
+
+		// These alleles need to have their molecular note updated
+		if (alleleNotes.size() > 0) {
+			Set entries = alleleNotes.entrySet();
+			Iterator it = entries.iterator();
+			while (it.hasNext()) {
+				Map.Entry entry = (Map.Entry) it.next();
+				KnockoutAllele a = (KnockoutAllele) entry.getKey();
+				Set notes = (Set) entry.getValue();
+				if (notes.size() == 1) {
+					logger.logdInfo("Molecular note for " + a.getSymbol()
+							+ " updated to:\n" + notes, false);
+
+                    // If a note exists
+                    // Delete the existing note
+                    if (a.getNoteKey() != null)
+                    {
+                        String query = "DELETE FROM MGI_Note WHERE ";
+                        query += "_Note_key = ";
+                        query += a.getNoteKey();
+
+                        sqlDBMgr.executeUpdate(query);
+
+                        // Attach the new note to the existing allele
+                        a.updateNote(loadStream, (String) notes.toArray()[0]);
+    					qcStats.record("SUMMARY", NUM_ALLELES_NOTE_CHANGE);
+                    } else {
+                    	logger.logdInfo("Note key for " + a.getSymbol()
+    							+ " could NOT be found", false);
+                    }
+
+				} else {
+					logger.logdInfo("Molecular note for " + a.getSymbol()
+							+ " could NOT be updated to:\n" + notes, false);
+				}
+			}
+		}
+
 		return;
 	} // end protected void run()
 
@@ -1231,80 +1309,6 @@ public class TargetedAlleleLoad extends DLALoader {
 
 		TreeMap qc = null;
 		Iterator iterator = null;
-
-		// These alleles need to have their project ID updated
-		if (alleleProjects.size() > 0) {
-			Set entries = alleleProjects.entrySet();
-			Iterator it = entries.iterator();
-			while (it.hasNext()) {
-				Map.Entry entry = (Map.Entry) it.next();
-				KnockoutAllele existing = (KnockoutAllele) entry.getKey();
-				Set projects = (Set) entry.getValue();
-				if (projects.size() == 1) {
-					logger.logdInfo("Project for " + existing.getSymbol()
-							+ " updated to " + projects, false);
-
-					List listProjects = new ArrayList(projects);
-					String newProjectId = (String) listProjects.get(0);
-
-					String query = "UPDATE ACC_Accession" + " SET accID = '"
-							+ newProjectId + "'" + " WHERE _Object_key = "
-							+ existing.getKey() + " AND _LogicalDB_key = "
-							+ cfg.getProjectLogicalDb()
-							+ " AND _MGIType_key = "
-							+ Constants.ALLELE_MGI_TYPE + " AND accID = '"
-							+ existing.getProjectId() + "'";
-					if (cfg.getPreventBcpExecute()) {
-						logger.logdInfo(
-								"SQL prevented by CFG. Would have run: "
-										+ query, false);
-					} else {
-						sqlDBMgr.executeUpdate(query);
-					}
-
-				} else {
-					logger.logdInfo("Project for " + existing.getSymbol()
-							+ " could NOT be updated to " + projects, false);
-				}
-			}
-		}
-
-		// These alleles need to have their molecular note updated
-		if (alleleNotes.size() > 0) {
-			Set entries = alleleNotes.entrySet();
-			Iterator it = entries.iterator();
-			while (it.hasNext()) {
-				Map.Entry entry = (Map.Entry) it.next();
-				KnockoutAllele a = (KnockoutAllele) entry.getKey();
-				Set notes = (Set) entry.getValue();
-				if (notes.size() == 1) {
-					logger.logdInfo("Molecular note for " + a.getSymbol()
-							+ " updated to:\n" + notes, false);
-
-                    // If a note exists
-                    // Delete the existing note
-                    if (a.getNoteKey() != null)
-                    {
-                        String query = "DELETE FROM MGI_Note WHERE ";
-                        query += "_Note_key = ";
-                        query += a.getNoteKey();
-
-                        sqlDBMgr.executeUpdate(query);
-
-                        // Attach the new note to the existing allele
-                        a.updateNote(loadStream, (String) notes.toArray()[0]);
-    					qcStats.record("SUMMARY", NUM_ALLELES_NOTE_CHANGE);
-                    } else {
-                    	logger.logdInfo("Note key for " + a.getSymbol()
-    							+ " could NOT be found", false);
-                    }
-
-				} else {
-					logger.logdInfo("Molecular note for " + a.getSymbol()
-							+ " could NOT be updated to:\n" + notes, false);
-				}
-			}
-		}
 
 		// Print out the error statistics
 		qc = (TreeMap) qcStats.getStatistics().get("ERROR");
