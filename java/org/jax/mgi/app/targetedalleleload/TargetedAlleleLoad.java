@@ -593,12 +593,13 @@ public class TargetedAlleleLoad extends DLALoader {
 					// check is to see if there are project IDs that have NOT
 					// changed from the original, when others have.  The
 					// existence of an entry in alleleProjects means we've
-					// updated this project ID before...
+					// updated this project ID before.
 					if (!existing.getProjectId().equals(constructed.getProjectId())
 							|| alleleProjects.get(existing) != null ) {
-						// The project ID changed, but the type, group, creator
-						// derivation and marker didn't change, we can just try 
-						// to update the allele project ID in place
+						// The project ID changed, but the type, group, 
+						// creator, derivation and marker didn't change, we 
+						// can just try to update the allele project ID 
+						// in place
 
 						if (alleleProjects.get(existing) == null) {
 							alleleProjects.put(existing, new HashSet());
@@ -608,12 +609,14 @@ public class TargetedAlleleLoad extends DLALoader {
 						Set projSet = (Set) alleleProjects.get(existing);
 						projSet.add(constructed.getProjectId());
 						alleleProjects.put(existing, projSet);
+						System.out.println(alleleProjects.size());
 
 						// save the new project ID for this allele symbol
 						String m = existing.getSymbol() + "\t"
 								+ existing.getProjectId() + "\t"
 								+ constructed.getProjectId() + "\t"
 								+ in.getMutantCellLine();
+						System.out.println("gotta check: "+m);
 						alleleProjectIdUpdated.add(m);
 					}
 
@@ -628,13 +631,14 @@ public class TargetedAlleleLoad extends DLALoader {
 					// check is to see if there are notes that have NOT
 					// changed from the original, when others have.  The
 					// existence of an entry in alleleNotes means we've
-					// updated this note before...
+					// updated this note before.
 					if (!existingNote.equals(constructedNote)
 							|| alleleNotes.get(existing) != null) {
 						// If we get this far in the QC checks, then
-						// we can be sure that the creator, the type, the vector,
-						// and the parental cell line are all the same. The only
-						// thing left that could have changed are the coordinates
+						// we can be sure that the creator, the type,
+						// the vector, and the parental cell line are all 
+						// the same. The only thing left that could have 
+						// changed are the coordinates
 
 						if (alleleNotes.get(existing) == null) {
 							alleleNotes.put(existing, new HashSet());
@@ -644,6 +648,7 @@ public class TargetedAlleleLoad extends DLALoader {
 						Set notes = (Set) alleleNotes.get(existing);
 						notes.add(constructed.getNote());
 						alleleNotes.put(existing, notes);
+						System.out.println(alleleNotes.size());
 					}
 				}
 
@@ -1237,13 +1242,17 @@ public class TargetedAlleleLoad extends DLALoader {
 			while (it.hasNext()) {
 				Map.Entry entry = (Map.Entry) it.next();
 				KnockoutAllele existing = (KnockoutAllele) entry.getKey();
-				Set projects = (Set) entry.getValue();
-				if (projects.size() == 1) {
+
+				List projects = new ArrayList((Set) entry.getValue());
+
+				if (projects.size() != 1) {
+					logger.logdInfo("Project for " + existing.getSymbol()
+						+ " could NOT be updated to " + projects, false);
+				} else if (!existing.getProjectId().equals(projects.get(0))) {
 					logger.logdInfo("Project for " + existing.getSymbol()
 							+ " updated to " + projects, false);
 
-					List listProjects = new ArrayList(projects);
-					String newProjectId = (String) listProjects.get(0);
+					String newProjectId = (String) projects.get(0);
 
 					String query = "UPDATE ACC_Accession" + " SET accID = '"
 							+ newProjectId + "'" + " WHERE _Object_key = "
@@ -1259,11 +1268,7 @@ public class TargetedAlleleLoad extends DLALoader {
 					} else {
 						sqlDBMgr.executeUpdate(query);
 					}
-
-				} else {
-					logger.logdInfo("Project for " + existing.getSymbol()
-							+ " could NOT be updated to " + projects, false);
-				}
+				} 
 			}
 		}
 
@@ -1274,8 +1279,17 @@ public class TargetedAlleleLoad extends DLALoader {
 			while (it.hasNext()) {
 				Map.Entry entry = (Map.Entry) it.next();
 				KnockoutAllele a = (KnockoutAllele) entry.getKey();
-				Set notes = (Set) entry.getValue();
-				if (notes.size() == 1) {
+				List notes = new ArrayList((Set) entry.getValue());
+
+				if (notes.size() != 1) {
+					
+					// Multiple notes for this allele!
+					
+					logger.logdInfo("Molecular note for " + a.getSymbol()
+						+ " could NOT be updated to:\n" + notes, false);
+				} else if (!a.getNote().equals(notes.get(0))) {
+
+					// The MCLs all agree that there should be a new note
 					logger.logdInfo("Molecular note for " + a.getSymbol()
 							+ " updated to:\n" + notes, false);
 
@@ -1290,16 +1304,12 @@ public class TargetedAlleleLoad extends DLALoader {
                         sqlDBMgr.executeUpdate(query);
 
                         // Attach the new note to the existing allele
-                        a.updateNote(loadStream, (String) notes.toArray()[0]);
+                        a.updateNote(loadStream, (String) notes.get(0));
     					qcStats.record("SUMMARY", NUM_ALLELES_NOTE_CHANGE);
                     } else {
                     	logger.logdInfo("Note key for " + a.getSymbol()
     							+ " could NOT be found", false);
                     }
-
-				} else {
-					logger.logdInfo("Molecular note for " + a.getSymbol()
-							+ " could NOT be updated to:\n" + notes, false);
 				}
 			}
 		}
