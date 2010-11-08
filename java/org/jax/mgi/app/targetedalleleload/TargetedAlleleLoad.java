@@ -609,7 +609,7 @@ public class TargetedAlleleLoad extends DLALoader {
 						Set projSet = (Set) alleleProjects.get(existing);
 						projSet.add(constructed.getProjectId());
 						alleleProjects.put(existing, projSet);
-						System.out.println(alleleProjects.size());
+						System.out.println("proj changes: " +alleleProjects.size());
 
 						// save the new project ID for this allele symbol
 						String m = existing.getSymbol() + "\t"
@@ -648,7 +648,7 @@ public class TargetedAlleleLoad extends DLALoader {
 						Set notes = (Set) alleleNotes.get(existing);
 						notes.add(constructed.getNote());
 						alleleNotes.put(existing, notes);
-						System.out.println(alleleNotes.size());
+						System.out.println("note changes: "+ alleleNotes.size());
 					}
 				}
 
