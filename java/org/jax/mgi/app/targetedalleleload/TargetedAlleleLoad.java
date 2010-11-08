@@ -38,17 +38,19 @@ import org.jax.mgi.shr.ioutils.InputDataFile;
 import org.jax.mgi.shr.ioutils.RecordDataIterator;
 
 /**
+ * The TargetedAlleleLoad class is the main entry for this load.  It is a 
+ * DLALoader style class that is responsible for reading an Allele input 
+ * file (downloaded nightly from the KOMP production centers) and 
+ * determining, for each line in the file, if an Allele already exists in 
+ * the MGI database. If it does not exist, The TargetedAlleleLoad creates 
+ * the allele. If it does exist, the Allele gets a series of quality control
+ * checks performed on it.
+ *       
  * @is a DLALoader for loading KOMP produced Alleles into the database and
- *     associating them with appropriate marker annotations, strains, molecular
- *     notes, and J-number references. This process will also create the
- *     official nomenclature and generate an official MGI ID for the allele.
- * @has nothing
- * @does reads the Allele input file (downloaded nightly from the KOMP
- *       production centers websites) and determines, for each line in the file,
- *       if the Allele already exists in the MGI database. If it does not exist,
- *       The targetedalleleload creates the allele.
- * @company Jackson Laboratory
- * @author jmason
+ *     associating them with appropriate marker annotations, strains, 
+ *     molecular notes, and J-number references. This process will also 
+ *     create the official nomenclature and generate an official MGI ID for
+ *     the allele.
  * 
  */
 
@@ -57,34 +59,82 @@ public class TargetedAlleleLoad extends DLALoader {
 	private QualityControlStatistics qcStats = new QualityControlStatistics();
 
 	// String constants for QC reporting
-	private static final String NUM_DERIVATIONS_NOT_FOUND = "Number of derivations not found";
-	private static final String NUM_BAD_CELLLINE_PROCESSING = "Number of cell lines that were not able to be constructed";
-	private static final String NUM_ALLELES_NOTE_CHANGE = "Number of alleles that had molecular notes updated";
-	private static final String NUM_CELLLINES_CHANGE_TYPE = "Number of cell lines that changed type";
-	private static final String NUM_CELLLINES_CHANGED_DERIVATION = "Number of cell lines that changed derivation";
-	private static final String NUM_CELLLINES_CHANGED_PIPELINE = "Number of cell lines that changed IKMC groups";
-	private static final String NUM_CELLLINES_CHANGED_NUMBER = "Number of cell lines that changed sequence number";
-	private static final String NUM_CELLINES_MISSING_ALLELE = "Number of cell lines that cannot find associated allele";
-	private static final String NUM_CELLINES_CHANGED_MARKER = "Number of cell lines that changed marker, skipped";
-	private static final String NUM_BAD_ALLELE_PROCESSING = "Number of alleles that were not able to be constructed";
-	private static final String NUM_MISSING_PARENT = "Number of input records missing parental cell line";
-	private static final String NUM_CELLLINES_CREATED = "Number of cell lines created";
-	private static final String NUM_ALLELES_CREATED = "Number of alleles created";
-	private static final String NUM_DUPLICATE_INPUT_REC = "Number of duplicate cell line records in input file";
-	private static final String NUM_BAD_INPUT_REC = "Number of input records that were unable to be processed";
-	private static final String NUM_CELLLINES_CHANGED_CREATOR = "Number of cell lines that changed creator";
-	private static final String NUM_CELLLINES_CHANGED_ALLELE = "Number of cell lines that changed allele associations";
-	private static final String NUM_ORPHANED_ALLELES = "Number of orphaned alleles created";
+	private static final String NUM_DERIVATIONS_NOT_FOUND = 
+		"Number of derivations not found";
+	private static final String NUM_BAD_CELLLINE_PROCESSING = 
+		"Number of cell lines that were not able to be constructed";
+	private static final String NUM_ALLELES_NOTE_CHANGE = 
+		"Number of alleles that had molecular notes updated";
+	private static final String NUM_CELLLINES_CHANGE_TYPE = 
+		"Number of cell lines that changed type";
+	private static final String NUM_CELLLINES_CHANGED_DERIVATION = 
+		"Number of cell lines that changed derivation";
+	private static final String NUM_CELLLINES_CHANGED_PIPELINE = 
+		"Number of cell lines that changed IKMC groups";
+	private static final String NUM_CELLLINES_CHANGED_NUMBER = 
+		"Number of cell lines that changed sequence number";
+	private static final String NUM_CELLINES_MISSING_ALLELE = 
+		"Number of cell lines that cannot find associated allele";
+	private static final String NUM_CELLINES_CHANGED_MARKER = 
+		"Number of cell lines that changed marker, skipped";
+	private static final String NUM_BAD_ALLELE_PROCESSING = 
+		"Number of alleles that were not able to be constructed";
+	private static final String NUM_MISSING_PARENT = 
+		"Number of input records missing parental cell line";
+	private static final String NUM_CELLLINES_CREATED = 
+		"Number of cell lines created";
+	private static final String NUM_ALLELES_CREATED = 
+		"Number of alleles created";
+	private static final String NUM_DUPLICATE_INPUT_REC = 
+		"Number of duplicate cell line records in input file";
+	private static final String NUM_BAD_INPUT_REC = 
+		"Number of input records that were unable to be processed";
+	private static final String NUM_CELLLINES_CHANGED_CREATOR = 
+		"Number of cell lines that changed creator";
+	private static final String NUM_CELLLINES_CHANGED_ALLELE = 
+		"Number of cell lines that changed allele associations";
+	private static final String NUM_ORPHANED_ALLELES = 
+		"Number of orphaned alleles created";
 
 	// String constants for Log messages
-	private static final String LOG_ALLELE_NOT_FOUND = "Cell line ~~INPUT_MCL~~ found in database, but cannot find associated allele\n";
-	private static final String LOG_MARKER_CHANGED = "MUTANT ES CELL CHANGED MARKER\nMutant Cell line: ~~INPUT_MCL~~\nExisting Marker: ~~EXISTING_MARKER~~\nChanged to: ~~INPUT_MARKER~~\n";
-	private static final String LOG_CELLLINE_TYPE_CHANGED = "MUTANT ES CELL CHANGED TYPE\nMutant Cell line: ~~INPUT_MCL~~\nExisting allele symbol: ~~EXISTING_SYMBOL~~\nNew allele symbol: ~~INPUT_SYMBOL~~\n";
-	private static final String LOG_CELLLINE_GROUP_CHANGED = "MUTANT ES CELL CHANGED GROUP\nMutant Cell line: ~~INPUT_MCL~~\nExisting allele symbol: ~~EXISTING_SYMBOL~~\nNew allele symbol: ~~INPUT_SYMBOL~~\n";
-	private static final String LOG_CELLLINE_CREATOR_CHANGED = "MUTANT ES CELL CHANGED CREATOR\nMutant Cell line: ~~INPUT_MCL~~\nExisting allele symbol: ~~EXISTING_SYMBOL~~\nNew allele symbol: ~~INPUT_SYMBOL~~\n";
-	private static final String LOG_CELLLINE_DERIVATION_CHANGED = "MUTANT ES CELL CHANGED DERIVATION\nMutant Cell line: ~~INPUT_MCL~~\nExisting allele symbol: ~~EXISTING_SYMBOL~~\nChanged derivation from ~~EXISTING_DERIVATION~~ to ~~INPUT_DERIVATION~~\n";
-	private static final String LOG_CELLLINE_NUMBER_CHANGED = "MUTANT ES CELL CHANGED SEQUENCE NUMBER\nMutant Cell line: ~~INPUT_MCL~~\nExisting allele symbol: ~~EXISTING_SYMBOL~~\nNew allele symbol: ~~INPUT_SYMBOL~~\n";
-	private static final String LOG_CELLLINE_ALLELE_CHANGED = "MUTANT ES CELL CHANGED ALLELE\nMutant Cell line: ~~INPUT_MCL~~\nOld allele symbol: ~~EXISTING_SYMBOL~~\nNew allele symbol: ~~INPUT_SYMBOL~~\nDeriavation changed from ~~EXISTING_DERIVATION~~ to ~~INPUT_DERIVATION~~\n";
+	private static final String LOG_ALLELE_NOT_FOUND = 
+		"Cell line ~~INPUT_MCL~~ found in database, but cannot find associated allele\n";
+	private static final String LOG_MARKER_CHANGED = 
+		"MUTANT ES CELL CHANGED MARKER\n" +
+		"Mutant Cell line: ~~INPUT_MCL~~\n"+
+		"Existing Marker: ~~EXISTING_MARKER~~\n"+
+		"Changed to: ~~INPUT_MARKER~~\n";
+	private static final String LOG_CELLLINE_TYPE_CHANGED = 
+		"MUTANT ES CELL CHANGED TYPE\n"+
+		"Mutant Cell line: ~~INPUT_MCL~~\n"+
+		"Existing allele symbol: ~~EXISTING_SYMBOL~~\n"+
+		"New allele symbol: ~~INPUT_SYMBOL~~\n";
+	private static final String LOG_CELLLINE_GROUP_CHANGED = 
+		"MUTANT ES CELL CHANGED GROUP\n"+
+		"Mutant Cell line: ~~INPUT_MCL~~\n"+
+		"Existing allele symbol: ~~EXISTING_SYMBOL~~\n"+
+		"New allele symbol: ~~INPUT_SYMBOL~~\n";
+	private static final String LOG_CELLLINE_CREATOR_CHANGED = 
+		"MUTANT ES CELL CHANGED CREATOR\n"+
+		"Mutant Cell line: ~~INPUT_MCL~~\n"+
+		"Existing allele symbol: ~~EXISTING_SYMBOL~~\n"+
+		"New allele symbol: ~~INPUT_SYMBOL~~\n";
+	private static final String LOG_CELLLINE_DERIVATION_CHANGED = 
+		"MUTANT ES CELL CHANGED DERIVATION\n"+
+		"Mutant Cell line: ~~INPUT_MCL~~\n"+
+		"Existing allele symbol: ~~EXISTING_SYMBOL~~\n"+
+		"Changed derivation from ~~EXISTING_DERIVATION~~ to ~~INPUT_DERIVATION~~\n";
+	private static final String LOG_CELLLINE_NUMBER_CHANGED = 
+		"MUTANT ES CELL CHANGED SEQUENCE NUMBER\n"+
+		"Mutant Cell line: ~~INPUT_MCL~~\n"+
+		"Existing allele symbol: ~~EXISTING_SYMBOL~~\n"+
+		"New allele symbol: ~~INPUT_SYMBOL~~\n";
+	private static final String LOG_CELLLINE_ALLELE_CHANGED = 
+		"MUTANT ES CELL CHANGED ALLELE\n"+
+		"Mutant Cell line: ~~INPUT_MCL~~\n"+
+		"Old allele symbol: ~~EXISTING_SYMBOL~~\n"+
+		"New allele symbol: ~~INPUT_SYMBOL~~\n"+
+		"Deriavation changed from ~~EXISTING_DERIVATION~~ to ~~INPUT_DERIVATION~~\n";
 
 	// Constant Regular expression patterns
 	private static final Pattern pipelinePattern = Pattern
@@ -130,10 +180,10 @@ public class TargetedAlleleLoad extends DLALoader {
 	private Set databaseCellLines = new HashSet();
 
 	/**
-	 * constructor
+	 * The 
 	 * 
-	 * @throws DLALoaderException
-	 *             thrown if the super class cannot be instantiated
+	 * @throws DLALoaderException  thrown if the super class cannot be 
+	 *                             instantiated
 	 */
 	public TargetedAlleleLoad() throws MGIException {
 		// Instance the configuration object
@@ -162,14 +212,15 @@ public class TargetedAlleleLoad extends DLALoader {
 		markerLookup = new MarkerLookupByMGIID();
 		vocTermLookup = new VocabTermLookup();
 		cellLineNameLookupByKey = new CellLineNameLookupByKey();
-		cellLineStrainKeyLookupByCellLineKey = new CellLineStrainKeyLookupByCellLineKey();
+		cellLineStrainKeyLookupByCellLineKey = 
+			new CellLineStrainKeyLookupByCellLineKey();
 		strainNameLookup = new StrainNameLookup();
 
 		alleleFactory = KnockoutAlleleFactory.getFactory();
 
 		// This contains the combination of pipeline and provider
 		// that this load is currently loading.
-		String loadProvider = "(" + cfg.getPipeline() + ")" + cfg.getProvider();
+		String loadProvider = "("+cfg.getPipeline()+")"+cfg.getProvider();
 
 		filterProjectIds(databaseProjectIds, loadProvider);
 		filterCellLines(databaseCellLines, loadProvider);
@@ -196,8 +247,8 @@ public class TargetedAlleleLoad extends DLALoader {
 			String label = (String) it.next();
 			Map a = alleleLookupByProjectId.lookup(label);
 
-			// All alleles in the project belong to the same pipeline/provider
-			// combination, so just look at the first one.
+			// All alleles in the project belong to the same 
+			// pipeline/provider combination, so just look at the first one
 			Map b = (Map) a.values().toArray()[0];
 
 			// If the allele belongs to the same combination of pipeline
@@ -267,9 +318,10 @@ public class TargetedAlleleLoad extends DLALoader {
 	}
 
 	/**
-	 * @does The input files are in different formats, so read each of the files
-	 *       according to their input format objects to provide a collection of
-	 *       consistent Allele objects to the run process
+	 * The input files are in different formats, so read each of the 
+	 * files according to their input format objects to provide a collection 
+	 * of consistent Allele objects to the run process
+	 * 
 	 * @assumes nothing
 	 * @effects nothing
 	 * @throws nothing
@@ -283,12 +335,12 @@ public class TargetedAlleleLoad extends DLALoader {
 	}
 
 	/**
-	 * read the knockout allele input file and run the process that creates new
-	 * alleles in MGD
+	 * read the knockout allele input file and run the process that creates 
+	 * new alleles in MGD
 	 * 
 	 * @assumes nothing
-	 * @effects the data will be created for loading Alleles and associated ES
-	 *          Cell lines into the database
+	 * @effects the data will be created for loading Alleles and associated 
+	 * 			ES Cell lines into the database
 	 * @throws MGIException
 	 *             thrown if there is an error accessing the input file or
 	 *             writing output data
@@ -538,7 +590,7 @@ public class TargetedAlleleLoad extends DLALoader {
 					qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_DERIVATION);
 					qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_ALLELE);
 
-					// Re-associate the allele (it might reassociate to the
+					// Re-associate the allele (it might re-associate to the
 					// same allele, but it doing so, it will adjust the
 					// derivation)
 					changeMutantCellLineAssociation(in, esCell, existing,
@@ -605,18 +657,19 @@ public class TargetedAlleleLoad extends DLALoader {
 					mclKey = createMutantCellLine(in, false);
 				} catch (MGIException e) {
 					qcStats.record("ERROR", NUM_BAD_CELLLINE_PROCESSING);
-					String m = "Exception creating mutant cell line, skipping record: ";
-					m += in.getMutantCellLine() + "\n";
-					m += in + "\n";
-					m += e.getMessage();
+					String m = "Exception creating mutant cell line, "+ 
+						"skipping record: "+
+						in.getMutantCellLine() + "\n" + 
+						in + "\n" +
+						e.getMessage();
 					logger.logdInfo(m, false);
 					continue;
 				}
 				if (mclKey == null) {
 					qcStats.record("ERROR", NUM_BAD_CELLLINE_PROCESSING);
-					String m = "Mutant cell line not created, skipping record: ";
-					m += in.getMutantCellLine() + "\n";
-					m += in + "\n";
+					String m = "Mutant cell line not created, "+
+						"skipping record: "+ in.getMutantCellLine() +
+						"\n"+ in + "\n";
 					logger.logdInfo(m, false);
 					continue;
 				}
@@ -660,12 +713,13 @@ public class TargetedAlleleLoad extends DLALoader {
 	} // end protected void run()
 
 	/**
-	 * Checks if two KnockoutAllele objects have the same creator lab code based
-	 * on a substring of the symbols. The creator lab code has been included in
-	 * the allele symbol and is a strong pattern to find (alleleCreatorPattern)
+	 * Checks if two KnockoutAllele objects have the same creator lab code 
+	 * based on a substring of the symbols. The creator lab code has been 
+	 * included in the allele symbol and is a strong pattern to find 
+	 * (alleleCreatorPattern)
 	 * 
-	 * This method short circuits with true (changed) if it cannot find creator
-	 * for either of the alleles
+	 * This method short circuits with true (changed) if it cannot find 
+	 * creator for either of the alleles
 	 * 
 	 * Example: Xyz&lt;tm1a(KOMP)Wtsi&lt; has a type difference from
 	 * Xyz&lt;tm1a(KOMP)Ucd&gt;
@@ -703,13 +757,13 @@ public class TargetedAlleleLoad extends DLALoader {
 	}
 
 	/**
-	 * Checks if two KnockoutAllele objects have the same sequence number based
-	 * on a substring of the symbols. The sequence number has been included in
-	 * the allele symbol as an integer and is a strong pattern to find
-	 * (alleleSequencePattern)
+	 * Checks if two KnockoutAllele objects have the same sequence number
+	 * based on a substring of the symbols. The sequence number has been 
+	 * included in the allele symbol as an integer and is a strong pattern 
+	 * to find (alleleSequencePattern)
 	 * 
-	 * This method short circuits with true (changed) if it cannot find sequence
-	 * for either of the alleles
+	 * This method short circuits with true (changed) if it cannot find 
+	 * sequence for either of the alleles
 	 * 
 	 * Example: Xyz&lt;tm1a(KOMP)Wtsi&lt; has a type difference from
 	 * Xyz&lt;tm2a(KOMP)Wtsi&gt;
@@ -748,9 +802,9 @@ public class TargetedAlleleLoad extends DLALoader {
 
 	/**
 	 * Checks if two KnockoutAllele objects have the same type based on a
-	 * substring of the symbols. The type has been included in the allele symbol
-	 * as a letter code (or lacking a letter) and is a strong pattern to find
-	 * (alleleTypePattern)
+	 * substring of the symbols. The type has been included in the allele
+	 * symbol as a letter code (or lacking a letter) and is a strong pattern
+	 * to find (alleleTypePattern)
 	 * 
 	 * Example: Xyz&lt;tm1a(KOMP)Wtsi&lt; has a type difference from
 	 * Xyz&lt;tm1e(KOMP)Wtsi&gt;
@@ -788,13 +842,13 @@ public class TargetedAlleleLoad extends DLALoader {
 	}
 
 	/**
-	 * Checks if two KnockoutAllele objects have the same IKMC group based on a
-	 * substring of the symbols. The IKMC group has been included in the allele
-	 * symbol in parenthesis and there is a strong pattern to find it
-	 * (pipelinePattern)
+	 * Checks if two KnockoutAllele objects have the same IKMC group based
+	 *  on a substring of the symbols. The IKMC group has been included in
+	 *  the allele symbol in parenthesis and there is a strong pattern to
+	 *  find it (pipelinePattern)
 	 * 
-	 * This method short circuits with true (changed) if it cannot find an IKMC
-	 * group for either of the alleles
+	 * This method short circuits with true (changed) if it cannot find 
+	 * an IKMC group for either of the alleles
 	 * 
 	 * Example: Xyz&lt;tm1a(KOMP)Wtsi&gt; has a group difference from
 	 * Xyz&lt;tm1a(EUCOMM)Wtsi&gt;
@@ -852,8 +906,8 @@ public class TargetedAlleleLoad extends DLALoader {
 	}
 
 	/**
-	 * Checks if two KnockoutAllele objects belong to the same gene. The gene is
-	 * identified by gene_key
+	 * Checks if two KnockoutAllele objects belong to the same gene. The 
+	 * gene is identified by gene_key
 	 * 
 	 * @param first
 	 * @param second
@@ -922,8 +976,8 @@ public class TargetedAlleleLoad extends DLALoader {
 							.lookup(parentKey));
 
 			// Derivation name is Creator+Type+Parental+Strain+Vector
-			String name = creatorName + " " + typeName + " " + parentName + " "
-					+ strainName + " " + cassette;
+			String name = creatorName + " " + typeName + " " + parentName 
+					+ " " + strainName + " " + cassette;
 
 			d.setName(name);
 			d.setDescription(null);
@@ -1087,7 +1141,8 @@ public class TargetedAlleleLoad extends DLALoader {
 			// Create the MutantCellLine Accession object
 			// note the missing AccID parameter which indicates this is
 			// an MGI ID
-			AccessionId mclAccId = new AccessionId(in.getMutantCellLine(), // MCL
+			AccessionId mclAccId = new AccessionId(
+					in.getMutantCellLine(), // MCL
 					cfg.getEsCellLogicalDb(), // Logical DB
 					mclDAO.getKey().getKey(), // MCL object key
 					new Integer(Constants.ESCELL_MGITYPE_KEY), // MGI type
@@ -1158,8 +1213,8 @@ public class TargetedAlleleLoad extends DLALoader {
 	}
 
 	/**
-	 * Must close the BCP file stream and commit the new maximum MGI number back
-	 * to the database. Print out the QC statistics
+	 * Must close the BCP file stream and commit the new maximum MGI number 
+	 * back to the database. Print out the QC statistics
 	 * 
 	 * @assumes nothing
 	 * @effects Updates the database row in ACC_AccessionMax for MGI IDs
