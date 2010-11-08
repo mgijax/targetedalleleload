@@ -457,6 +457,10 @@ public class TargetedAlleleLoad extends DLALoader {
 					continue;
 				}
 
+				// ********************************************************
+				// BEGIN QC CHECKS
+				// ********************************************************
+
 				// Check the allele to marker association, if it has changed,
 				// report to the log for manual curation.
 				boolean matchingGene = isMatchingGene(existing, constructed);
@@ -471,48 +475,10 @@ public class TargetedAlleleLoad extends DLALoader {
 
 					logger.logcInfo(m, false);
 					qcStats.record("SUMMARY", NUM_CELLINES_CHANGED_MARKER);
-					continue;
-				}
+				} else if (!existing.getSymbol().equals(constructed.getSymbol())) {
+					// If the associated allele symbol has changed at all,
+					// then we need to change it and update the derivation
 
-				// We need to update the Project ID of any alleles first...
-				// before we do any of the other checks. But we can only
-				// update the project ID once all cell lines for the allele
-				// have been checked. So, if this gets triggered, we have to
-				// skip the rest of the QC checks for now. If (when) the
-				// project ID gets updated (in the postprocess method) the
-				// subsequent run of the load will correct anything else that
-				// needs changing.
-
-				// If the project ID changed, but the type, group, and creator
-				// didn't change, we can just try to update the project ID
-				// in place
-				if (!existing.getProjectId().equals(constructed.getProjectId())
-						&& !isTypeChange(existing, constructed)
-						&& !isGroupChange(existing, constructed)
-						&& !isCreatorChange(existing, constructed)
-						&& !isDerivationChange(esCell, in)) {
-					// This mutant cell line had a project ID change
-					if (alleleProjects.get(existing) == null) {
-						alleleProjects.put(existing, new HashSet());
-					}
-
-					// Record the updated project ID for this allele symbol
-					Set projSet = (Set) alleleProjects.get(existing);
-					projSet.add(constructed.getProjectId());
-					alleleProjects.put(existing, projSet);
-
-					// Log this action
-					String m = existing.getSymbol() + "\t"
-							+ existing.getProjectId() + "\t"
-							+ constructed.getProjectId() + "\t"
-							+ in.getMutantCellLine();
-					alleleProjectIdUpdated.add(m);
-					continue;
-				}
-
-				// If the associated allele symbol has changed at all,
-				// then we need to change it and update the derivation
-				if (!existing.getSymbol().equals(constructed.getSymbol())) {
 					// Symbols don't match
 					// The marker didn't change (checked previously)
 					// so one of these attributes changed.
@@ -595,17 +561,11 @@ public class TargetedAlleleLoad extends DLALoader {
 					// derivation)
 					changeMutantCellLineAssociation(in, esCell, existing,
 							constructed);
+				} else if (!esCell.getDerivationKey().equals(getDerivationKey(in))) {
+					// Check the derivation (this implicitly checks the
+					// parental cell line, the creator, the vector and the 
+					// allele type)
 
-					// This record has changed substantially, any further
-					// QC checks would be incorrect, so skip to the next
-					// input record
-					continue;
-				}
-
-				// Check the derivation (this implicitly checks the
-				// parental cell line, the creator, the vector and the allele
-				// type)
-				if (!esCell.getDerivationKey().equals(getDerivationKey(in))) {
 					String m = LOG_CELLLINE_DERIVATION_CHANGED
 							.replaceAll("~~INPUT_MCL~~", in.getMutantCellLine())
 							.replaceAll("~~EXISTING_SYMBOL~~",
@@ -616,39 +576,83 @@ public class TargetedAlleleLoad extends DLALoader {
 									getDerivationKey(in).toString());
 					logger.logcInfo(m, false);
 
+					qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_DERIVATION);
+
+					// Re-associate the allele (it might re-associate to the
+					// same allele, but it doing so, it will adjust the
+					// derivation)
 					changeMutantCellLineAssociation(in, esCell, existing,
 							constructed);
-					qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_DERIVATION);
-					continue;
-				}
+				} else {
 
-				// Compress the note fields to discount any extra spaces that
-				// might have snuck in
-				String existingNote = existing.getNote().replaceAll("\\n", "")
-						.replaceAll(" ", "");
-				String constructedNote = constructed.getNote()
-						.replaceAll("\\n", "").replaceAll(" ", "");
+					// We can only update the project ID or the molecular 
+					// note once all cell lines for the allele have been 
+					// verified to require the same change
 
-				// If we get this far in the QC checks, then
-				// we can be sure that the creator, the type, the vector,
-				// and the parental cell line are all the same. The only
-				// thing left that could have changed are the coordinates
-				if (!existingNote.equals(constructedNote)
-						|| alleleNotes.get(existing) != null) {
-					// This MCL is associated with an allele
-					// that has a molecular note change
-					if (alleleNotes.get(existing) == null) {
-						alleleNotes.put(existing, new HashSet());
+					// The extra "|| alleleProjects.get(existing) != null"
+					// check is to see if there are project IDs that have NOT
+					// changed from the original, when others have.  The
+					// existence of an entry in alleleProjects means we've
+					// updated this project ID before...
+					if (!existing.getProjectId().equals(constructed.getProjectId())
+							|| alleleProjects.get(existing) != null ) {
+						// The project ID changed, but the type, group, creator
+						// derivation and marker didn't change, we can just try 
+						// to update the allele project ID in place
+
+						if (alleleProjects.get(existing) == null) {
+							alleleProjects.put(existing, new HashSet());
+						}
+
+						// Record the updated project ID for this allele symbol
+						Set projSet = (Set) alleleProjects.get(existing);
+						projSet.add(constructed.getProjectId());
+						alleleProjects.put(existing, projSet);
+
+						// save the new project ID for this allele symbol
+						String m = existing.getSymbol() + "\t"
+								+ existing.getProjectId() + "\t"
+								+ constructed.getProjectId() + "\t"
+								+ in.getMutantCellLine();
+						alleleProjectIdUpdated.add(m);
 					}
 
-					// save the new molecular note for this allele symbol
-					Set notes = (Set) alleleNotes.get(existing);
-					notes.add(constructed.getNote());
-					alleleNotes.put(existing, notes);
+					// Compress the note fields to discount any extra spaces that
+					// might have snuck in
+					String existingNote = existing.getNote()
+							.replaceAll("\\n", "").replaceAll(" ", "");
+					String constructedNote = constructed.getNote()
+							.replaceAll("\\n", "").replaceAll(" ", "");
+	
+					// The extra "|| alleleNotes.get(existing) != null"
+					// check is to see if there are notes that have NOT
+					// changed from the original, when others have.  The
+					// existence of an entry in alleleNotes means we've
+					// updated this note before...
+					if (!existingNote.equals(constructedNote)
+							|| alleleNotes.get(existing) != null) {
+						// If we get this far in the QC checks, then
+						// we can be sure that the creator, the type, the vector,
+						// and the parental cell line are all the same. The only
+						// thing left that could have changed are the coordinates
+
+						if (alleleNotes.get(existing) == null) {
+							alleleNotes.put(existing, new HashSet());
+						}
+	
+						// save the new molecular note for this allele symbol
+						Set notes = (Set) alleleNotes.get(existing);
+						notes.add(constructed.getNote());
+						alleleNotes.put(existing, notes);
+					}
 				}
 
+				// ********************************************************
+				// END QC CHECKS
+				// ********************************************************
 				// done with QC checks. skip on to the next record
 				continue;
+
 			} else {
 				// MCL not found in database
 
@@ -706,84 +710,6 @@ public class TargetedAlleleLoad extends DLALoader {
 				}
 
 				associateCellLineToAllele(alleleKey, mclKey);
-			}
-		}
-
-
-		// After processing ALL the input records, there is now enough
-		// data to determine if the allele level attributes can be changed.
-
-		// These alleles need to have their project ID updated
-		if (alleleProjects.size() > 0) {
-			Set entries = alleleProjects.entrySet();
-			Iterator it = entries.iterator();
-			while (it.hasNext()) {
-				Map.Entry entry = (Map.Entry) it.next();
-				KnockoutAllele existing = (KnockoutAllele) entry.getKey();
-				Set projects = (Set) entry.getValue();
-				if (projects.size() == 1) {
-					logger.logdInfo("Project for " + existing.getSymbol()
-							+ " updated to " + projects, false);
-
-					List listProjects = new ArrayList(projects);
-					String newProjectId = (String) listProjects.get(0);
-
-					String query = "UPDATE ACC_Accession" + " SET accID = '"
-							+ newProjectId + "'" + " WHERE _Object_key = "
-							+ existing.getKey() + " AND _LogicalDB_key = "
-							+ cfg.getProjectLogicalDb()
-							+ " AND _MGIType_key = "
-							+ Constants.ALLELE_MGI_TYPE + " AND accID = '"
-							+ existing.getProjectId() + "'";
-					if (cfg.getPreventBcpExecute()) {
-						logger.logdInfo(
-								"SQL prevented by CFG. Would have run: "
-										+ query, false);
-					} else {
-						sqlDBMgr.executeUpdate(query);
-					}
-
-				} else {
-					logger.logdInfo("Project for " + existing.getSymbol()
-							+ " could NOT be updated to " + projects, false);
-				}
-			}
-		}
-
-		// These alleles need to have their molecular note updated
-		if (alleleNotes.size() > 0) {
-			Set entries = alleleNotes.entrySet();
-			Iterator it = entries.iterator();
-			while (it.hasNext()) {
-				Map.Entry entry = (Map.Entry) it.next();
-				KnockoutAllele a = (KnockoutAllele) entry.getKey();
-				Set notes = (Set) entry.getValue();
-				if (notes.size() == 1) {
-					logger.logdInfo("Molecular note for " + a.getSymbol()
-							+ " updated to:\n" + notes, false);
-
-                    // If a note exists
-                    // Delete the existing note
-                    if (a.getNoteKey() != null)
-                    {
-                        String query = "DELETE FROM MGI_Note WHERE ";
-                        query += "_Note_key = ";
-                        query += a.getNoteKey();
-
-                        sqlDBMgr.executeUpdate(query);
-
-                        // Attach the new note to the existing allele
-                        a.updateNote(loadStream, (String) notes.toArray()[0]);
-    					qcStats.record("SUMMARY", NUM_ALLELES_NOTE_CHANGE);
-                    } else {
-                    	logger.logdInfo("Note key for " + a.getSymbol()
-    							+ " could NOT be found", false);
-                    }
-
-				} else {
-					logger.logdInfo("Molecular note for " + a.getSymbol()
-							+ " could NOT be updated to:\n" + notes, false);
-				}
 			}
 		}
 
@@ -1300,6 +1226,86 @@ public class TargetedAlleleLoad extends DLALoader {
 	 *             if something goes wrong
 	 */
 	protected void postprocess() throws MGIException {
+
+		// After processing ALL the input records, there is now enough
+		// data to determine if the allele level attributes can be changed.
+
+		// These alleles need to have their project ID updated
+		if (alleleProjects.size() > 0) {
+			Set entries = alleleProjects.entrySet();
+			Iterator it = entries.iterator();
+			while (it.hasNext()) {
+				Map.Entry entry = (Map.Entry) it.next();
+				KnockoutAllele existing = (KnockoutAllele) entry.getKey();
+				Set projects = (Set) entry.getValue();
+				if (projects.size() == 1) {
+					logger.logdInfo("Project for " + existing.getSymbol()
+							+ " updated to " + projects, false);
+
+					List listProjects = new ArrayList(projects);
+					String newProjectId = (String) listProjects.get(0);
+
+					String query = "UPDATE ACC_Accession" + " SET accID = '"
+							+ newProjectId + "'" + " WHERE _Object_key = "
+							+ existing.getKey() + " AND _LogicalDB_key = "
+							+ cfg.getProjectLogicalDb()
+							+ " AND _MGIType_key = "
+							+ Constants.ALLELE_MGI_TYPE + " AND accID = '"
+							+ existing.getProjectId() + "'";
+					if (cfg.getPreventBcpExecute()) {
+						logger.logdInfo(
+								"SQL prevented by CFG. Would have run: "
+										+ query, false);
+					} else {
+						sqlDBMgr.executeUpdate(query);
+					}
+
+				} else {
+					logger.logdInfo("Project for " + existing.getSymbol()
+							+ " could NOT be updated to " + projects, false);
+				}
+			}
+		}
+
+		// These alleles need to have their molecular note updated
+		if (alleleNotes.size() > 0) {
+			Set entries = alleleNotes.entrySet();
+			Iterator it = entries.iterator();
+			while (it.hasNext()) {
+				Map.Entry entry = (Map.Entry) it.next();
+				KnockoutAllele a = (KnockoutAllele) entry.getKey();
+				Set notes = (Set) entry.getValue();
+				if (notes.size() == 1) {
+					logger.logdInfo("Molecular note for " + a.getSymbol()
+							+ " updated to:\n" + notes, false);
+
+                    // If a note exists
+                    // Delete the existing note
+                    if (a.getNoteKey() != null)
+                    {
+                        String query = "DELETE FROM MGI_Note WHERE ";
+                        query += "_Note_key = ";
+                        query += a.getNoteKey();
+
+                        sqlDBMgr.executeUpdate(query);
+
+                        // Attach the new note to the existing allele
+                        a.updateNote(loadStream, (String) notes.toArray()[0]);
+    					qcStats.record("SUMMARY", NUM_ALLELES_NOTE_CHANGE);
+                    } else {
+                    	logger.logdInfo("Note key for " + a.getSymbol()
+    							+ " could NOT be found", false);
+                    }
+
+				} else {
+					logger.logdInfo("Molecular note for " + a.getSymbol()
+							+ " could NOT be updated to:\n" + notes, false);
+				}
+			}
+		}
+
+
+		// Close the database writer
 		loadStream.close();
 
 		// If any new MGI IDs have been generated during processing, the
