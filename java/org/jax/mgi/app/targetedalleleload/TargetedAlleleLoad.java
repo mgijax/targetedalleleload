@@ -1300,7 +1300,7 @@ public class TargetedAlleleLoad extends DLALoader {
                     }
 
 				} else {
-					logger.logdInfo("Molecular note for " + symbol
+					logger.logdInfo("Molecular note for " + a.getSymbol()
 							+ " could NOT be updated to:\n" + notes, false);
 				}
 			}
