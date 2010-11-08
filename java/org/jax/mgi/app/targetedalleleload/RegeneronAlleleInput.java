@@ -4,24 +4,13 @@ import java.lang.Integer;
 import org.jax.mgi.shr.exception.MGIException;
 
 /**
- * @is An object that represents a Regeneron Knockout Allele Input record.
- * @has <UL>
- *      <LI>parameters that are needed to populate a KnockoutAllele object.
- *      </UL>
- * @does <UL>
- *       <LI>Provides methods for setting all its attributes.
- *       <LI>Encapsulates a single row of data from the input file</LI>
- *       </UL>
- * @company The Jackson Laboratory
- * @author jmason
+ * a plain old java object that represents a Regeneron Knockout Allele Input 
+ * record.
  */
 
 public class RegeneronAlleleInput implements KnockoutAlleleInput {
-	// ///////////////
-	// Variables //
-	// ///////////////
 
-	// The fields in the INPUT FILE from Regeneron are:
+	// The fields in the INPUT FILE from Regeneron:
 	// 0 - Mutant ES Cell Name
 	// 1 - Parental ES Cell
 	// 2 - Mouse Strain
@@ -48,10 +37,7 @@ public class RegeneronAlleleInput implements KnockoutAlleleInput {
 	private String inputPipeline;
 
 	/**
-	 * Constructs a Knockout Allele Input object
-	 * 
-	 * @assumes Nothing
-	 * @effects Set the class variables.
+	 * Empty constructor
 	 */
 	public RegeneronAlleleInput() throws MGIException {
 	}
