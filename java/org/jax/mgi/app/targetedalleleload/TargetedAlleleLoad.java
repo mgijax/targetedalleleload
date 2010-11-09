@@ -1301,7 +1301,13 @@ public class TargetedAlleleLoad extends DLALoader {
                         query += "_Note_key = ";
                         query += a.getNoteKey();
 
-                        sqlDBMgr.executeUpdate(query);
+    					if (cfg.getPreventBcpExecute()) {
+    						logger.logdInfo(
+    								"SQL prevented by CFG. Would have run: "
+    										+ query, false);
+    					} else {
+    						sqlDBMgr.executeUpdate(query);
+    					}
 
                         // Attach the new note to the existing allele
                         a.updateNote(loadStream, (String) notes.get(0));
