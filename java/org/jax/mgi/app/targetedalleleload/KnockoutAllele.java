@@ -203,6 +203,16 @@ public class KnockoutAllele implements Comparable {
 	}
 
 	// @Override
+	public boolean equals(Object that) throws ClassCastException {
+		if (!(that instanceof KnockoutAllele)) {
+			throw new ClassCastException("A KnockoutAllele object expected.");
+		}
+
+		String thatSymbol = ((KnockoutAllele) that).getSymbol();
+		return this.getSymbol().equals(thatSymbol);
+	}
+
+	// @Override
 	public int compareTo(Object that) throws ClassCastException {
 		if (!(that instanceof KnockoutAllele)) {
 			throw new ClassCastException("A KnockoutAllele object expected.");
