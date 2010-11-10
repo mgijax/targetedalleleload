@@ -631,21 +631,21 @@ public class TargetedAlleleLoad extends DLALoader {
 					// existence of an entry in alleleNotes means we've
 					// updated this note before.
 					if (!existingNote.equals(constructedNote)
-							|| alleleNotes.get(existing) != null) {
+							|| alleleNotes.get(existing.getKey()) != null) {
 						// If we get this far in the QC checks, then
 						// we can be sure that the creator, the type,
 						// the vector, and the parental cell line are all 
 						// the same. The only thing left that could have 
 						// changed are the coordinates
 
-						if (alleleNotes.get(existing) == null) {
-							alleleNotes.put(existing, new HashSet());
+						if (alleleNotes.get(existing.getKey()) == null) {
+							alleleNotes.put(existing.getKey(), new HashSet());
 						}
 	
 						// save the new molecular note for this allele symbol
-						Set notes = (Set) alleleNotes.get(existing);
+						Set notes = (Set) alleleNotes.get(existing.getKey());
 						notes.add(constructed.getNote());
-						alleleNotes.put(existing, notes);
+						alleleNotes.put(existing.getKey(), notes);
 					}
 				}
 
@@ -1275,7 +1275,8 @@ public class TargetedAlleleLoad extends DLALoader {
 			Iterator it = entries.iterator();
 			while (it.hasNext()) {
 				Map.Entry entry = (Map.Entry) it.next();
-				KnockoutAllele a = (KnockoutAllele) entry.getKey();
+				Integer key = (Integer) entry.getKey();
+				KnockoutAllele a = alleleLookupByKey.lookup(key);
 				List notes = new ArrayList((Set) entry.getValue());
 
 				if (notes.size() != 1) {
