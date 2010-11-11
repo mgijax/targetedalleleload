@@ -449,7 +449,6 @@ public class TargetedAlleleLoad extends DLALoader {
 				} else if (alleleProjects.get(existing.getKey()) != null ||
 						(!existing.getProjectId().equals(
 						constructed.getProjectId())
-						&& !isNumberChange(existing, constructed)
 						&& !isTypeChange(existing, constructed)
 						&& !isGroupChange(existing, constructed)
 						&& !isCreatorChange(existing, constructed)
