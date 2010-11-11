@@ -78,21 +78,21 @@ public class KOMutantCellLineLookup extends FullCachedLookup {
 	 */
 	public String getFullInitQuery() {
 		return "SELECT a.accID, a._logicalDB_key, ldb.name as ldbName, "
-						+ "c._CellLine_key, c.cellLine, c._CellLine_Type_key, "
-						+ "v.term as cellLineType, c._Strain_key, s.strain, "
-						+ "c._Derivation_key, c.isMutant, c.creation_date, "
-						+ "c.modification_date, "
-						+ "c._CreatedBy_key, c._ModifiedBy_key "
-						+ "FROM ACC_Accession a, ALL_CellLine_View c, "
-						+ "VOC_Term v, PRB_Strain s, ACC_LogicalDB ldb "
-						+ "WHERE a._MGIType_key = " + MGITypeConstants.CELLLINE
-						+ " " + "AND a._LogicalDB_key = ldb._LogicalDB_key "
-						+ "AND a._Object_key = c._CellLine_key "
-						+ "AND c.isMutant = 1 "
-						+ "AND c._CellLine_Type_key = v._Term_key "
-						+ "AND c._Strain_key = s._Strain_key "
-						+ "AND c._Derivation_key != null "
-						+ "AND a._LogicalDB_Key in (108,109,137,142)";
+				+ "c._CellLine_key, c.cellLine, c._CellLine_Type_key, "
+				+ "v.term as cellLineType, c._Strain_key, s.strain, "
+				+ "c._Derivation_key, c.isMutant, c.creation_date, "
+				+ "c.modification_date, "
+				+ "c._CreatedBy_key, c._ModifiedBy_key "
+				+ "FROM ACC_Accession a, ALL_CellLine_View c, "
+				+ "VOC_Term v, PRB_Strain s, ACC_LogicalDB ldb "
+				+ "WHERE a._MGIType_key = " + MGITypeConstants.CELLLINE + " "
+				+ "AND a._LogicalDB_key = ldb._LogicalDB_key "
+				+ "AND a._Object_key = c._CellLine_key "
+				+ "AND c.isMutant = 1 "
+				+ "AND c._CellLine_Type_key = v._Term_key "
+				+ "AND c._Strain_key = s._Strain_key "
+				+ "AND c._Derivation_key != null "
+				+ "AND a._LogicalDB_Key in (108,109,137,142)";
 	}
 
 	/**

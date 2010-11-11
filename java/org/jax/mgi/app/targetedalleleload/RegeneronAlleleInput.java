@@ -4,7 +4,7 @@ import java.lang.Integer;
 import org.jax.mgi.shr.exception.MGIException;
 
 /**
- * a plain old java object that represents a Regeneron Knockout Allele Input 
+ * a plain old java object that represents a Regeneron Knockout Allele Input
  * record.
  */
 

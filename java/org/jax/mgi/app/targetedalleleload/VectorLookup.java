@@ -91,8 +91,7 @@ public class VectorLookup extends FullCachedLookup {
 	private class Interpreter implements RowDataInterpreter {
 
 		public Object interpret(RowReference row) throws DBException {
-			return new KeyValue(row.getString("term"),
-					row.getInt("_term_key"));
+			return new KeyValue(row.getString("term"), row.getInt("_term_key"));
 		}
 	}
 

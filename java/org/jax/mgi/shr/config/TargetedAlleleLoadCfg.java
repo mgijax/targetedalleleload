@@ -54,8 +54,6 @@ public class TargetedAlleleLoadCfg extends InputDataCfg {
 		return getConfigBoolean("MGD_BCP_PREVENT_EXECUTE").booleanValue();
 	}
 
-	
-
 	/**
 	 * Is the load allowed to overwrite the molecular notes?
 	 * 
@@ -282,7 +280,8 @@ public class TargetedAlleleLoadCfg extends InputDataCfg {
 		return getConfigString("NOTE_TEMPLATE_CONDITIONAL_DELBACTPNEOFFL");
 	}
 
-	public String getNoteTemplateNonCondDel_BactPneo_FFL() throws ConfigException {
+	public String getNoteTemplateNonCondDel_BactPneo_FFL()
+			throws ConfigException {
 		return getConfigString("NOTE_TEMPLATE_NONCONDITIONAL_DELBACTPNEOFFL");
 	}
 

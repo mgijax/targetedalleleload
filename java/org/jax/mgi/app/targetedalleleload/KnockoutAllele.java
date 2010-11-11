@@ -25,9 +25,9 @@ import org.jax.mgi.shr.dbutils.DBException;
 import org.jax.mgi.shr.dbutils.dao.SQLStream;
 
 /**
- * A plain old java object for representing an allele record in MGD 
- * (specifically used for loading the knockout alleles created by the
- * targeted allele load).
+ * A plain old java object for representing an allele record in MGD
+ * (specifically used for loading the knockout alleles created by the targeted
+ * allele load).
  */
 
 public class KnockoutAllele implements Comparable {

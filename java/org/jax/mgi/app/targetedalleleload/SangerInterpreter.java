@@ -180,7 +180,7 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 		if (!parts[3].replaceAll("\"", "").matches(pipeline)) {
 			// Wrong project
 			qcStatistics.record("SUMMARY", NUM_NOT_APPROPRIATE);
-			
+
 			// include these records for later QC
 		}
 		if (parts[6].indexOf(",") != -1) {

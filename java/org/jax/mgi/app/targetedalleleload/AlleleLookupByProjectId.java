@@ -11,7 +11,6 @@ import java.util.Vector;
 import org.jax.mgi.dbs.SchemaConstants;
 import org.jax.mgi.shr.cache.CacheException;
 import org.jax.mgi.shr.cache.FullCachedLookup;
-import org.jax.mgi.shr.cache.KeyNotFoundException;
 import org.jax.mgi.shr.cache.KeyValue;
 import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
 import org.jax.mgi.shr.dbutils.DBException;

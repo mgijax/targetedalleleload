@@ -25,7 +25,6 @@ public class RegeneronInterpreter extends KnockoutAlleleInterpreter {
 	private static final int MIN_REC_LENGTH = 50;
 	private TargetedAlleleLoadCfg cfg = null;
 
-
 	/**
 	 * Constructs a Regeneron specific interpreter object
 	 * 

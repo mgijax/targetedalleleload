@@ -150,11 +150,11 @@ public class SangerProcessor extends KnockoutAlleleProcessor {
 					"Number of conditional input record(s)");
 		} else if (mutType.equals("Targeted non-conditional")) {
 			let = "e";
-			
+
 			// Default value
 			koAllele.setTypeKey(cfg.getAlleleType("NONCONDITIONAL"));
 
-			if(in.getCassette().equals("L1L2_Del_BactPneo_FFL")) {
+			if (in.getCassette().equals("L1L2_Del_BactPneo_FFL")) {
 				// SPECIAL CASE:
 				// Per C.Smith and H.Dene 2010-11-03, alleles with this
 				// cassette don't have a reporter, so they should not be
@@ -169,8 +169,8 @@ public class SangerProcessor extends KnockoutAlleleProcessor {
 		} else if (mutType.equals("Deletion")) {
 			let = ""; // Empty string for Deletion alleles
 			koAllele.setTypeKey(cfg.getAlleleType("DELETION"));
-			qcStatistics.record("SUMMARY", 
-					"Number of deletion input record(s)");
+			qcStatistics
+					.record("SUMMARY", "Number of deletion input record(s)");
 		} else {
 			qcStatistics.record("ERROR",
 					"Number of records with unknown mutation type");

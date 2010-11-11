@@ -49,7 +49,7 @@ public class Derivation extends org.jax.mgi.dbs.mgd.loads.Alo.Derivation {
 		// Store the key that gets generated when this object is instead
 		// into the database
 		this.setDerivationKey(dao.getKey().getKey());
-		
+
 		// Add this new derivation to the lookup
 		lookup.addToCache(this);
 	}
