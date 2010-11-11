@@ -1214,7 +1214,8 @@ public class TargetedAlleleLoad extends DLALoader {
 			Iterator it = entries.iterator();
 			while (it.hasNext()) {
 				Map.Entry entry = (Map.Entry) it.next();
-				KnockoutAllele existing = (KnockoutAllele) entry.getKey();
+				Integer key = (Integer) entry.getKey();
+				KnockoutAllele existing = alleleLookupByKey.lookup(key);
 
 				List projects = new ArrayList((Set) entry.getValue());
 
