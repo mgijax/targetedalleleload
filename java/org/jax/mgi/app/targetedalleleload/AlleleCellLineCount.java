@@ -2,7 +2,6 @@ package org.jax.mgi.app.targetedalleleload;
 
 import java.util.Set;
 
-import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
 import org.jax.mgi.dbs.SchemaConstants;
 import org.jax.mgi.shr.cache.CacheException;
 import org.jax.mgi.shr.cache.FullCachedLookup;
@@ -74,18 +73,13 @@ public class AlleleCellLineCount extends FullCachedLookup {
 	 * @return the initialization query
 	 */
 	public String getFullInitQuery() {
-		String pipeline = null;
-		try {
-			TargetedAlleleLoadCfg cfg = new TargetedAlleleLoadCfg();
-			pipeline = cfg.getPipeline();
-		} catch (MGIException e) {
-			return "";
-		}
-
 		return "SELECT a.symbol, COUNT(ac._mutantcellline_key) as cnt "
 				+ "FROM All_allele a, All_allele_cellline ac "
 				+ "WHERE a._allele_key *= ac._allele_key "
-				+ "AND a.symbol LIKE '%(" + pipeline + ")%' "
+				// This query cannot be pipeline specific because 
+				// alleles change between pipelines and creators, so we
+				// need the ability to lookup ALL allele cell line counts 
+				// + "AND a.symbol LIKE '%(" + pipeline + ")%' "
 				+ "GROUP BY a.symbol "
 				+ "ORDER BY COUNT(ac._mutantcellline_key) ";
 	}
@@ -117,12 +111,18 @@ public class AlleleCellLineCount extends FullCachedLookup {
 		// Increment the count, or if the symbol didn't exist
 		// add it and initialize the count to 1
 		Integer i = lookup(symbol.toLowerCase());
-		i = (i == null) ? new Integer(0) : new Integer(i.intValue() - 1);
+		if (i == null) {
+			throw new MGIException(this.getClass().getName()
+					+ ": Trying to decrement a non existing allele (" 
+					+ symbol + ")");
+		}
+
+		i = new Integer(i.intValue() - 1);
 
 		if (i.intValue() < 0) {
 			throw new MGIException(this.getClass().getName()
-					+ ": Trying to decrement a non-existing allele (" + symbol
-					+ ")");
+					+ ": Trying to decrement an allele lower than 0 (" 
+					+ symbol + ")");
 		}
 
 		// Replace the current value if it exists

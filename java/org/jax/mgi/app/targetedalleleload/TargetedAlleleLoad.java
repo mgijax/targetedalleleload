@@ -1005,19 +1005,19 @@ public class TargetedAlleleLoad extends DLALoader {
 			KnockoutAllele newAllele) throws MGIException {
 
 		// Update the count of MCL associated to this allele and create a new
-		// one if the count drops to "none"
+		// one if the count drops to 0
 		alleleCellLineCount.decrement(oldAllele.getSymbol());
 		alleleCellLineCount.increment(newAllele.getSymbol());
 
 		Integer count = alleleCellLineCount.lookup(oldAllele.getSymbol());
 		if (count.intValue() < 1) {
-			// we're removing the *last* MCL associated to the old allele
-			// create an orphaned MCL and associate it to the allele first
+			// the *last* MCL associated to the old allele has been removed
+			// create an orphaned MCL and associate it to the allele
 			createOrphanMCL(in, oldAllele);
 
 			// we just created a "placeholder" MCL to keep the allele
 			// associated to the correct derivation even though the last
-			// "real" MCL migrated elsewhere. Anyway, increment the counter
+			// "real" MCL migrated elsewhere. increment the counter
 			alleleCellLineCount.increment(oldAllele.getSymbol());
 		}
 
