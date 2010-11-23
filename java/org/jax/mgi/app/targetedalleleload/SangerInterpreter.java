@@ -138,20 +138,43 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 		inputData.setESCellName(fields[5]);
 		inputData.setParentESCellName(fields[6]);
 		inputData.setMutationType(fields[8]);
-		String[] locus1parts = fields[9].split("-");
-		inputData.setLocus1(locus1parts[0]);
+		
+		// Check if this is a negative strand gene by comparing the
+		// orientation of the coordinates
+		String[] part = fields[9].split("-");
+		int coordIndex = getCoordIndex(fields[9]);
 
+		inputData.setLocus1(part[coordIndex]);
+		
 		if (fields[10].equals("-")) {
-			// Deletion allele doesn't have second coord pair, use the second
-			// part of the first coord pair
-			inputData.setLocus2(locus1parts[1]);
+			// Deletion allele doesn't have second coordinate pair, use 
+			// the second part of the first coordinate pair
+			inputData.setLocus2(part[1]);
 		} else {
-			String[] locus2parts = fields[10].split("-");
-			inputData.setLocus2(locus2parts[0]);
+			part = fields[10].split("-");
+			inputData.setLocus2(part[coordIndex]);
 		}
 
 		// Return the populated inputData object.
 		return inputData;
+	}
+
+	/**
+	 * Determine if the record encodes a positive of negative strand
+	 * gene (negative strand genes are reported with the genomic 
+	 * coordinates swapped)
+	 * @param coordinates the dash separated coordinates of the first feature
+	 * @return 1 (for array element 1) if it is in the negative strand
+	 *         else 0.   
+	 */
+	private int getCoordIndex(String coordinates) {
+		String[] part = coordinates.split("-");
+		if (Integer.valueOf(part[0]).intValue() > Integer.valueOf(part[1]).intValue()) {
+			// Negative strand gene
+			return 1;
+		}
+		// default to positive strand gene
+		return 0;
 	}
 
 	/**

@@ -27,7 +27,14 @@ abstract class KnockoutAlleleFactory {
 		} else if (jNumber.equals("J:157065")) {
 			// EUCOMM Hmgu
 			return new SangerFactory();
+		} else if (jNumber.equals("J:165963")) {
+			// NorCOMM Cmhd
+			return new NorcommFactory();
+		} else if (jNumber.equals("J:165964")) {
+			// NorCOMM Mfgc
+			return new NorcommFactory();
 		}
+
 
 		throw new MGIException("Factory not found. Check Jnumber in cfg");
 	}

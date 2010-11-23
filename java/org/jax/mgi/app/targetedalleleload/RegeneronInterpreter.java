@@ -5,17 +5,8 @@ import org.jax.mgi.shr.exception.MGIException;
 import org.jax.mgi.shr.ioutils.RecordFormatException;
 
 /**
- * @is An object that knows how to create RegeneronAlleleInput objects from the
- *     Regeneron allele file
- * @has <UL>
- *      <LI>RegeneronAlleleInput object being created (which is then returned)
- *      </UL>
- * @does <UL>
- *       <LI>Parses a Regeneron Allele file record into a RegeneronAlleleInput
- *       object
- *       </UL>
- * @company The Jackson Laboratory
- * @author jmason
+ * An object that knows how to create RegeneronAlleleInput objects from 
+ * the Regeneron allele file
  */
 
 public class RegeneronInterpreter extends KnockoutAlleleInterpreter {
