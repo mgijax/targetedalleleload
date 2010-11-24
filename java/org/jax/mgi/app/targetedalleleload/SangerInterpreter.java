@@ -143,7 +143,6 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 		
 		// Check if this is a negative strand gene by comparing the
 		// orientation of the coordinates
-		String[] part = fields[9].split("-");
 		List coords = getCoords(fields[9], fields[10]);
 		inputData.setLocus1((String) coords.get(0));
 		inputData.setLocus2((String) coords.get(1));
