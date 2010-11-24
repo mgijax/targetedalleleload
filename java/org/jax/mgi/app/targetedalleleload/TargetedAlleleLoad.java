@@ -437,22 +437,7 @@ public class TargetedAlleleLoad extends DLALoader {
 				// BEGIN QC CHECKS
 				// ********************************************************
 
-				if (existing.getTransmissionKey().intValue() 
-						!= Constants.ALLELE_TRANSMISSION_CELLLINE) {
-					// Check the allele to marker association, if it has changed,
-					// report to the log for manual curation.
-					String m = LOG_ALLELE_TRANSMISSION_CHANGED
-							.replaceAll("~~INPUT_MCL~~", 
-									in.getMutantCellLine())
-							.replaceAll("~~EXISTING_ALLELE~~",
-									existing.getSymbol())
-							.replaceAll("~~CONSTRUCTED_ALLELE~~",
-									existing.getSymbol());
-
-					logger.logcInfo(m, false);
-					qcStats.record("SUMMARY", NUM_ALLELES_CHANGED_TRANS);
-					
-				} else if ( ! isMatchingGene(existing, constructed)) {
+				if ( ! isMatchingGene(existing, constructed)) {
 					// Check the allele to marker association, if it has changed,
 					// report to the log for manual curation.
 					String m = LOG_MARKER_CHANGED
@@ -586,9 +571,7 @@ public class TargetedAlleleLoad extends DLALoader {
 					qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_DERIVATION);
 					qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_ALLELE);
 
-					// Re-associate the allele (it might re-associate to the
-					// same allele, but it doing so, it will adjust the
-					// derivation)
+					// Re-associate the cell line to a new allele
 					changeMutantCellLineAssociation(in, esCell, existing,
 							constructed);
 				} else if ( ! esCell.getDerivationKey().equals(
@@ -606,14 +589,10 @@ public class TargetedAlleleLoad extends DLALoader {
 							.replaceAll("~~INPUT_DERIVATION~~",
 									getDerivationKey(in).toString());
 					logger.logcInfo(m, false);
-
 					qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_DERIVATION);
 
-					// Re-associate the allele (it might re-associate to the
-					// same allele, but it doing so, it will adjust the
-					// derivation)
-					changeMutantCellLineAssociation(in, esCell, existing,
-							constructed);
+					changeDerivationKey(getDerivationKey(in), esCell);
+
 				} else {
 
 					// Compress the note fields to discount any extra spaces
@@ -1017,6 +996,26 @@ public class TargetedAlleleLoad extends DLALoader {
 	private void changeMutantCellLineAssociation(KnockoutAlleleInput in,
 			MutantCellLine esCell, KnockoutAllele oldAllele,
 			KnockoutAllele newAllele) throws MGIException {
+
+		// Prevent the cell line from being moved to a different
+		// allele if the transmission has changed
+		if ((oldAllele.getTransmissionKey().intValue() 
+				!= Constants.ALLELE_TRANSMISSION_CELLLINE) &&
+				! oldAllele.getSymbol().equals(newAllele.getSymbol())) {
+			// Check the allele to marker association, if it has changed,
+			// report to the log for manual curation.
+			String m = LOG_ALLELE_TRANSMISSION_CHANGED
+					.replaceAll("~~INPUT_MCL~~", 
+							in.getMutantCellLine())
+					.replaceAll("~~EXISTING_ALLELE~~",
+							oldAllele.getSymbol())
+					.replaceAll("~~CONSTRUCTED_ALLELE~~",
+							newAllele.getSymbol());
+
+			logger.logcInfo(m, false);
+			qcStats.record("SUMMARY", NUM_ALLELES_CHANGED_TRANS);
+			return;
+		}
 
 		// Update the count of MCL associated to this allele and create a new
 		// one if the count drops to 0
