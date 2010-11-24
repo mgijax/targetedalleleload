@@ -89,8 +89,8 @@ NAME_TEMPLATE='targeted mutation ~~SEQUENCE~~, Velocigene'
 # ~~CHROMOSOME~~ is replaced with the chromosome of the deletion
 # ~~BUILD~~ is replaced with the genome build specified in the file
 #
-NOTE_TEMPLATE='The insertion of Velocigene cassette ~~CASSETTE~~ created a deletion of size ~~SIZE~~bp starting at position ~~START~~ and ending at position ~~END~~ of Chromosome ~~CHROMOSOME~~ (Genome Build ~~BUILD~~).'
-MISSINGCOORDS_NOTE_TEMPLATE='The insertion of Velocigene cassette ~~CASSETTE~~ deleted the coding region of this gene located on Chromosome ~~CHROMOSOME~~.'
+NOTE_TEMPLATE='The insertion of Velocigene cassette ~~CASSETTE~~ created a deletion of size ~~SIZE~~bp between positions ~~START~~-~~END~~ of Chromosome ~~CHROMOSOME~~ (Genome Build~~BUILD~~).'
+MISSINGCOORDS_NOTE_TEMPLATE='The insertion of Velocigene cassette ~~CASSETTE~~ deleted the coding region of this gene located on Chromosome ~~CHROMOSOME~~ (Genome Build~~BUILD~~).'
 
 #
 # New alleles are created with the following mutation types

@@ -1,5 +1,8 @@
 package org.jax.mgi.app.targetedalleleload;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.StringReader;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -395,7 +398,17 @@ public class TargetedAlleleLoad extends DLALoader {
 				qcStats.record("ERROR", NUM_BAD_ALLELE_PROCESSING);
 
 				String m = "General error, skipping record: "
-						+ in.getMutantCellLine() + "\n" + e.getMessage();
+						+ in.getMutantCellLine() 
+						+ "\n";
+				try {
+					BufferedReader reader = new BufferedReader(
+							new StringReader(e.getMessage()));
+					m += reader.readLine();
+				} catch (IOException e1) {
+					m = "An error occured processing "+ in.getMutantCellLine() +
+						" then another error occured trying to get that error.";
+				}
+
 				logger.logdInfo(m, false);
 				continue;
 			}
@@ -878,7 +891,7 @@ public class TargetedAlleleLoad extends DLALoader {
 			KnockoutAlleleInput in) throws MGIException {
 		Integer key = esCell.getDerivationKey();
 		Integer newKey = getDerivationKey(in);
-		if ( ! key.equals(newKey)) {
+		if ( key.equals(newKey)) {
 			// is not different
 			return false;
 		}
