@@ -177,21 +177,7 @@ ${DLAINSTALL} ${DEV} ${DO_BUILD}
 
 
 #########################################################################
-# run DLAInstall for tal_eucomm_hmgu
-#
-if [ -r ${EUCOMM_HMGU_CONFIG} ]
-then
-    echo "Source ${EUCOMM_HMGU_CONFIG}"
-    . ${EUCOMM_HMGU_CONFIG}
-else
-    echo "Cannot source configuration file: ${EUCOMM_HMGU_CONFIG}"
-    installFailed
-fi
-. ${COMMON_CONFIG}
-${DLAINSTALL} ${DEV} ${DO_BUILD}
-
-#########################################################################
-# run DLAInstall for tal_eucomm_hmgu
+# run DLAInstall for tal_norcomm_cmhd
 #
 if [ -r ${NORCOMM_CMHD_CONFIG} ]
 then
@@ -205,7 +191,7 @@ fi
 ${DLAINSTALL} ${DEV} ${DO_BUILD}
 
 #########################################################################
-# run DLAInstall for tal_eucomm_hmgu
+# run DLAInstall for tal_norcomm_mfgc
 #
 if [ -r ${NORCOMM_MFGC_CONFIG} ]
 then
