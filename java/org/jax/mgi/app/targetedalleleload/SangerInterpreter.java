@@ -180,8 +180,8 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 			coords.add(new Integer(parts1[1]));
 			coords.add(new Integer(parts2[0]));
 			coords.add(new Integer(parts2[1]));
-			Integer largest = new Integer((String) Collections.max(coords));
-			Integer smallest = new Integer((String) Collections.min(coords));
+			Integer largest = (Integer) Collections.max(coords);
+			Integer smallest = (Integer) Collections.min(coords);
 
 			// default to positive strand gene
 			genomic.add(0, smallest.toString());
