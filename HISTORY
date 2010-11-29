@@ -1,3 +1,16 @@
+TAG: targetedalleleload-4-4-0-1
+DATE: 11/29/2010
+STAFF: jmason
+CHANGES:
+1) Add norcomm specific classes and cfg files (not used yet)
+2) Add orphaned MCL when the last real MCL moves away from an allele
+3) Create derivation records on the fly as needed as long as all the
+   required information already exists in the database
+4) Update derivation associations when an MCL changes to a new allele
+5) Update note templates to be more generic to avoid needing to calculate
+   which is the start and which is the end
+6) Format the exception messages better  
+
 TAG: targetedalleleload-4-3-5-1
 DATE: 6/22/2010
 STAFF: jmason
