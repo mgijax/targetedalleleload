@@ -1159,7 +1159,7 @@ public class TargetedAlleleLoad extends DLALoader {
 		associateCellLineToAllele(oldAllele.getKey(), 
 				mclDAO.getKey().getKey());
 
-		// Set the allele to deleted status
+		// Set the old allele to deleted status
 		String query = "UPDATE ALL_Allele SET _Allele_Status_key = "+
 			Constants.ALLELE_STATUS_DELETED + " WHERE _Allele_key = "+
 			oldAllele.getKey();
