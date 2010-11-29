@@ -56,8 +56,8 @@ public class KnockoutAllele implements Comparable {
 
 	private Integer modeKey = new Integer(Constants.ALLELE_MODE);
 	private Integer typeKey = new Integer(Constants.ALLELE_TYPE);
-	private Integer statusKey = new Integer(Constants.ALLELE_STATUS);
-	private Integer transmissionKey = new Integer(Constants.TRANSMISSION_KEY);
+	private Integer statusKey = new Integer(Constants.ALLELE_STATUS_APPROVED);
+	private Integer transmissionKey = new Integer(Constants.ALLELE_TRANSMISSION_CELLLINE);
 	private Boolean isWildType = new Boolean(false);
 	private Boolean isExtinct = new Boolean(false);
 	private Boolean isMixed = new Boolean(false);
@@ -87,6 +87,21 @@ public class KnockoutAllele implements Comparable {
 	}
 
 	// Getters / Setters
+	public void setStatus(Integer key) {
+		this.statusKey = key;
+	}
+	public Integer getStatus() {
+		return this.statusKey;
+	}
+
+	public void setTransmissionKey(Integer key) {
+		this.transmissionKey = key;
+	}
+
+	public Integer getTransmissionKey() {
+		return this.transmissionKey;
+	}
+
 	public Integer getKey() {
 		return key;
 	}
@@ -95,8 +110,8 @@ public class KnockoutAllele implements Comparable {
 		this.key = key;
 	}
 
-	public void setTypeKey(Integer typeKey) {
-		this.typeKey = typeKey;
+	public void setTypeKey(Integer key) {
+		this.typeKey = key;
 	}
 
 	public Integer getTypeKey() {
@@ -107,24 +122,24 @@ public class KnockoutAllele implements Comparable {
 		return cellLineKey;
 	}
 
-	public void setCellLineKey(Integer cellLineKey) {
-		this.cellLineKey = cellLineKey;
+	public void setCellLineKey(Integer key) {
+		this.cellLineKey = key;
 	}
 
 	public Integer getMarkerKey() {
 		return markerKey;
 	}
 
-	public void setMarkerKey(Integer markerKey) {
-		this.markerKey = markerKey;
+	public void setMarkerKey(Integer key) {
+		this.markerKey = key;
 	}
 
 	public Integer getStrainKey() {
 		return strainKey;
 	}
 
-	public void setStrainKey(Integer strainKey) {
-		this.strainKey = strainKey;
+	public void setStrainKey(Integer key) {
+		this.strainKey = key;
 	}
 
 	public String getSymbol() {
@@ -183,8 +198,8 @@ public class KnockoutAllele implements Comparable {
 		return noteKey;
 	}
 
-	public void setNoteKey(Integer noteKey) {
-		this.noteKey = noteKey;
+	public void setNoteKey(Integer key) {
+		this.noteKey = key;
 	}
 
 	public Integer getNoteModifiedByKey() {
@@ -245,7 +260,7 @@ public class KnockoutAllele implements Comparable {
 		MGI_NoteState nState = new MGI_NoteState();
 		nState.setObjectKey(key);
 		nState.setMGITypeKey(new Integer(Constants.ALLELE_MGI_TYPE));
-		nState.setNoteTypeKey(new Integer(Constants.NOTE_TYPE));
+		nState.setNoteTypeKey(new Integer(Constants.NOTE_TYPE_MOLECULAR));
 
 		MGI_NoteDAO nDAO = new MGI_NoteDAO(nState);
 		stream.insert(nDAO);

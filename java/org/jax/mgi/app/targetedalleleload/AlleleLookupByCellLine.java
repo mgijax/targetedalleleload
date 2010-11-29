@@ -118,7 +118,7 @@ public class AlleleLookupByCellLine extends FullCachedLookup {
 				+ "alleleSymbol=a.symbol, alleleType=a._Allele_Type_key, "
 				+ "geneSymbol=mrk.symbol, chr=mrk.chromosome, "
 				+ "geneKey=mrk._Marker_key, geneMgiid=acc.accID, "
-				+ "alleleNote=nc.note, "
+				+ "alleleNote=nc.note, alleleTrans=a._Transmission_key, "
 				+ "alleleNoteSeq=nc.sequenceNum, alleleNoteKey=nc._note_key, "
 				+ "alleleNoteModifiedBy=n._ModifiedBy_key, "
 				+ "alleleNoteCreatedBy=n._CreatedBy_key, "
@@ -190,6 +190,8 @@ public class AlleleLookupByCellLine extends FullCachedLookup {
 				koAllele.setName(rd.alleleName);
 				koAllele.setSymbol(rd.alleleSymbol);
 				koAllele.setKey(rd.alleleKey);
+				koAllele.setTypeKey(rd.alleleType);
+				koAllele.setTransmissionKey(rd.alleleTrans);
 				koAllele.setProjectId(rd.projectId);
 				koAllele.setNote(rd.alleleNote);
 				koAllele.setNoteKey(rd.alleleNoteKey);
@@ -228,6 +230,7 @@ public class AlleleLookupByCellLine extends FullCachedLookup {
 		protected Integer alleleKey;
 		protected String projectId;
 		protected Integer alleleType;
+		protected Integer alleleTrans;
 		protected String alleleName;
 		protected String alleleSymbol;
 		protected String alleleNote;
@@ -243,6 +246,7 @@ public class AlleleLookupByCellLine extends FullCachedLookup {
 			alleleKey = row.getInt("alleleKey");
 			projectId = row.getString("projectId");
 			alleleType = row.getInt("alleleType");
+			alleleTrans = row.getInt("alleleTrans");
 			alleleName = row.getString("alleleName");
 			alleleSymbol = row.getString("alleleSymbol");
 			alleleNote = row.getString("alleleNote");

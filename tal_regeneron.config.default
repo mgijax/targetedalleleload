@@ -67,7 +67,7 @@ JNUMBER='J:136110'
 OVERWRITE_NOTE='false'
 
 #
-# New Alleles are created using the folloing template as the Allele Symbol.  
+# New Alleles are created using the following template as the Allele Symbol.  
 # ~~SYMBOL~~ is replaced with the Symbol of the gene
 # ~~SEQUENCE~~ is replaced with the (number of Existing Alleles)+1
 #
@@ -81,17 +81,16 @@ SYMBOL_TEMPLATE='~~SYMBOL~~<tm~~SEQUENCE~~(KOMP)Vlcg>'
 NAME_TEMPLATE='targeted mutation ~~SEQUENCE~~, Velocigene'
 
 #
-# New Alleles are created using the following template as a moleculare note.  
+# New Alleles are created using the following template as a molecular note.  
 # ~~CASSETTE~~ is replaced with the cassette used
 # ~~SIZE~~ is replaced with the size of the deletion
 # ~~START~~ is replaced with the start of the deletion
 # ~~END~~ is replaced with the end of the deletion
 # ~~CHROMOSOME~~ is replaced with the chromosome of the deletion
 # ~~BUILD~~ is replaced with the genome build specified in the file
-# ~~JNUMBER~~ is replaced with the JNUMBER specified in this file
 #
-NOTE_TEMPLATE='The insertion of Velocigene cassette ~~CASSETTE~~ created a deletion of size ~~SIZE~~bp starting at position ~~START~~ and ending at position ~~END~~ of Chromosome ~~CHROMOSOME~~ (Genome Build ~~BUILD~~).'
-MISSINGCOORDS_NOTE_TEMPLATE='The insertion of Velocigene cassette ~~CASSETTE~~ deleted the coding region of this gene located on Chromosome ~~CHROMOSOME~~.'
+NOTE_TEMPLATE='The insertion of Velocigene cassette ~~CASSETTE~~ created a deletion of size ~~SIZE~~bp between positions ~~START~~-~~END~~ of Chromosome ~~CHROMOSOME~~ (Genome Build~~BUILD~~).'
+MISSINGCOORDS_NOTE_TEMPLATE='The insertion of Velocigene cassette ~~CASSETTE~~ deleted the coding region of this gene located on Chromosome ~~CHROMOSOME~~ (Genome Build~~BUILD~~).'
 
 #
 # New alleles are created with the following mutation types
@@ -104,7 +103,7 @@ MUTATION_TYPES='Insertion, Intragenic deletion'
 ESCELL_LOGICAL_DB='109'
 
 #
-# The projects for regeneron are stored using the following logical db
+# The projects for Regeneron are stored using the following logical db
 #
 PROJECT_LOGICAL_DB='125'
 export PROJECT_LOGICAL_DB

@@ -38,7 +38,7 @@ public class Constants {
 	/*
 	 * MGI_NoteType key for note type (Molecular)
 	 */
-	public static final int NOTE_TYPE = 1021;
+	public static final int NOTE_TYPE_MOLECULAR = 1021;
 
 	/**
 	 * VOC_Vocab key for allele vocabulary
@@ -58,12 +58,13 @@ public class Constants {
 	/*
 	 * VOC_Term key for Allele status (Approved)
 	 */
-	public static final int ALLELE_STATUS = 847114;
+	public static final int ALLELE_STATUS_APPROVED = 847114;
+	public static final int ALLELE_STATUS_DELETED = 847112;
 
 	/*
 	 * VOC_Term key for transmission (Cell Line)
 	 */
-	public static final int TRANSMISSION_KEY = 3982953;
+	public static final int ALLELE_TRANSMISSION_CELLLINE = 3982953;
 
 	/*
 	 * MGI_RefAssocType keys for reference types (Original, Molecular)

@@ -9,7 +9,9 @@
 # 4) cp tal_csd_wtsi.config.default tal_csd_wtsi.config
 # 5) cp tal_eucomm_wtsi.config.default tal_eucomm_wtsi.config
 # 6) cp tal_eucomm_hgmu.config.default tal_eucomm_hgmu.config
-# 7) Install 
+# 7) cp tal_norcomm_cmhd.config.default tal_norcomm_cmhd.config
+# 8) cp tal_norcomm_mfgc.config.default tal_norcomm_mfgc.config
+# 9) Install 
 #
 
 Usage=Install
@@ -46,12 +48,14 @@ fi
 #
 cd `dirname $0`
 
-# establish the config files
+# establish the config file 
 REGENERON_CONFIG=tal_regeneron.config
 CSD_WTSI_CONFIG=tal_csd_wtsi.config
 CSD_UCD_CONFIG=tal_csd_ucd.config
 EUCOMM_WTSI_CONFIG=tal_eucomm_wtsi.config
 EUCOMM_HMGU_CONFIG=tal_eucomm_hmgu.config
+NORCOMM_CMHD_CONFIG=tal_norcomm_cmhd.config
+NORCOMM_MFGC_CONFIG=tal_norcomm_mfgc.config
 COMMON_CONFIG=tal_common.config
 
 #
@@ -70,7 +74,7 @@ else
 fi
 
 #
-# Create the input diretory
+# Create the input directory
 #
 if [ ! -d ${INPUTDIR} ]
 then
@@ -93,8 +97,13 @@ else
     chmod -f 755 ${INPUTDIR}
 fi
 
+echo 'running DLAINSTALL for each configuration of the load'
 
+#########################################################################
+# run DLAInstall for tal_regeneron
+#
 # Make sure config file exists and source it
+# the resource the common config and run DLAINSTALL
 if [ -r ${REGENERON_CONFIG} ]
 then
     echo "Source ${REGENERON_CONFIG}"
@@ -103,17 +112,13 @@ else
     echo "Cannot source configuration file: ${REGENERON_CONFIG}"
     installFailed
 fi
-
-
-#
-# run DLAInstall for each configuration file
-#
-echo 'running DLAINSTALL'
 . ${COMMON_CONFIG}
 ${DLAINSTALL} ${DEV} ${DO_BUILD}
 
 
-# Make sure config file exists and source it
+#########################################################################
+# run DLAInstall for tal_csd_wtsi
+#
 if [ -r ${CSD_WTSI_CONFIG} ]
 then
     echo "Source ${CSD_WTSI_CONFIG}"
@@ -122,16 +127,13 @@ else
     echo "Cannot source configuration file: ${CSD_WTSI_CONFIG}"
     installFailed
 fi
-
-#
-# run DLAInstall for tal_csd_wtsi
-# source tal_common.config again
-#
 . ${COMMON_CONFIG}
 ${DLAINSTALL} ${DEV} ${DO_BUILD}
 
 
-# Make sure config file exists and source it
+#########################################################################
+# run DLAInstall for tal_csd_ucd
+#
 if [ -r ${CSD_UCD_CONFIG} ]
 then
     echo "Source ${CSD_UCD_CONFIG}"
@@ -140,16 +142,13 @@ else
     echo "Cannot source configuration file: ${CSD_UCD_CONFIG}"
     installFailed
 fi
-
-#
-# run DLAInstall for tal_csd_ucd
-# source tal_common.config again
-#
 . ${COMMON_CONFIG}
 ${DLAINSTALL} ${DEV} ${DO_BUILD}
 
 
-# Make sure config file exists and source it
+#########################################################################
+# run DLAInstall for tal_eucomm_wtsi
+#
 if [ -r ${EUCOMM_WTSI_CONFIG} ]
 then
     echo "Source ${EUCOMM_WTSI_CONFIG}"
@@ -158,16 +157,13 @@ else
     echo "Cannot source configuration file: ${EUCOMM_WTSI_CONFIG}"
     installFailed
 fi
-
-#
-# run DLAInstall for tal_eucomm_wtsi
-# source tal_common.config again
-#
 . ${COMMON_CONFIG}
 ${DLAINSTALL} ${DEV} ${DO_BUILD}
 
 
-# Make sure config file exists and source it
+#########################################################################
+# run DLAInstall for tal_eucomm_hmgu
+#
 if [ -r ${EUCOMM_HMGU_CONFIG} ]
 then
     echo "Source ${EUCOMM_HMGU_CONFIG}"
@@ -176,15 +172,40 @@ else
     echo "Cannot source configuration file: ${EUCOMM_HMGU_CONFIG}"
     installFailed
 fi
+. ${COMMON_CONFIG}
+${DLAINSTALL} ${DEV} ${DO_BUILD}
 
-DO_BUILD=""
+
+#########################################################################
+# run DLAInstall for tal_norcomm_cmhd
+#
+if [ -r ${NORCOMM_CMHD_CONFIG} ]
+then
+    echo "Source ${NORCOMM_CMHD_CONFIG}"
+    . ${NORCOMM_CMHD_CONFIG}
+else
+    echo "Cannot source configuration file: ${NORCOMM_CMHD_CONFIG}"
+    installFailed
+fi
+. ${COMMON_CONFIG}
+${DLAINSTALL} ${DEV} ${DO_BUILD}
+
+#########################################################################
+# run DLAInstall for tal_norcomm_mfgc
+#
+if [ -r ${NORCOMM_MFGC_CONFIG} ]
+then
+    echo "Source ${NORCOMM_MFGC_CONFIG}"
+    . ${NORCOMM_MFGC_CONFIG}
+else
+    echo "Cannot source configuration file: ${NORCOMM_MFGC_CONFIG}"
+    installFailed
+fi
 
 #
 # run DLAInstall for the last time, this time build the software
 #
-# run DLAInstall for tal_eucomm_hmgu
-# source tal_common.config again
-#
+DO_BUILD=""
 . ${COMMON_CONFIG}
 ${DLAINSTALL} ${DEV} ${DO_BUILD}
 

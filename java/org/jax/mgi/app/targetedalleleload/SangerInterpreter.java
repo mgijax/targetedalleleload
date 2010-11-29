@@ -1,6 +1,7 @@
 package org.jax.mgi.app.targetedalleleload;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -138,20 +139,62 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 		inputData.setESCellName(fields[5]);
 		inputData.setParentESCellName(fields[6]);
 		inputData.setMutationType(fields[8]);
-		String[] locus1parts = fields[9].split("-");
-		inputData.setLocus1(locus1parts[0]);
-
-		if (fields[10].equals("-")) {
-			// Deletion allele doesn't have second coord pair, use the second
-			// part of the first coord pair
-			inputData.setLocus2(locus1parts[1]);
-		} else {
-			String[] locus2parts = fields[10].split("-");
-			inputData.setLocus2(locus2parts[0]);
-		}
+		
+		// Check if this is a negative strand gene by comparing the
+		// orientation of the coordinates
+		List coords = getCoords(fields[9], fields[10]);
+		inputData.setLocus1((String) coords.get(0));
+		inputData.setLocus2((String) coords.get(1));
 
 		// Return the populated inputData object.
 		return inputData;
+	}
+
+	/**
+	 * Determine if the record encodes a positive of negative strand
+	 * gene (negative strand genes are reported with the genomic 
+	 * coordinates swapped)
+	 * @param coordinates the dash separated coordinates of the first feature
+	 * @return 1 (for array element 1) if it is in the negative strand
+	 *         else 0.   
+	 */
+	private List getCoords(String locus1, String locus2) {
+		List genomic = new ArrayList();
+		String[] parts1 = locus1.split("-");
+		
+		if (locus2.equals("-")) {
+			// If the second coordinate pair field is a dash, then this 
+			// record represents a deletion allele. the genomic 
+			// coordinates are the two provided in the first 
+			// coordinate pair
+			genomic.add(0, parts1[0]);
+			genomic.add(1, parts1[1]);			
+		} else {
+			// This is not a deletion allele, so figure out the correct
+			// min/max of the coordinates provided.
+			String[] parts2 = locus2.split("-");
+		
+			List coords = new ArrayList();
+			coords.add(new Integer(parts1[0]));
+			coords.add(new Integer(parts1[1]));
+			coords.add(new Integer(parts2[0]));
+			coords.add(new Integer(parts2[1]));
+			Integer largest = (Integer) Collections.max(coords);
+			Integer smallest = (Integer) Collections.min(coords);
+
+			// default to positive strand gene
+			genomic.add(0, smallest.toString());
+			genomic.add(1, largest.toString());
+
+			// check for negative strand gene
+			int first = Integer.valueOf(parts1[0]).intValue();
+			int second = Integer.valueOf(parts2[0]).intValue();
+			if(first > second) {
+				genomic.add(0, largest.toString());
+				genomic.add(1, smallest.toString());
+			}
+		}
+		return genomic;
 	}
 
 	/**
