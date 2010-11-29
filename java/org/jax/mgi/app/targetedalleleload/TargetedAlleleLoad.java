@@ -401,6 +401,8 @@ public class TargetedAlleleLoad extends DLALoader {
 						+ in.getMutantCellLine() 
 						+ "\n";
 				try {
+					// Just the first message of the exception needs
+					// to be reported
 					BufferedReader reader = new BufferedReader(
 							new StringReader(e.getMessage()));
 					m += reader.readLine();
@@ -656,7 +658,19 @@ public class TargetedAlleleLoad extends DLALoader {
 					qcStats.record("ERROR", NUM_BAD_CELLLINE_PROCESSING);
 					String m = "Exception creating mutant cell line, "
 							+ "skipping record: " + in.getMutantCellLine()
-							+ "\n" + in + "\n" + e.getMessage();
+							+ "\n" + in + "\n";
+
+					try {
+						// Just the first message of the exception needs
+						// to be reported
+						BufferedReader reader = new BufferedReader(
+								new StringReader(e.getMessage()));
+						m += reader.readLine();
+					} catch (IOException e1) {
+						m = "An error occured processing "+ in.getMutantCellLine() +
+							" then another error occured trying to get that error.";
+					}
+
 					logger.logdInfo(m, false);
 					continue;
 				}
@@ -1030,8 +1044,8 @@ public class TargetedAlleleLoad extends DLALoader {
 			return;
 		}
 
-		// Update the count of MCL associated to this allele and create a new
-		// one if the count drops to 0
+		// Update the count of MCL associated to this allele and create an
+		// orphan MCL record if the count drops to 0
 		alleleCellLineCount.decrement(oldAllele.getSymbol());
 		alleleCellLineCount.increment(newAllele.getSymbol());
 
@@ -1039,14 +1053,15 @@ public class TargetedAlleleLoad extends DLALoader {
 		if (count.intValue() < 1) {
 			// the *last* MCL associated to the old allele has been removed
 			// create an orphaned MCL and associate it to the allele
-			createOrphanMCL(in, oldAllele);
+			createOrphanMCL(esCell, oldAllele);
 
 			// we just created a "placeholder" MCL to keep the allele
 			// associated to the correct derivation even though the last
-			// "real" MCL migrated elsewhere. increment the counter
+			// "real" MCL migrated elsewhere. increment the MCL counter
 			alleleCellLineCount.increment(oldAllele.getSymbol());
 		}
 
+		// Change the derivation _after_ the orphan is created...
 		// Changing the allele requires that the derivation key changes.
 		changeDerivationKey(getDerivationKey(in), esCell);
 
@@ -1105,23 +1120,44 @@ public class TargetedAlleleLoad extends DLALoader {
 	}
 
 
-	private void createOrphanMCL(KnockoutAlleleInput in,
+	private void createOrphanMCL(MutantCellLine esCell,
 			KnockoutAllele oldAllele) throws MGIException {
+		/*
 		SangerAlleleInput input = new SangerAlleleInput();
-
 		input.setESCellName("Orphaned");
-		input.setMutationType(in.getMutationType());
-		input.setParentESCellName(in.getParentCellLine());
-		input.setProjectId(in.getProjectId());
-		input.setGeneId(in.getGeneId());
+		input.setMutationType(esCell.getCellLineType());
+		input.setParentESCellName(esCell.get);
+		input.setProjectId(oldAllele.getProjectId());
+		input.setGeneId(oldAllele.getMarkerKey());
 		input.setLocus1("0");
 		input.setLocus2("0");
 		input.setBuild(in.getBuild());
-		input.setCassette(in.getCassette());
-		input.setInputPipeline(in.getInputPipeline());
+		input.setCassette();
+		input.setInputPipeline(cfg.getPipeline());
 
 		Integer celllineKey = createMutantCellLine(input, true);
-		associateCellLineToAllele(oldAllele.getKey(), celllineKey);
+		
+		*/
+		//////////////////////////////////////////////////////////////
+
+		// Create the mutant cell line
+		MutantCellLine mcl = new MutantCellLine();
+		mcl.setCellLine("Orphaned");
+		mcl.setCellLineTypeKey(new Integer(Constants.ESCELL_TYPE_KEY));
+		mcl.setDerivationKey(esCell.getDerivationKey());
+		mcl.setIsMutant(new Boolean(true));
+		mcl.setStrainKey(esCell.getStrainKey());
+		mcl.setCreationDate(currentTime);
+		mcl.setModificationDate(currentTime);
+		mcl.setCreatedByKey(cfg.getJobStreamKey());
+		mcl.setModifiedByKey(cfg.getJobStreamKey());
+
+		// Insert the MCL into the database to get the _CellLine_key
+		ALL_CellLineDAO mclDAO = new ALL_CellLineDAO(mcl.getState());
+		loadStream.insert(mclDAO);
+		//////////////////////////////////////////////////////////////
+		associateCellLineToAllele(oldAllele.getKey(), 
+				mclDAO.getKey().getKey());
 
 		// Set the allele to deleted status
 		String query = "UPDATE ALL_Allele SET _Allele_Status_key = "+
