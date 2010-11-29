@@ -1167,7 +1167,9 @@ public class TargetedAlleleLoad extends DLALoader {
 		executeQuery(query);
 
 		qcStats.record("WARNING", NUM_ORPHANED_ALLELES);
-		logger.logcInfo("Orphaned allele " + oldAllele.getSymbol(), false);
+		logger.logcInfo("Orphaned allele " 
+				+ oldAllele.getSymbol() 
+				+ "\n", false);
 	}
 
 	private Integer createMutantCellLine(KnockoutAlleleInput in, boolean orphan)
