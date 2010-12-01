@@ -76,7 +76,7 @@ LOG_FACTORY=org.jax.mgi.shr.dla.log.DLALoggerFactory
 export LOG_PROC LOG_DIAG LOG_CUR LOG_VAL LOG_DEBUG 
 export CACHE_DEBUG LOG_FACTORY
 
-TAL_UPDATE=false
+TAL_UPDATE=true
 export TAL_UPDATE
 
 ###########################################################################

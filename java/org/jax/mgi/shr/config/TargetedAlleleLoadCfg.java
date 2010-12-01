@@ -55,6 +55,18 @@ public class TargetedAlleleLoadCfg extends InputDataCfg {
 	}
 
 	/**
+	 * Is the load in update only mode?
+	 * 
+	 * @assumes The "TAL_UPDATE" constant is defined
+	 * @effects Nothing
+	 * @return The configuration value
+	 * @throws ConfigException
+	 *             if the value is not found
+	 */
+	public boolean getUpdateOnlyMode() throws ConfigException {
+		return getConfigBoolean("TAL_UPDATE").booleanValue();
+	}
+	/**
 	 * Is the load allowed to overwrite the molecular notes?
 	 * 
 	 * @assumes The "OVERWRITE_NOTE" constant is defined in the config file and

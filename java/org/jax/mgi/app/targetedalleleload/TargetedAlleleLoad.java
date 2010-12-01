@@ -310,7 +310,6 @@ public class TargetedAlleleLoad extends DLALoader {
 		// by the load so far
 		qcStats.record("SUMMARY", NUM_ALLELES_CREATED, 0);
 		qcStats.record("SUMMARY", NUM_CELLLINES_CREATED, 0);
-		return;
 	}
 
 	/**
@@ -428,7 +427,10 @@ public class TargetedAlleleLoad extends DLALoader {
 			// cache (database or recently created)?
 			MutantCellLine esCell = koMutantCellLineLookup.lookup(in
 					.getMutantCellLine());
-			if (esCell != null) {
+			
+			// Update mode or create mode
+			if (cfg.getUpdateOnlyMode()) {
+				if (esCell != null) {
 				// Mutant ES Cell found in MGI, check the associated allele
 
 				// Find the existing associated allele
@@ -455,16 +457,7 @@ public class TargetedAlleleLoad extends DLALoader {
 				if ( ! isMatchingGene(existing, constructed)) {
 					// Check the allele to marker association, if it has changed,
 					// report to the log for manual curation.
-					String m = LOG_MARKER_CHANGED
-							.replaceAll("~~INPUT_MCL~~", 
-									in.getMutantCellLine())
-							.replaceAll("~~EXISTING_MARKER~~",
-									existing.getSymbol())
-							.replaceAll("~~INPUT_MARKER~~",
-									constructed.getSymbol());
-
-					logger.logcInfo(m, false);
-					qcStats.record("SUMMARY", NUM_CELLINES_CHANGED_MARKER);
+					logMarkerChanged(in, constructed, existing);
 				} else if (alleleProjects.get(existing.getKey()) != null ||
 						( ! existing.getProjectId().equals(
 						constructed.getProjectId())
@@ -477,7 +470,7 @@ public class TargetedAlleleLoad extends DLALoader {
 					// for the allele have been
 					// verified to require the same change
 
-					// The extra "|| alleleProjects.get(existing) != null"
+					// The extra "alleleProjects.get(existing) != null ||"
 					// check is to see if there are project IDs that have
 					// NOT
 					// changed from the original, when others have. The
@@ -516,77 +509,26 @@ public class TargetedAlleleLoad extends DLALoader {
 					// 2- Type
 					// 3- IKMC group
 					// 4- Creator
+					// 5- Vector
 
-					boolean typeChange = isTypeChange(existing, constructed);
-					boolean groupChange = isGroupChange(existing, constructed);
-					boolean creatorChange = isCreatorChange(existing,
-							constructed);
-					boolean numberChange = isNumberChange(existing, constructed);
-
-					if (typeChange) {
-						String m = LOG_CELLLINE_TYPE_CHANGED
-								.replaceAll("~~INPUT_MCL~~",
-										in.getMutantCellLine())
-								.replaceAll("~~EXISTING_SYMBOL~~",
-										existing.getSymbol())
-								.replaceAll("~~INPUT_SYMBOL~~",
-										constructed.getSymbol());
-						logger.logcInfo(m, false);
-						qcStats.record("SUMMARY", NUM_CELLLINES_CHANGE_TYPE);
+					if (isTypeChange(existing, constructed)) {
+						logTypeChange(in, constructed, existing);
 					}
 
-					if (groupChange) {
-						String m = LOG_CELLLINE_GROUP_CHANGED
-								.replaceAll("~~INPUT_MCL~~",
-										in.getMutantCellLine())
-								.replaceAll("~~EXISTING_SYMBOL~~",
-										existing.getSymbol())
-								.replaceAll("~~INPUT_SYMBOL~~",
-										constructed.getSymbol());
-						logger.logcInfo(m, false);
-						qcStats.record("SUMMARY",
-								NUM_CELLLINES_CHANGED_PIPELINE);
+					if (isGroupChange(existing, constructed)) {
+						logGroupChange(in, constructed, existing);
 					}
 
-					if (creatorChange) {
-						String m = LOG_CELLLINE_CREATOR_CHANGED
-								.replaceAll("~~INPUT_MCL~~",
-										in.getMutantCellLine())
-								.replaceAll("~~EXISTING_SYMBOL~~",
-										existing.getSymbol())
-								.replaceAll("~~INPUT_SYMBOL~~",
-										constructed.getSymbol());
-						logger.logcInfo(m, false);
-						qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_CREATOR);
+					if (isCreatorChange(existing, constructed)) {
+						logCreatorChange(in, constructed, existing);
 					}
 
-					if (numberChange) {
-						String m = LOG_CELLLINE_NUMBER_CHANGED
-								.replaceAll("~~INPUT_MCL~~",
-										in.getMutantCellLine())
-								.replaceAll("~~EXISTING_SYMBOL~~",
-										existing.getSymbol())
-								.replaceAll("~~INPUT_SYMBOL~~",
-										constructed.getSymbol());
-						logger.logcInfo(m, false);
-						qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_NUMBER);
+					if (isNumberChange(existing, constructed)) {
+						logNumberChange(in, constructed, existing);
 					}
-
-					String m = LOG_CELLLINE_ALLELE_CHANGED
-							.replaceAll("~~INPUT_MCL~~", in.getMutantCellLine())
-							.replaceAll("~~EXISTING_SYMBOL~~",
-									existing.getSymbol())
-							.replaceAll("~~INPUT_SYMBOL~~",
-									constructed.getSymbol())
-							.replaceAll("~~EXISTING_DERIVATION~~",
-									esCell.getDerivationKey().toString())
-							.replaceAll("~~INPUT_DERIVATION~~",
-									getDerivationKey(in).toString());
-					logger.logcInfo(m, false);
-					qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_DERIVATION);
-					qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_ALLELE);
 
 					// Re-associate the cell line to a new allele
+					logAlleleChanged(in, constructed, esCell, existing);
 					changeMutantCellLineAssociation(in, esCell, existing,
 							constructed);
 				} else if ( ! esCell.getDerivationKey().equals(
@@ -595,17 +537,7 @@ public class TargetedAlleleLoad extends DLALoader {
 					// parental cell line, the creator, the vector and the
 					// allele type)
 
-					String m = LOG_CELLLINE_DERIVATION_CHANGED
-							.replaceAll("~~INPUT_MCL~~", in.getMutantCellLine())
-							.replaceAll("~~EXISTING_SYMBOL~~",
-									existing.getSymbol())
-							.replaceAll("~~EXISTING_DERIVATION~~",
-									esCell.getDerivationKey().toString())
-							.replaceAll("~~INPUT_DERIVATION~~",
-									getDerivationKey(in).toString());
-					logger.logcInfo(m, false);
-					qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_DERIVATION);
-
+					logDerivationChange(in, esCell, existing);
 					changeDerivationKey(getDerivationKey(in), esCell);
 
 				} else {
@@ -647,79 +579,176 @@ public class TargetedAlleleLoad extends DLALoader {
 				// ********************************************************
 				// done with QC checks. skip on to the next record
 				continue;
-
+				}
 			} else {
-				// MCL not found in database
-
-				Integer mclKey = null;
-				try {
-					mclKey = createMutantCellLine(in, false);
-				} catch (MGIException e) {
-					qcStats.record("ERROR", NUM_BAD_CELLLINE_PROCESSING);
-					String m = "Exception creating mutant cell line, "
-							+ "skipping record: " + in.getMutantCellLine()
-							+ "\n" + in + "\n";
-
+				
+				// Only create anything if the cell line doesn't exist
+				// the QC checking process (which occurs if this load
+				// is run when the cfg.getUpdateOnlyMode() is true)
+				
+				// If the cell line was not found in the database,
+				// create a new cell line and associated objects
+				if (esCell == null) {
+					Integer mclKey = null;
 					try {
-						// Just the first message of the exception needs
-						// to be reported
-						BufferedReader reader = new BufferedReader(
-								new StringReader(e.getMessage()));
-						m += reader.readLine();
-					} catch (IOException e1) {
-						m = "An error occured processing "+ in.getMutantCellLine() +
-							" then another error occured trying to get that error.";
+						mclKey = createMutantCellLine(in, false);
+					} catch (MGIException e) {
+						qcStats.record("ERROR", NUM_BAD_CELLLINE_PROCESSING);
+						String m = "Exception creating mutant cell line, "
+								+ "skipping record: " + in.getMutantCellLine()
+								+ "\n" + in + "\n";
+						try {
+							// Just the first message of the exception needs
+							// to be reported
+							BufferedReader reader = new BufferedReader(
+									new StringReader(e.getMessage()));
+							m += reader.readLine();
+						} catch (IOException e1) {
+							m = "An error occured processing "+ in.getMutantCellLine() +
+								" then another error occured trying to get that error.";
+						}
+						logger.logdInfo(m, false);
+						continue;
 					}
 
-					logger.logdInfo(m, false);
-					continue;
-				}
-				if (mclKey == null) {
-					qcStats.record("ERROR", NUM_BAD_CELLLINE_PROCESSING);
-					String m = "Mutant cell line not created, "
-							+ "skipping record: " + in.getMutantCellLine()
-							+ "\n" + in + "\n";
-					logger.logdInfo(m, false);
-					continue;
-				}
-
-				// lookup existing alleles for this project
-				String projectId = in.getProjectId();
-				Map alleles = alleleLookupByProjectId.lookup(projectId);
-
-				Integer alleleKey = null;
-				if (alleles != null) {
-					// try to get the allele identified by the constructed
-					// symbol
-					Map allele = (Map) alleles.get(constructed.getSymbol());
-					if (allele != null) {
-						// found an allele with this same symbol
-						alleleKey = (Integer) allele.get("key");
+					if (mclKey == null) {
+						qcStats.record("ERROR", NUM_BAD_CELLLINE_PROCESSING);
+						String m = "Mutant cell line not created, "
+								+ "skipping record: " + in.getMutantCellLine()
+								+ "\n" + in + "\n";
+						logger.logdInfo(m, false);
+						continue;
 					}
+	
+					// lookup existing alleles for this project
+					String projectId = in.getProjectId();
+					Map alleles = alleleLookupByProjectId.lookup(projectId);
+					Integer alleleKey = null;
+					if (alleles != null) {
+						// try to get the allele identified by the constructed
+						// symbol
+						Map allele = (Map) alleles.get(constructed.getSymbol());
+						if (allele != null) {
+							// found an allele with this same symbol
+							alleleKey = (Integer) allele.get("key");
+						}
+					}
+	
+					if (alleleKey == null) {
+						// did not find appropriate allele. create a new allele
+						createAllele(constructed, in, alleles);
+						alleleKey = constructed.getKey();
+					}
+	
+					// if an appropriate allele cannot be found or created,
+					// report the error and skip on to the next record
+					if (alleleKey == null) {
+						String m = "An error occured creating allele: ";
+						m += constructed + "\n";
+						m += in + "\n";
+						logger.logdInfo(m, false);
+						continue;
+					}
+	
+					associateCellLineToAllele(alleleKey, mclKey);
 				}
-
-				if (alleleKey == null) {
-					// did not find appropriate allele. create a new allele
-					createAllele(constructed, in, alleles);
-					alleleKey = constructed.getKey();
-				}
-
-				// if an appropriate allele cannot be found or created,
-				// report the error and skip on to the next record
-				if (alleleKey == null) {
-					String m = "An error occured creating allele: ";
-					m += constructed + "\n";
-					m += in + "\n";
-					logger.logdInfo(m, false);
-					continue;
-				}
-
-				associateCellLineToAllele(alleleKey, mclKey);
 			}
-		}
-
-		return;
+		} // end while (iter.hasNext())
 	} // end protected void run()
+
+	// Logging helper functions
+	private void logMarkerChanged(KnockoutAlleleInput in,
+			KnockoutAllele constructed, KnockoutAllele existing) {
+		String m = LOG_MARKER_CHANGED
+				.replaceAll("~~INPUT_MCL~~", 
+						in.getMutantCellLine())
+				.replaceAll("~~EXISTING_MARKER~~",
+						existing.getSymbol())
+				.replaceAll("~~INPUT_MARKER~~",
+						constructed.getSymbol());
+
+		logger.logcInfo(m, false);
+		qcStats.record("SUMMARY", NUM_CELLINES_CHANGED_MARKER);
+	}
+	private void logDerivationChange(KnockoutAlleleInput in,
+			MutantCellLine esCell, KnockoutAllele existing) throws MGIException {
+		String m = LOG_CELLLINE_DERIVATION_CHANGED
+				.replaceAll("~~INPUT_MCL~~", in.getMutantCellLine())
+				.replaceAll("~~EXISTING_SYMBOL~~",
+						existing.getSymbol())
+				.replaceAll("~~EXISTING_DERIVATION~~",
+						esCell.getDerivationKey().toString())
+				.replaceAll("~~INPUT_DERIVATION~~",
+						getDerivationKey(in).toString());
+		logger.logcInfo(m, false);
+		qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_DERIVATION);
+	}
+	private void logAlleleChanged(KnockoutAlleleInput in,
+			KnockoutAllele constructed, MutantCellLine esCell,
+			KnockoutAllele existing) throws MGIException {
+		String m = LOG_CELLLINE_ALLELE_CHANGED
+				.replaceAll("~~INPUT_MCL~~", in.getMutantCellLine())
+				.replaceAll("~~EXISTING_SYMBOL~~",
+						existing.getSymbol())
+				.replaceAll("~~INPUT_SYMBOL~~",
+						constructed.getSymbol())
+				.replaceAll("~~EXISTING_DERIVATION~~",
+						esCell.getDerivationKey().toString())
+				.replaceAll("~~INPUT_DERIVATION~~",
+						getDerivationKey(in).toString());
+		logger.logcInfo(m, false);
+		qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_DERIVATION);
+		qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_ALLELE);
+	}
+	private void logNumberChange(KnockoutAlleleInput in,
+			KnockoutAllele constructed, KnockoutAllele existing) {
+		String m = LOG_CELLLINE_NUMBER_CHANGED
+				.replaceAll("~~INPUT_MCL~~",
+						in.getMutantCellLine())
+				.replaceAll("~~EXISTING_SYMBOL~~",
+						existing.getSymbol())
+				.replaceAll("~~INPUT_SYMBOL~~",
+						constructed.getSymbol());
+		logger.logcInfo(m, false);
+		qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_NUMBER);
+	}
+	private void logCreatorChange(KnockoutAlleleInput in,
+			KnockoutAllele constructed, KnockoutAllele existing) {
+		String m = LOG_CELLLINE_CREATOR_CHANGED
+				.replaceAll("~~INPUT_MCL~~",
+						in.getMutantCellLine())
+				.replaceAll("~~EXISTING_SYMBOL~~",
+						existing.getSymbol())
+				.replaceAll("~~INPUT_SYMBOL~~",
+						constructed.getSymbol());
+		logger.logcInfo(m, false);
+		qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_CREATOR);
+	}
+	private void logGroupChange(KnockoutAlleleInput in,
+			KnockoutAllele constructed, KnockoutAllele existing) {
+		String m = LOG_CELLLINE_GROUP_CHANGED
+				.replaceAll("~~INPUT_MCL~~",
+						in.getMutantCellLine())
+				.replaceAll("~~EXISTING_SYMBOL~~",
+						existing.getSymbol())
+				.replaceAll("~~INPUT_SYMBOL~~",
+						constructed.getSymbol());
+		logger.logcInfo(m, false);
+		qcStats.record("SUMMARY",
+				NUM_CELLLINES_CHANGED_PIPELINE);
+	}
+	private void logTypeChange(KnockoutAlleleInput in,
+			KnockoutAllele constructed, KnockoutAllele existing) {
+		String m = LOG_CELLLINE_TYPE_CHANGED
+				.replaceAll("~~INPUT_MCL~~",
+						in.getMutantCellLine())
+				.replaceAll("~~EXISTING_SYMBOL~~",
+						existing.getSymbol())
+				.replaceAll("~~INPUT_SYMBOL~~",
+						constructed.getSymbol());
+		logger.logcInfo(m, false);
+		qcStats.record("SUMMARY", NUM_CELLLINES_CHANGE_TYPE);
+	}
 
 	/**
 	 * Checks if two KnockoutAllele objects have the same creator lab code based
