@@ -894,23 +894,25 @@ public class TargetedAlleleLoad extends DLALoader {
 	 * @return the type of allele passed in
 	 */
 	private String getAlleleType(KnockoutAllele allele) {
-		Matcher regexMatcher;
-		String type;
+        Matcher regexMatcher;
+        String type;
 
-		regexMatcher = alleleTypePattern.matcher(allele.getSymbol());
-		if (regexMatcher.find()) {
-			if (regexMatcher.group(1).equals("a")) {
-				type = "Conditional";
-			} else if (regexMatcher.group(1).equals("e")) {
-				type = "Targeted non-conditional";
-			} else {
-				type = "Unknown";
-			}
-		} else {
-			type = "Deletion";
-		}
+        regexMatcher = alleleTypePattern.matcher(allele.getSymbol());
+        if (regexMatcher.find()) {
+            if (regexMatcher.group(1).equals("a")) {
+                type = "Conditional";
+            } else if (regexMatcher.group(1).equals("e")) {
+                type = "Targeted non-conditional";
+            } else if (regexMatcher.group(1).equals("e")) {
+                type = "Deletion";
+            } else {
+                type = "Unknown";
+            }
+        } else {
+            type = "Deletion";
+        }
 
-		return type;
+        return type;
 	}
 
 	/**
