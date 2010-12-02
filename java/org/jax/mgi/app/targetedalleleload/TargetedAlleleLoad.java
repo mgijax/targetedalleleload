@@ -458,7 +458,6 @@ public class TargetedAlleleLoad extends DLALoader {
 					// derivation.  The allele type overrules the derivation
 					// if it's different.
 					String aType = getAlleleType(existing);
-					System.out.println(existing + " type = "+aType);
 					Integer typeKey = (Integer) Constants.MUTATION_TYPE_KEYS.get(aType);
 					
 					String vector = d.getVectorName();
@@ -905,9 +904,8 @@ public class TargetedAlleleLoad extends DLALoader {
 			} else if (regexMatcher.group(1).equals("e")) {
 				type = "Targeted non-conditional";
 			} else {
-				type="Unknown";
+				type = "Unknown";
 			}
-			type = regexMatcher.group(1);
 		} else {
 			type = "Deletion";
 		}
