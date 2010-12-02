@@ -903,7 +903,7 @@ public class TargetedAlleleLoad extends DLALoader {
                 type = "Conditional";
             } else if (regexMatcher.group(1).equals("e")) {
                 type = "Targeted non-conditional";
-            } else if (regexMatcher.group(1).equals("e")) {
+            } else if (regexMatcher.group(1).equals("")) {
                 type = "Deletion";
             } else {
                 type = "Unknown";
@@ -911,7 +911,6 @@ public class TargetedAlleleLoad extends DLALoader {
         } else {
             type = "Deletion";
         }
-
         return type;
 	}
 
