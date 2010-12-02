@@ -62,7 +62,7 @@ fi
 #  Establish the configuration file names.
 #
 CONFIG_LOAD=`pwd`/$1
-CONFIG_LOAD_COMMON=`pwd`/tal_common_update.config
+CONFIG_LOAD_COMMON=`pwd`/tal_common_updatederivations.config
 
 #
 #  Make sure the configuration files are readable.

@@ -66,6 +66,20 @@ public class TargetedAlleleLoadCfg extends InputDataCfg {
 	public boolean getUpdateOnlyMode() throws ConfigException {
 		return getConfigBoolean("TAL_UPDATE").booleanValue();
 	}
+
+	/**
+	 * Is the load in update derivation only mode?
+	 * 
+	 * @assumes The "TAL_UPDATE_DERIVATIONS" constant is defined
+	 * @effects Nothing
+	 * @return The configuration value
+	 * @throws ConfigException
+	 *             if the value is not found
+	 */	public boolean getUpdateDerivationMode() throws ConfigException {
+		// TODO Auto-generated method stub
+		return getConfigBoolean("TAL_UPDATE_DERIVATIONS").booleanValue();
+	}
+
 	/**
 	 * Is the load allowed to overwrite the molecular notes?
 	 * 

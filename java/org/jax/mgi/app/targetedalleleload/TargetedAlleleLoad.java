@@ -21,6 +21,7 @@ import org.jax.mgi.dbs.mgd.AccessionLib;
 import org.jax.mgi.dbs.mgd.dao.ALL_Allele_CellLineDAO;
 import org.jax.mgi.dbs.mgd.dao.ALL_Allele_CellLineState;
 import org.jax.mgi.dbs.mgd.dao.ALL_CellLineDAO;
+import org.jax.mgi.dbs.mgd.loads.Alo.DerivationLookupByKey;
 import org.jax.mgi.dbs.mgd.loads.Alo.MutantCellLine;
 import org.jax.mgi.dbs.mgd.lookup.CellLineNameLookupByKey;
 import org.jax.mgi.dbs.mgd.lookup.ParentStrainLookupByParentKey;
@@ -151,6 +152,7 @@ public class TargetedAlleleLoad extends DLALoader {
 	private CellLineStrainKeyLookupByCellLineKey cellLineStrainKeyLookupByCellLineKey;
 	private StrainNameLookup strainNameLookup;
 	private AlleleCellLineCount alleleCellLineCount;
+	private DerivationLookupByKey derivationLookupByKey;
 
 	// Class variables to hold global QC data
 	private Map alleleProjects = new HashMap();
@@ -183,6 +185,7 @@ public class TargetedAlleleLoad extends DLALoader {
 		derivationLookup = DerivationLookupByVectorCreatorParentType
 				.getInstance();
 
+		derivationLookupByKey = new DerivationLookupByKey();
 		alleleLookupByCellLine = new AlleleLookupByCellLine();
 		alleleLookupByCellLine.initCache();
 
@@ -428,6 +431,50 @@ public class TargetedAlleleLoad extends DLALoader {
 			MutantCellLine esCell = koMutantCellLineLookup.lookup(in
 					.getMutantCellLine());
 			
+			if (cfg.getUpdateDerivationMode()) {
+				if (esCell != null) {
+					// Find the existing associated allele
+					KnockoutAllele existing = alleleLookupByCellLine.lookup(in
+							.getMutantCellLine());
+
+					// If the associated allele can't be found, there's a major
+					// problem. The caches are out of synch, or the cell line to
+					// allele association is missing. Regardless, we can't
+					// process this record further, report the error and continue
+					if (existing == null) {
+						// Report this to the diagnostic log
+						String m = LOG_ALLELE_NOT_FOUND.replaceAll("~~INPUT_MCL~~",
+								in.getMutantCellLine());
+						logger.logdInfo(m, true);
+						qcStats.record("ERROR", NUM_CELLINES_MISSING_ALLELE);
+						continue;
+					}
+
+					Derivation d = (Derivation) derivationLookupByKey.lookup(esCell.getDerivationKey());
+					
+					// We need to compare the type of allele to the associated
+					// derivation.  The allele type overrules the derivation
+					// if it's different.
+					String aType = getAlleleType(existing);
+					Integer typeKey = (Integer) Constants.MUTATION_TYPE_KEYS.get(aType);
+					
+					String vector = d.getVectorName();
+					Integer parentKey = d.getParentCellLineKey();
+
+					Integer realDerivationKey = getDerivationKey(vector, parentKey, typeKey);
+					
+					if ( ! esCell.getDerivationKey().equals(realDerivationKey)) {
+						logDerivationChange(in, esCell, existing);
+						changeDerivationKey(realDerivationKey, esCell);
+					}
+				}
+				
+				// We are in update the derivation mode only!  Nothing
+				// else is supposed to occur, so just skip to the next
+				// record
+				continue;
+			}
+		
 			// Update mode or create mode
 			if (cfg.getUpdateOnlyMode()) {
 				if (esCell != null) {
@@ -652,7 +699,7 @@ public class TargetedAlleleLoad extends DLALoader {
 	
 					associateCellLineToAllele(alleleKey, mclKey);
 				}
-			}
+			} // end if (cfg.getUpdateOnlyMode())
 		} // end while (iter.hasNext())
 	} // end protected void run()
 
@@ -838,6 +885,34 @@ public class TargetedAlleleLoad extends DLALoader {
 	}
 
 	/**
+	 * Returns the type of an IKMC allele based on a letter code defined
+	 * by the International nomenclature committee
+	 * 
+	 * @param allele 
+	 * @return the type of allele passed in
+	 */
+	private String getAlleleType(KnockoutAllele allele) {
+		Matcher regexMatcher;
+		String type;
+
+		regexMatcher = alleleTypePattern.matcher(allele.getSymbol());
+		if (regexMatcher.find()) {
+			if (regexMatcher.group(1).equals("a")) {
+				type = "Conditional";
+			} else if (regexMatcher.group(1).equals("e")) {
+				type = "Targeted non-conditional";
+			} else {
+				type="Unknown";
+			}
+			type = regexMatcher.group(1);
+		} else {
+			type = "Deletion";
+		}
+
+		return type;
+	}
+
+	/**
 	 * Checks if two KnockoutAllele objects have the same type based on a
 	 * substring of the symbols. The type has been included in the allele symbol
 	 * as a letter code (or lacking a letter) and is a strong pattern to find
@@ -851,23 +926,8 @@ public class TargetedAlleleLoad extends DLALoader {
 	 * @return true if both alleles have the same type, false otherwise
 	 */
 	private boolean isTypeChange(KnockoutAllele first, KnockoutAllele second) {
-		Matcher regexMatcher;
-		String firstType;
-		String secondType;
-
-		regexMatcher = alleleTypePattern.matcher(first.getSymbol());
-		if (regexMatcher.find()) {
-			firstType = regexMatcher.group(1);
-		} else {
-			firstType = "Deletion";
-		}
-
-		regexMatcher = alleleTypePattern.matcher(second.getSymbol());
-		if (regexMatcher.find()) {
-			secondType = regexMatcher.group(1);
-		} else {
-			secondType = "Deletion";
-		}
+		String firstType = getAlleleType(first);
+		String secondType = getAlleleType(second);
 
 		if (firstType.equals(secondType)) {
 			// is not different
@@ -959,6 +1019,68 @@ public class TargetedAlleleLoad extends DLALoader {
 		return false;
 	}
 
+	private Integer getDerivationKey(String vector, Integer parentKey, Integer typeKey)
+	throws MGIException {
+		// Find the derivation key for this ES Cell
+		// The correct derivation is found by combining:
+		// * cassette
+		// * parental cell line
+		// * mutation type
+		// * creator
+		Integer vectorKey = vectorLookup.lookup(vector);
+		
+		if (vectorKey == null) {
+			throw new MGIException("Cannot find vector: "
+					+ vector);
+		}
+
+		Integer creatorKey = new Integer(cfg.getCreatorKey());
+
+		String dCompoundKey = vectorKey.toString();
+		dCompoundKey += "|" + creatorKey.toString();
+		dCompoundKey += "|" + parentKey.toString();
+		dCompoundKey += "|" + typeKey.toString();
+		
+		Integer derivationKey = derivationLookup.lookup(dCompoundKey);
+		
+		if (derivationKey == null) {
+			// CREATE THE NEW DERIVATION AND INSERT IT
+			Derivation d = new Derivation();
+		
+			String creatorName = vocTermLookup.lookup(creatorKey);
+			String typeName = vocTermLookup.lookup(typeKey);
+			String parentName = cellLineNameLookupByKey.lookup(parentKey);
+			String strainName = strainNameLookup
+					.lookup(cellLineStrainKeyLookupByCellLineKey
+							.lookup(parentKey));
+		
+			// Derivation name is Creator+Type+Parental+Strain+Vector
+			String name = creatorName + " " + typeName + " " + parentName + " "
+					+ strainName + " " + vector;
+		
+			d.setName(name);
+			d.setDescription(null);
+			d.setVectorKey(vectorKey);
+			d.setVectorTypeKey(new Integer(Constants.VECTOR_TYPE_KEY));
+			d.setParentCellLineKey(parentKey);
+			d.setDerivationTypeKey(typeKey);
+			d.setCreatorKey(creatorKey);
+			d.setRefsKey(null);
+		
+			// Inserting a new derivation automatically adds it to the
+			// singleton derivation lookup cache
+			d.insert(loadStream);
+		
+			derivationKey = d.getDerivationKey();
+		
+			String s = "Creating derivation for " + name;
+			qcStats.record("WARNING", s);
+			logger.logdInfo(s, true);
+		}
+		
+		return derivationKey;
+	}
+	
 	private Integer getDerivationKey(KnockoutAlleleInput in)
 			throws MGIException {
 

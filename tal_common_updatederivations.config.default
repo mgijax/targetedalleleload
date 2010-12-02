@@ -77,7 +77,7 @@ export LOG_PROC LOG_DIAG LOG_CUR LOG_VAL LOG_DEBUG
 export CACHE_DEBUG LOG_FACTORY
 
 TAL_UPDATE=false
-TAL_UPDATEDERIVATIONS=false
+TAL_UPDATEDERIVATIONS=true
 export TAL_UPDATE TAL_UPDATEDERIVATIONS
 
 ###########################################################################
