@@ -1441,6 +1441,55 @@ public class TargetedAlleleLoad extends DLALoader {
 	 */
 	protected void postprocess() throws MGIException {
 
+		TreeMap qc = null;
+		Iterator iterator = null;
+
+		// Print out the error statistics
+		qc = (TreeMap) qcStats.getStatistics().get("ERROR");
+
+		if (qc != null) {
+			logger.logdInfo("\nERRORS", false);
+			logger.logpInfo("\nERRORS", false);
+
+			iterator = qc.keySet().iterator();
+			while (iterator.hasNext()) {
+				String label = (String) iterator.next();
+				logger.logdInfo(label + ": " + qc.get(label), false);
+				logger.logpInfo(label + ": " + qc.get(label), false);
+			}
+		}
+
+		// Print out the warning statistics
+		qc = (TreeMap) qcStats.getStatistics().get("WARNING");
+
+		if (qc != null) {
+			logger.logdInfo("\nWARNINGS", false);
+			logger.logpInfo("\nWARNINGS", false);
+
+			iterator = qc.keySet().iterator();
+			while (iterator.hasNext()) {
+				String label = (String) iterator.next();
+				logger.logdInfo(label + ": " + qc.get(label), false);
+				logger.logpInfo(label + ": " + qc.get(label), false);
+			}
+		}
+
+		// Print out the summary statistics
+		qc = (TreeMap) qcStats.getStatistics().get("SUMMARY");
+
+		if (qc != null) {
+			logger.logdInfo("\nSUMMARY", false);
+			logger.logpInfo("\nSUMMARY", false);
+
+			iterator = qc.keySet().iterator();
+			while (iterator.hasNext()) {
+				String label = (String) iterator.next();
+				logger.logdInfo(label + ": " + qc.get(label), false);
+				logger.logpInfo(label + ": " + qc.get(label), false);
+			}
+		}
+
+
 		// After processing ALL the input records, there is now enough
 		// data to determine if the allele level attributes can be changed.
 
@@ -1519,7 +1568,118 @@ public class TargetedAlleleLoad extends DLALoader {
 					}
 				}
 			}
+	
+			if (databaseCellLines.size() > 0 || databaseProjectIds.size() > 0
+					|| alleleProjectIdUpdated.size() > 0) {
+				logger.logdInfo(
+						"Number of project IDs that exist in the MGI database, but not in file: "
+								+ databaseProjectIds.size(), false);
+				logger.logpInfo(
+						"Number of project IDs that exist in the MGI database, but not in file: "
+								+ databaseProjectIds.size(), false);
+	
+				logger.logdInfo(
+						"Number of celllines that exist in the MGI database, but not in file: "
+								+ databaseCellLines.size(), false);
+				logger.logpInfo(
+						"Number of celllines that exist in the MGI database, but not in file: "
+								+ databaseCellLines.size(), false);
+	
+				logger.logdInfo("Number of alleles that changed project IDs: "
+						+ alleleProjectIdUpdated.size(), false);
+				logger.logpInfo("Number of alleles that changed project IDs: "
+						+ alleleProjectIdUpdated.size(), false);
+	
+				logger.logdInfo("\nANOMALIES", false);
+				logger.logcInfo("\nANOMALIES", false);
+			}
+	
+			if (databaseCellLines.size() > 0) {
+				logger.logdInfo(
+						"\nCelllines that exist in the MGI database, but not in the input file: "
+								+ databaseCellLines.size(), false);
+				logger.logcInfo(
+						"\nCelllines that exist in the MGI database, but not in the input file: "
+								+ databaseCellLines.size(), false);
+	
+				logger.logdInfo("\nAllele\tExisting Project\tES Cell Line", false);
+				logger.logcInfo("\nAllele\tExisting Project\tES Cell Line", false);
+	
+				iterator = databaseCellLines.iterator();
+				Set s = new TreeSet();
+				while (iterator.hasNext()) {
+					String label = (String) iterator.next();
+					KnockoutAllele a = alleleLookupByCellLine.lookup(label);
+					s.add(a.getSymbol() + "\t" + a.getProjectId() + "\t"
+							+ label.toUpperCase());
+				}
+	
+				iterator = s.iterator();
+				while (iterator.hasNext()) {
+					String lbl = (String) iterator.next();
+					logger.logdInfo(lbl, false);
+					logger.logcInfo(lbl, false);
+				}
+			}
+	
+			if (databaseProjectIds.size() > 0) {
+				logger.logdInfo(
+						"\nProject IDs that exist in the MGI database, but not in the input file: "
+								+ databaseProjectIds.size(), false);
+				logger.logcInfo(
+						"\nProject IDs that exist in the MGI database, but not in the input file: "
+								+ databaseProjectIds.size(), false);
+	
+				logger.logdInfo("\nAllele\tExisting Project", false);
+				logger.logcInfo("\nAllele\tExisting Project", false);
+	
+				iterator = databaseProjectIds.iterator();
+				Set s = new TreeSet();
+				while (iterator.hasNext()) {
+					String label = (String) iterator.next();
+					Map hmA = alleleLookupByProjectId.lookup(label);
+					if (hmA != null) {
+						Set entries = hmA.entrySet();
+						Iterator aIt = entries.iterator();
+						while (aIt.hasNext()) {
+							Map.Entry entry = (Map.Entry) aIt.next();
+							Map tmpAllele = (Map) entry.getValue();
+							s.add((String) tmpAllele.get("symbol") + "\t" + label);
+						}
+					}
+				}
+	
+				iterator = s.iterator();
+				while (iterator.hasNext()) {
+					String lbl = (String) iterator.next();
+					logger.logdInfo(lbl, false);
+					logger.logcInfo(lbl, false);
+				}
+			}
+	
+			if (alleleProjectIdUpdated.size() > 0) {
+				logger.logdInfo("\nAlleles that have had project ID changes: "
+						+ alleleProjectIdUpdated.size(), false);
+				logger.logcInfo("\nAlleles that have had project ID changes: "
+						+ alleleProjectIdUpdated.size(), false);
+	
+				logger.logdInfo("\nAllele\tExisting Project\tNew Project\tMCL",
+						false);
+				logger.logcInfo("\nAllele\tExisting Project\tNew Project\tMCL",
+						false);
+	
+				iterator = alleleProjectIdUpdated.iterator();
+				while (iterator.hasNext()) {
+					String label = (String) iterator.next();
+					logger.logdInfo(label, false);
+					logger.logcInfo(label, false);
+				}
+			}
 		} // end if ( ! cfg.getUpdateDerivationMode()) 
+
+		// Empty line to the log files
+		logger.logdInfo("\n", false);
+		logger.logcInfo("\n", false);
 
 		// Close the database writer
 		loadStream.close();
@@ -1528,165 +1688,6 @@ public class TargetedAlleleLoad extends DLALoader {
 		// ACC_AccessionMax table needs to be updated with the new maximum
 		// value.
 		AccessionLib.commitAccessionMax();
-
-		TreeMap qc = null;
-		Iterator iterator = null;
-
-		// Print out the error statistics
-		qc = (TreeMap) qcStats.getStatistics().get("ERROR");
-
-		if (qc != null) {
-			logger.logdInfo("\nERRORS", false);
-			logger.logpInfo("\nERRORS", false);
-
-			iterator = qc.keySet().iterator();
-			while (iterator.hasNext()) {
-				String label = (String) iterator.next();
-				logger.logdInfo(label + ": " + qc.get(label), false);
-				logger.logpInfo(label + ": " + qc.get(label), false);
-			}
-		}
-
-		// Print out the warning statistics
-		qc = (TreeMap) qcStats.getStatistics().get("WARNING");
-
-		if (qc != null) {
-			logger.logdInfo("\nWARNINGS", false);
-			logger.logpInfo("\nWARNINGS", false);
-
-			iterator = qc.keySet().iterator();
-			while (iterator.hasNext()) {
-				String label = (String) iterator.next();
-				logger.logdInfo(label + ": " + qc.get(label), false);
-				logger.logpInfo(label + ": " + qc.get(label), false);
-			}
-		}
-
-		// Print out the summary statistics
-		qc = (TreeMap) qcStats.getStatistics().get("SUMMARY");
-
-		if (qc != null) {
-			logger.logdInfo("\nSUMMARY", false);
-			logger.logpInfo("\nSUMMARY", false);
-
-			iterator = qc.keySet().iterator();
-			while (iterator.hasNext()) {
-				String label = (String) iterator.next();
-				logger.logdInfo(label + ": " + qc.get(label), false);
-				logger.logpInfo(label + ": " + qc.get(label), false);
-			}
-		}
-
-		if (databaseCellLines.size() > 0 || databaseProjectIds.size() > 0
-				|| alleleProjectIdUpdated.size() > 0) {
-			logger.logdInfo(
-					"Number of project IDs that exist in the MGI database, but not in file: "
-							+ databaseProjectIds.size(), false);
-			logger.logpInfo(
-					"Number of project IDs that exist in the MGI database, but not in file: "
-							+ databaseProjectIds.size(), false);
-
-			logger.logdInfo(
-					"Number of celllines that exist in the MGI database, but not in file: "
-							+ databaseCellLines.size(), false);
-			logger.logpInfo(
-					"Number of celllines that exist in the MGI database, but not in file: "
-							+ databaseCellLines.size(), false);
-
-			logger.logdInfo("Number of alleles that changed project IDs: "
-					+ alleleProjectIdUpdated.size(), false);
-			logger.logpInfo("Number of alleles that changed project IDs: "
-					+ alleleProjectIdUpdated.size(), false);
-
-			logger.logdInfo("\nANOMALIES", false);
-			logger.logcInfo("\nANOMALIES", false);
-		}
-
-		if (databaseCellLines.size() > 0) {
-			logger.logdInfo(
-					"\nCelllines that exist in the MGI database, but not in the input file: "
-							+ databaseCellLines.size(), false);
-			logger.logcInfo(
-					"\nCelllines that exist in the MGI database, but not in the input file: "
-							+ databaseCellLines.size(), false);
-
-			logger.logdInfo("\nAllele\tExisting Project\tES Cell Line", false);
-			logger.logcInfo("\nAllele\tExisting Project\tES Cell Line", false);
-
-			iterator = databaseCellLines.iterator();
-			Set s = new TreeSet();
-			while (iterator.hasNext()) {
-				String label = (String) iterator.next();
-				KnockoutAllele a = alleleLookupByCellLine.lookup(label);
-				s.add(a.getSymbol() + "\t" + a.getProjectId() + "\t"
-						+ label.toUpperCase());
-			}
-
-			iterator = s.iterator();
-			while (iterator.hasNext()) {
-				String lbl = (String) iterator.next();
-				logger.logdInfo(lbl, false);
-				logger.logcInfo(lbl, false);
-			}
-		}
-
-		if (databaseProjectIds.size() > 0) {
-			logger.logdInfo(
-					"\nProject IDs that exist in the MGI database, but not in the input file: "
-							+ databaseProjectIds.size(), false);
-			logger.logcInfo(
-					"\nProject IDs that exist in the MGI database, but not in the input file: "
-							+ databaseProjectIds.size(), false);
-
-			logger.logdInfo("\nAllele\tExisting Project", false);
-			logger.logcInfo("\nAllele\tExisting Project", false);
-
-			iterator = databaseProjectIds.iterator();
-			Set s = new TreeSet();
-			while (iterator.hasNext()) {
-				String label = (String) iterator.next();
-				Map hmA = alleleLookupByProjectId.lookup(label);
-				if (hmA != null) {
-					Set entries = hmA.entrySet();
-					Iterator aIt = entries.iterator();
-					while (aIt.hasNext()) {
-						Map.Entry entry = (Map.Entry) aIt.next();
-						Map tmpAllele = (Map) entry.getValue();
-						s.add((String) tmpAllele.get("symbol") + "\t" + label);
-					}
-				}
-			}
-
-			iterator = s.iterator();
-			while (iterator.hasNext()) {
-				String lbl = (String) iterator.next();
-				logger.logdInfo(lbl, false);
-				logger.logcInfo(lbl, false);
-			}
-		}
-
-		if (alleleProjectIdUpdated.size() > 0) {
-			logger.logdInfo("\nAlleles that have had project ID changes: "
-					+ alleleProjectIdUpdated.size(), false);
-			logger.logcInfo("\nAlleles that have had project ID changes: "
-					+ alleleProjectIdUpdated.size(), false);
-
-			logger.logdInfo("\nAllele\tExisting Project\tNew Project\tMCL",
-					false);
-			logger.logcInfo("\nAllele\tExisting Project\tNew Project\tMCL",
-					false);
-
-			iterator = alleleProjectIdUpdated.iterator();
-			while (iterator.hasNext()) {
-				String label = (String) iterator.next();
-				logger.logdInfo(label, false);
-				logger.logcInfo(label, false);
-			}
-		}
-
-		// Empty line to the log files
-		logger.logdInfo("\n", false);
-		logger.logcInfo("\n", false);
 
 		logger.logInfo("Process Finishing");
 		return;
