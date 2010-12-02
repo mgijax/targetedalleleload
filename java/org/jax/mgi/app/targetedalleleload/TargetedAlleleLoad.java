@@ -1443,58 +1443,9 @@ public class TargetedAlleleLoad extends DLALoader {
 	 */
 	protected void postprocess() throws MGIException {
 
-		TreeMap qc = null;
-		Iterator iterator = null;
-
-		// Print out the error statistics
-		qc = (TreeMap) qcStats.getStatistics().get("ERROR");
-
-		if (qc != null) {
-			logger.logdInfo("\nERRORS", false);
-			logger.logpInfo("\nERRORS", false);
-
-			iterator = qc.keySet().iterator();
-			while (iterator.hasNext()) {
-				String label = (String) iterator.next();
-				logger.logdInfo(label + ": " + qc.get(label), false);
-				logger.logpInfo(label + ": " + qc.get(label), false);
-			}
-		}
-
-		// Print out the warning statistics
-		qc = (TreeMap) qcStats.getStatistics().get("WARNING");
-
-		if (qc != null) {
-			logger.logdInfo("\nWARNINGS", false);
-			logger.logpInfo("\nWARNINGS", false);
-
-			iterator = qc.keySet().iterator();
-			while (iterator.hasNext()) {
-				String label = (String) iterator.next();
-				logger.logdInfo(label + ": " + qc.get(label), false);
-				logger.logpInfo(label + ": " + qc.get(label), false);
-			}
-		}
-
-		// Print out the summary statistics
-		qc = (TreeMap) qcStats.getStatistics().get("SUMMARY");
-
-		if (qc != null) {
-			logger.logdInfo("\nSUMMARY", false);
-			logger.logpInfo("\nSUMMARY", false);
-
-			iterator = qc.keySet().iterator();
-			while (iterator.hasNext()) {
-				String label = (String) iterator.next();
-				logger.logdInfo(label + ": " + qc.get(label), false);
-				logger.logpInfo(label + ": " + qc.get(label), false);
-			}
-		}
-
 
 		// After processing ALL the input records, there is now enough
 		// data to determine if the allele level attributes can be changed.
-
 		if ( ! cfg.getUpdateDerivationMode()) {
 			// If not in derivation update only mode
 			// These alleles need to have their project ID updated
@@ -1570,7 +1521,60 @@ public class TargetedAlleleLoad extends DLALoader {
 					}
 				}
 			}
-	
+		}
+		
+		// LOG THE RESULTS OF THE LOAD
+
+		TreeMap qc = null;
+		Iterator iterator = null;
+
+		// Print out the error statistics
+		qc = (TreeMap) qcStats.getStatistics().get("ERROR");
+
+		if (qc != null) {
+			logger.logdInfo("\nERRORS", false);
+			logger.logpInfo("\nERRORS", false);
+
+			iterator = qc.keySet().iterator();
+			while (iterator.hasNext()) {
+				String label = (String) iterator.next();
+				logger.logdInfo(label + ": " + qc.get(label), false);
+				logger.logpInfo(label + ": " + qc.get(label), false);
+			}
+		}
+
+		// Print out the warning statistics
+		qc = (TreeMap) qcStats.getStatistics().get("WARNING");
+
+		if (qc != null) {
+			logger.logdInfo("\nWARNINGS", false);
+			logger.logpInfo("\nWARNINGS", false);
+
+			iterator = qc.keySet().iterator();
+			while (iterator.hasNext()) {
+				String label = (String) iterator.next();
+				logger.logdInfo(label + ": " + qc.get(label), false);
+				logger.logpInfo(label + ": " + qc.get(label), false);
+			}
+		}
+
+		// Print out the summary statistics
+		qc = (TreeMap) qcStats.getStatistics().get("SUMMARY");
+
+		if (qc != null) {
+			logger.logdInfo("\nSUMMARY", false);
+			logger.logpInfo("\nSUMMARY", false);
+
+			iterator = qc.keySet().iterator();
+			while (iterator.hasNext()) {
+				String label = (String) iterator.next();
+				logger.logdInfo(label + ": " + qc.get(label), false);
+				logger.logpInfo(label + ": " + qc.get(label), false);
+			}
+		}
+
+		if ( ! cfg.getUpdateDerivationMode()) {
+			// If not in derivation update only mode
 			if (databaseCellLines.size() > 0 || databaseProjectIds.size() > 0
 					|| alleleProjectIdUpdated.size() > 0) {
 				logger.logdInfo(
