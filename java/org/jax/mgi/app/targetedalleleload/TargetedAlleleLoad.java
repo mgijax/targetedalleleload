@@ -450,7 +450,9 @@ public class TargetedAlleleLoad extends DLALoader {
 						continue;
 					}
 
-					Derivation d = (Derivation) derivationLookupByKey.lookup(esCell.getDerivationKey());
+					org.jax.mgi.dbs.mgd.loads.Alo.Derivation d = 
+						(org.jax.mgi.dbs.mgd.loads.Alo.Derivation) 
+						derivationLookupByKey.lookup(esCell.getDerivationKey());
 					
 					// We need to compare the type of allele to the associated
 					// derivation.  The allele type overrules the derivation
