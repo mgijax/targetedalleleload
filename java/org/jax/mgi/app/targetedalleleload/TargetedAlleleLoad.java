@@ -458,6 +458,7 @@ public class TargetedAlleleLoad extends DLALoader {
 					// derivation.  The allele type overrules the derivation
 					// if it's different.
 					String aType = getAlleleType(existing);
+					System.out.println(existing + " type = "+aType);
 					Integer typeKey = (Integer) Constants.MUTATION_TYPE_KEYS.get(aType);
 					
 					String vector = d.getVectorName();
