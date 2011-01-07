@@ -75,6 +75,10 @@ LOG_FACTORY=org.jax.mgi.shr.dla.log.DLALoggerFactory
 
 export LOG_DEBUG DBDEBUG CACHE_DEBUG LOG_FACTORY
 
+# Set the targeted allele load mode to LOAD
+TAL_UPDATE=false
+export TAL_UPDATE
+
 ###########################################################################
 #
 #  BCP MANAGER SETTINGS BY DATABASE

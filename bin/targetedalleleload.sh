@@ -62,7 +62,7 @@ fi
 #  Establish the configuration file names.
 #
 CONFIG_LOAD=`pwd`/$1
-CONFIG_LOAD_COMMON=`pwd`/tal_common.config
+CONFIG_LOAD_COMMON=`pwd`/tal_update.config
 
 #
 #  Make sure the configuration files are readable.
@@ -167,16 +167,16 @@ postload
 #########################################################################
 
 #
+#  Establish the configuration file names.
+#
+CONFIG_LOAD=`pwd`/$1
+CONFIG_LOAD_COMMON=`pwd`/tal_load.config
+
+#
 # Source the Targeted Allele Load configuration files again
 #
 . ${CONFIG_LOAD_COMMON}
 . ${CONFIG_LOAD}
-
-#
-# Set the targeted allele load mode to LOAD
-#
-TAL_UPDATE=false
-export TAL_UPDATE
 
 #
 #  Perform pre-load tasks.
