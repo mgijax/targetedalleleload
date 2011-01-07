@@ -62,7 +62,7 @@ fi
 #  Establish the configuration file names.
 #
 CONFIG_LOAD=`pwd`/$1
-CONFIG_LOAD_COMMON=`pwd`/tal_update.config
+CONFIG_LOAD_COMMON=`pwd`/tal_common.config
 
 #
 #  Make sure the configuration files are readable.
@@ -81,20 +81,24 @@ then
 fi
 
 #########################################################################
-# Update existing entries
+# Update existing entries first, before loading new entries
 #########################################################################
+
+CONFIG_LOAD_MODE=`pwd`/tal_update.config
+
+if [ ! -r ${CONFIG_LOAD_MODE} ]
+then
+    echo "Cannot read configuration file: ${CONFIG_LOAD_MODE}" | tee -a ${LOG}
+    exit 1
+fi
+
 
 #
 # Source the Targeted Allele Load configuration files - order is important
 #
 . ${CONFIG_LOAD_COMMON}
 . ${CONFIG_LOAD}
-
-#
-# Set the targeted allele load mode to UPDATE
-#
-TAL_UPDATE=true
-export TAL_UPDATE
+. ${CONFIG_LOAD_MODE}
 
 #
 #  Source the common DLA functions script.
@@ -147,7 +151,7 @@ preload ${OUTPUTDIR} ${INPUTDIR} ${LOGDIR}
 echo "\n`date`" >> ${LOG_PROC}
 echo "Run the targetedalleleLoad application in update mode" >> ${LOG_PROC}
 ${JAVA} ${JAVARUNTIMEOPTS} -classpath ${CLASSPATH} \
-        -DCONFIG=${CONFIG_MASTER},${CONFIG_LOAD_COMMON},${CONFIG_LOAD} \
+        -DCONFIG=${CONFIG_MASTER},${CONFIG_LOAD_COMMON},${CONFIG_LOAD_MODE},${CONFIG_LOAD} \
         -DJOBKEY=${JOBKEY} ${DLA_START}
 STAT=$?
 if [ ${STAT} -ne 0 ]
@@ -163,20 +167,24 @@ postload
 
 
 #########################################################################
-# Load new entries
+# After the update load has run, load new entries
 #########################################################################
 
-#
-#  Establish the configuration file names.
-#
-CONFIG_LOAD=`pwd`/$1
-CONFIG_LOAD_COMMON=`pwd`/tal_load.config
+CONFIG_LOAD_MODE=`pwd`/tal_load.config
+
+if [ ! -r ${CONFIG_LOAD_MODE} ]
+then
+    echo "Cannot read configuration file: ${CONFIG_LOAD_MODE}" | tee -a ${LOG}
+    exit 1
+fi
+
 
 #
 # Source the Targeted Allele Load configuration files again
 #
 . ${CONFIG_LOAD_COMMON}
 . ${CONFIG_LOAD}
+. ${CONFIG_LOAD_MODE}
 
 #
 #  Perform pre-load tasks.
@@ -190,7 +198,7 @@ preload ${OUTPUTDIR} ${INPUTDIR} ${LOGDIR}
 echo "\n`date`" >> ${LOG_PROC}
 echo "Run the targetedalleleLoad application in create mode" >> ${LOG_PROC}
 ${JAVA} ${JAVARUNTIMEOPTS} -classpath ${CLASSPATH} \
-        -DCONFIG=${CONFIG_MASTER},${CONFIG_LOAD_COMMON},${CONFIG_LOAD} \
+        -DCONFIG=${CONFIG_MASTER},${CONFIG_LOAD_COMMON},${CONFIG_LOAD_MODE},${CONFIG_LOAD} \
         -DJOBKEY=${JOBKEY} ${DLA_START}
 STAT=$?
 if [ ${STAT} -ne 0 ]
