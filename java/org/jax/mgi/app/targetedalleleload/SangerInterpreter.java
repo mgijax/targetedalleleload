@@ -22,10 +22,8 @@ import org.jax.mgi.shr.ioutils.RecordFormatException;
 public class SangerInterpreter extends KnockoutAlleleInterpreter {
 
 	// QC string constants
-	private static final String NUM_SUCCESS = "Successfully interpreted input record(s)";
 	private static final String NUM_UNKNOWN_MUTATION = "Input record(s) with unknown mutation type skipped";
 	private static final String NUM_UNKNOWN_PARENT = "Input record(s) with unknown parental cell line skipped";
-	private static final String NUM_NOT_APPROPRIATE = "Input record(s) not appropriate for this provider, skipped";
 
 	// The minimum length of a valid input record (including NL character).
 	private static final int MIN_REC_LENGTH = 50;
@@ -104,7 +102,7 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 		if (rec.length() < MIN_REC_LENGTH) {
 			RecordFormatException e = new RecordFormatException();
 			e.bindRecord(rec);
-			qcStatistics.record("WARNING", "Poorly formated input record(s)");
+			qcStatistics.record("WARNING", "Number of incorrectly formatted input records");
 			throw e;
 		}
 
@@ -222,9 +220,8 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 		}
 		if (!parts[3].replaceAll("\"", "").matches(pipeline)) {
 			// Wrong project
-			qcStatistics.record("SUMMARY", NUM_NOT_APPROPRIATE);
+			return false;
 
-			// include these records for later QC
 		}
 		if (parts[6].indexOf(",") != -1) {
 			// strangely formatted ES Cell (parental)
@@ -250,13 +247,10 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 			return false;
 		}
 		if (!allowedCelllines.contains(firstLetter)) {
-			// This cell line is not appropriate for this provider
-			qcStatistics.record("SUMMARY", NUM_NOT_APPROPRIATE);
 			return false;
 		}
 
 		// Default action is to indicate this record as valid
-		qcStatistics.record("SUMMARY", NUM_SUCCESS);
 		return true;
 	}
 }

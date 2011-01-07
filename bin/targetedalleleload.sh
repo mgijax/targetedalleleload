@@ -80,12 +80,21 @@ then
     exit 1
 fi
 
+#########################################################################
+# Update existing entries
+#########################################################################
+
 #
 # Source the Targeted Allele Load configuration files - order is important
 #
 . ${CONFIG_LOAD_COMMON}
 . ${CONFIG_LOAD}
 
+#
+# Set the targeted allele load mode to UPDATE
+#
+TAL_UPDATE=true
+export TAL_UPDATE
 
 #
 #  Source the common DLA functions script.
@@ -115,7 +124,7 @@ then
 fi
 
 #
-# Copy the input file into place
+# Copy the input files into place
 #
 DOWNLOAD=${DOWNLOADFILE_PATH}/${DOWNLOADFILE_NAME}
 INPUT=${INPUTDIR}/${DOWNLOADFILE_NAME}
@@ -136,7 +145,7 @@ preload ${OUTPUTDIR} ${INPUTDIR} ${LOGDIR}
 #  Run the load application.
 #
 echo "\n`date`" >> ${LOG_PROC}
-echo "Run the targetedalleleLoad application" >> ${LOG_PROC}
+echo "Run the targetedalleleLoad application in update mode" >> ${LOG_PROC}
 ${JAVA} ${JAVARUNTIMEOPTS} -classpath ${CLASSPATH} \
         -DCONFIG=${CONFIG_MASTER},${CONFIG_LOAD_COMMON},${CONFIG_LOAD} \
         -DJOBKEY=${JOBKEY} ${DLA_START}
@@ -151,6 +160,50 @@ fi
 echo "targetedalleleLoad application completed successfully" >> ${LOG_PROC}
 
 postload
+
+
+#########################################################################
+# Load new entries
+#########################################################################
+
+#
+# Source the Targeted Allele Load configuration files again
+#
+. ${CONFIG_LOAD_COMMON}
+. ${CONFIG_LOAD}
+
+#
+# Set the targeted allele load mode to LOAD
+#
+TAL_UPDATE=false
+export TAL_UPDATE
+
+#
+#  Perform pre-load tasks.
+#
+preload ${OUTPUTDIR} ${INPUTDIR} ${LOGDIR}
+#preload
+
+#
+#  Run the load application.
+#
+echo "\n`date`" >> ${LOG_PROC}
+echo "Run the targetedalleleLoad application in create mode" >> ${LOG_PROC}
+${JAVA} ${JAVARUNTIMEOPTS} -classpath ${CLASSPATH} \
+        -DCONFIG=${CONFIG_MASTER},${CONFIG_LOAD_COMMON},${CONFIG_LOAD} \
+        -DJOBKEY=${JOBKEY} ${DLA_START}
+STAT=$?
+if [ ${STAT} -ne 0 ]
+then
+    echo "targetedalleleLoad application failed.  Return status: ${STAT}" >> ${LOG_PROC}
+    postload
+    exit 1
+fi
+
+echo "targetedalleleLoad application completed successfully" >> ${LOG_PROC}
+
+postload
+
 
 echo "Run the targetedalleleLoad QC report" >> ${LOG_PROC}
 

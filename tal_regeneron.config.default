@@ -7,7 +7,7 @@
 #
 ###########################################################################
 
-#  The name of the load for the subject of an email notification
+# The name of the load for the subject of an email notification
 MAIL_LOADNAME="TargetedAllele Load (KOMP-Regeneron Vlcg)"
 export MAIL_LOADNAME 
 
@@ -19,17 +19,18 @@ ARCHIVEDIR=${FILEDIR}/archive
 OUTPUTDIR=${FILEDIR}/output
 INPUTDIR=${BASEDIR}/input
 
-#  Full path of the log files
+# Full path of the log files
 LOG_PROC=${LOGDIR}/tal.proc.log
 LOG_DIAG=${LOGDIR}/tal.diag.log
 LOG_CUR=${LOGDIR}/tal.cur.log
 LOG_VAL=${LOGDIR}/tal.val.log
 
-#  Full path of the downloaded and input files
+# Full path of the downloaded and input files
 DOWNLOADFILE_PATH=/data/downloads/ftp.regeneron
 DOWNLOADFILE_NAME=regn_clones.tab
 INFILE_NAME=${INPUTDIR}/regn_clones.tab
 
+export LOG_PROC LOG_DIAG LOG_CUR LOG_VAL
 export FILEDIR LOGDIR RPTDIR ARCHIVEDIR OUTPUTDIR 
 export INPUTDIR INFILE_NAME DOWNLOADILE_PATH DOWNLOADILE_NAME
 

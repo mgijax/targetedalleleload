@@ -124,11 +124,10 @@ public class AlleleLookupByMarker extends FullCachedLookup {
 		}
 
 		return "SELECT av._allele_key 'alleleKey', av.markerSymbol 'markerSymbol' "
-				+ "FROM ACC_Accession acc,  ALL_Allele_View av "
+				+ "FROM ALL_Allele_View av "
 				+ "WHERE av.symbol like '%<tm%"
 				+ provider
 				+ ">'"
-				+ "AND acc._object_key = av._Allele_key "
 				+ "ORDER BY markerSymbol";
 	}
 

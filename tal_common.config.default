@@ -73,12 +73,7 @@ CACHE_DEBUG=false
 # logger factory class - allows classes to get their own loggers
 LOG_FACTORY=org.jax.mgi.shr.dla.log.DLALoggerFactory
 
-export LOG_PROC LOG_DIAG LOG_CUR LOG_VAL LOG_DEBUG 
-export CACHE_DEBUG LOG_FACTORY
-
-TAL_UPDATE=false
-TAL_UPDATE_DERIVATIONS=false
-export TAL_UPDATE TAL_UPDATE_DERIVATIONS
+export LOG_DEBUG DBDEBUG CACHE_DEBUG LOG_FACTORY
 
 ###########################################################################
 #
@@ -101,13 +96,9 @@ export MGD_BCP_OK_TO_OVERWRITE
 #  MISCELLANEOUS SETTINGS
 #
 ###########################################################################
-#  The name of the load for the subject of an email notification
-#MAIL_LOADNAME="TargetedAllele Load"
 
 #  Recipient list for mailing the log files (comma-separated)
 MAIL_LOG_PROC="mgiadmin"
-
-#export MAIL_LOADNAME MAIL_LOG_PROC
 export MAIL_LOG_PROC
 
 #  Installation directory
@@ -211,6 +202,8 @@ DERIVATION_PARENTAL_KEY_JM8A3N1P18='558772'
 # Parental Cell Line C2 (Nagy)
 DERIVATION_PARENTAL_KEY_C2NAGY='40241'
 DERIVATION_PARENTAL_KEY_C2P13='40241'
+DERIVATION_PARENTAL_KEY_C2NAGYP13='40241'
+
 
 
 
