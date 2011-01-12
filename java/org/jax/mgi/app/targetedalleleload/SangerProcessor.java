@@ -202,27 +202,31 @@ public class SangerProcessor extends KnockoutAlleleProcessor {
 				Map alleles = alleleLookupByProjectId.lookup(in.getProjectId());
 				Map allele = null;
 
+				// Find the matching allele record in the alleleByProject
+				// set
 				if (alleles != null) {
-					Set entries = alleles.entrySet();
-					Iterator aIt = entries.iterator();
-					while (aIt.hasNext()) {
+					Iterator aIt = alleles.entrySet().iterator();
+					while (aIt.hasNext() && allele == null) {
 						Map.Entry entry = (Map.Entry) aIt.next();
 						Map tmpAllele = (HashMap) entry.getValue();
 						if (((String) tmpAllele.get("symbol"))
 								.equals(allSymbol)) {
 							allele = tmpAllele;
-							break;
 						}
 					}
 
 					if (allele != null) {
+						String extProjID = existingKoAllele.getProjectId();
+						String inProjID  = in.getProjectId();
+						Integer extParentKey = 
+							(Integer) allele.get("parentCellLineKey");
+						Integer inParentKey = 
+							cfg.getParentalKey(in.getParentCellLine());
+
 						// Check if the project ID and the parental is the
 						// same as the allele being constructed
-						if (existingKoAllele.getProjectId().equals(
-								in.getProjectId())
-								&& allele.get("parentCellLineKey").equals(
-										cfg.getParentalKey(in
-												.getParentCellLine()))) {
+						if (extProjID.equals(inProjID) &&
+							extParentKey.equals(inParentKey)) {
 							// If the project IDs and parental match, then
 							// use this allele sequence number as the default
 							regexMatcher = alleleSequencePattern
