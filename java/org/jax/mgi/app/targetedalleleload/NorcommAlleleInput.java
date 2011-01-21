@@ -29,8 +29,6 @@ public class NorcommAlleleInput implements KnockoutAlleleInput {
 	private String projectId;
 	private String mutantCellLine;
 	private String inputPipeline;
-	private String mutationType;
-	private String mutationSubType;
 	private String parentCellLine;
 	private String cassette;
 	private Integer start = new Integer(0);
@@ -81,20 +79,9 @@ public class NorcommAlleleInput implements KnockoutAlleleInput {
 		this.inputPipeline = pipeline;
 	}
 
+	// All NorCOMM alleles are of type Deletion
 	public String getMutationType() {
-		return mutationType;
-	}
-
-	public void setMutationType(String mutationType) {
-		this.mutationType = mutationType;
-	}
-
-	public String getMutationSubType() {
-		return mutationSubType;
-	}
-
-	public void setMutationSubType(String mutationSubType) {
-		this.mutationSubType = mutationSubType;
+		return "Deletion";
 	}
 
 	public String getParentCellLine() {

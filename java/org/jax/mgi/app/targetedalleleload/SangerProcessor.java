@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.*;
 
 import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;

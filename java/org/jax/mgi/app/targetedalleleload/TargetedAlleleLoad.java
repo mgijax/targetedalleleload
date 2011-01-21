@@ -1672,6 +1672,7 @@ public class TargetedAlleleLoad extends DLALoader {
 			logger.logdInfo("SQL prevented by CFG. Would have run: " + query,
 					false);
 		} else {
+			logger.logdInfo("Ran: " + query, false);
 			sqlDBMgr.executeUpdate(query);
 		}
 	}

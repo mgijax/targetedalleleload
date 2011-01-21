@@ -61,8 +61,8 @@ public class NorcommInterpreter extends KnockoutAlleleInterpreter {
 		// 1 - IKMC Project ID
 		// 2 - es cell ID
 		// 3 - pipeline (NorCOMM)
-		// 4 - mutation type
-		// 5 - mutation subtype
+		// 4 - mutation type (unused)
+		// 5 - mutation subtype (unused)
 		// 6 - parental (always C2)
 		// 7 - cassette
 		// 8 - start
@@ -75,8 +75,6 @@ public class NorcommInterpreter extends KnockoutAlleleInterpreter {
 		in.setProjectId(fields[1]);
 		in.setMutantCellLine(fields[2]);
 		in.setInputPipeline(cfg.getPipeline()); // Get pipeline from cfg
-		in.setMutationType(fields[4]);
-		in.setMutationSubType(fields[5]);
 		in.setParentCellLine(fields[6]);
 		in.setCassette(fields[7]);
 		Integer start = new Integer(fields[8]);
