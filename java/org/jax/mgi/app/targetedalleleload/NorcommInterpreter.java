@@ -1,6 +1,7 @@
 package org.jax.mgi.app.targetedalleleload;
 
 import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
+import org.jax.mgi.shr.dla.log.DLALogger;
 import org.jax.mgi.shr.exception.MGIException;
 import org.jax.mgi.shr.ioutils.RecordFormatException;
 
@@ -15,6 +16,7 @@ public class NorcommInterpreter extends KnockoutAlleleInterpreter {
 	//
 	private static final int MIN_REC_LENGTH = 50;
 	private TargetedAlleleLoadCfg cfg;
+	protected DLALogger logger;
 
 	/**
 	 * Constructs a NorCOMM specific interpreter object
@@ -24,6 +26,7 @@ public class NorcommInterpreter extends KnockoutAlleleInterpreter {
 	 */
 	public NorcommInterpreter() throws MGIException {
 		cfg = new TargetedAlleleLoadCfg();
+		logger = DLALogger.getInstance();
 	}
 
 	/**
@@ -101,6 +104,17 @@ public class NorcommInterpreter extends KnockoutAlleleInterpreter {
 	public boolean isValid(String rec) {
 
 		if (rec.length() < MIN_REC_LENGTH) {
+			return false;
+		}
+		// Get fields from the input record (TAB delimit) and trim off
+		// any whitespace
+		String[] fields = rec.split("\t");
+		for (int i=0; i<fields.length; i++) {
+			fields[i] = fields[i].trim();
+		}
+		if (fields[1]=="") {
+			qcStatistics.record("WARNING", "Poorly formated input record(s)");
+			logger.logInfo("Missing project ID" + fields[2] + ")");
 			return false;
 		}
 
