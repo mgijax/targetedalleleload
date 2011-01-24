@@ -1,9 +1,17 @@
+TAG: targetedalleleload-4-4-1-1
+DATE: 1/24/2011
+STAFF: jmason
+CHANGES:
+1) Updates required for NorCOMM loads
+
+
 TAG: targetedalleleload-4-4-0-4
 DATE: 12/2/2010
 STAFF: jmason
 CHANGES:
 1) Add configuration variable and code to switch the load
    to only process updated derivations 
+
 
 TAG: targetedalleleload-4-4-0-3
 DATE: 12/1/2010
