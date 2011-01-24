@@ -112,7 +112,7 @@ public class NorcommInterpreter extends KnockoutAlleleInterpreter {
 		for (int i=0; i<fields.length; i++) {
 			fields[i] = fields[i].trim();
 		}
-		if (fields[1]=="") {
+		if (fields[1].equals("")) {
 			qcStatistics.record("WARNING", "Poorly formated input record(s)");
 			logger.logInfo("Missing project ID" + fields[2] + ")");
 			return false;
