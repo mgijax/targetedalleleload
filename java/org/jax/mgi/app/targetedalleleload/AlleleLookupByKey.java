@@ -142,7 +142,7 @@ public class AlleleLookupByKey extends FullCachedLookup {
 				+ "AND acc2.preferred=1 "
 				+ "AND acc2.private=1 "
 				+ "AND acc2._Object_key = a._Allele_key "
-				+ "AND acc2._LogicalDB_key in (125,126,138) "
+				+ "AND acc2._LogicalDB_key in (125,126,138,143) "
 				+ "AND acc2._MGIType_key=11 "
 				+ "AND n._Object_key = a._Allele_key "
 				+ "AND n._MGIType_key = 11 "
