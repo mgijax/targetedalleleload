@@ -1,5 +1,9 @@
 package org.jax.mgi.app.targetedalleleload;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.jax.mgi.shr.config.ConfigException;
 import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
 import org.jax.mgi.shr.dla.log.DLALogger;
 import org.jax.mgi.shr.exception.MGIException;
@@ -17,6 +21,10 @@ public class NorcommInterpreter extends KnockoutAlleleInterpreter {
 	private static final int MIN_REC_LENGTH = 50;
 	private TargetedAlleleLoadCfg cfg;
 	protected DLALogger logger;
+
+	private Matcher regexMatcher;
+	private static final Pattern centerPattern = Pattern
+	.compile("N.*_.*_\\d+(.*)_.*");
 
 	/**
 	 * Constructs a NorCOMM specific interpreter object
@@ -106,17 +114,46 @@ public class NorcommInterpreter extends KnockoutAlleleInterpreter {
 		if (rec.length() < MIN_REC_LENGTH) {
 			return false;
 		}
-		// Get fields from the input record (TAB delimit) and trim off
-		// any whitespace
+
+		// Get fields from the input (TAB delim) and trim whitespace
 		String[] fields = rec.split("\t");
 		for (int i=0; i<fields.length; i++) {
 			fields[i] = fields[i].trim();
 		}
+
 		if (fields[1].equals("")) {
 			qcStatistics.record("WARNING", "Poorly formated input record(s)");
 			logger.logInfo("Missing project ID" + fields[2] + ")");
 			return false;
 		}
+
+		String center = "";
+		regexMatcher = centerPattern.matcher(fields[2]);
+
+		if (regexMatcher.find()) {
+
+			center = regexMatcher.group(1);
+
+			try {
+				if (center.equals("T") && !cfg.getProvider().equals("Cmhd")) {
+					// This input record is not valid for this provider 
+					return false;
+				}
+				if (center.equals("W") && !cfg.getProvider().equals("Mfgc")) {
+					// This input record is not valid for this provider 
+					return false;
+				}
+			} catch (ConfigException e) {
+				logger.logInfo("cannot retreive configuration for record:" + rec + ")");
+				return false;
+			}
+
+		} else {
+			
+			return false;
+			
+		}
+		
 
 		return true;
 	}
