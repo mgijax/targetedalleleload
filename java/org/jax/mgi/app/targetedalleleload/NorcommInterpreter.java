@@ -123,7 +123,7 @@ public class NorcommInterpreter extends KnockoutAlleleInterpreter {
 
 		if (fields[1].equals("")) {
 			qcStatistics.record("WARNING", "Poorly formated input record(s)");
-			logger.logInfo("Missing project ID" + fields[2] + ")");
+			logger.logInfo("Missing project ID (" + fields[2] + ")");
 			return false;
 		}
 
@@ -144,7 +144,7 @@ public class NorcommInterpreter extends KnockoutAlleleInterpreter {
 					return false;
 				}
 			} catch (ConfigException e) {
-				logger.logInfo("cannot retreive configuration for record:" + rec + ")");
+				logger.logInfo("cannot retreive configuration for record: \n" + rec);
 				return false;
 			}
 
