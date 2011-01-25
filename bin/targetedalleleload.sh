@@ -163,12 +163,6 @@ fi
 
 echo "targetedalleleLoad application in update mode completed successfully" >> ${LOG_PROC}
 
-if [ ${JOBKEY} -gt 0 ]
-then
-    echo "End the job stream" >> ${LOG_PROC}
-    ${JOBEND_CSH} ${JOBKEY} ${STAT}
-fi
-
 
 #########################################################################
 # After the update load has run, load new entries
@@ -190,24 +184,6 @@ fi
 . ${CONFIG_LOAD}
 . ${CONFIG_LOAD_MODE}
 
-#
-# Preload tasks, but don't start a new log file
-#
-
-#
-# Start a new job stream and get the job stream key.
-#
-echo "targetedalleleLoad application starting in load mode" >> ${LOG_PROC}
-echo "Start a new job stream" >> ${LOG_PROC}
-JOBKEY=`${JOBSTART_CSH} ${JOBSTREAM}`
-if [ $? -ne 0 ]
-then
-    echo "Could not start a new job stream for this load" >> ${LOG_PROC}
-    postload
-    exit 1
-fi
-echo "JOBKEY=${JOBKEY}" >> ${LOG_PROC}
-    
 #
 #  Run the load application.
 #
