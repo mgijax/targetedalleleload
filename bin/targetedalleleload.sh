@@ -156,14 +156,18 @@ ${JAVA} ${JAVARUNTIMEOPTS} -classpath ${CLASSPATH} \
 STAT=$?
 if [ ${STAT} -ne 0 ]
 then
-    echo "targetedalleleLoad application failed.  Return status: ${STAT}" >> ${LOG_PROC}
+    echo "targetedalleleLoad application in update mode failed.  Return status: ${STAT}" >> ${LOG_PROC}
     postload
     exit 1
 fi
 
-echo "targetedalleleLoad application completed successfully" >> ${LOG_PROC}
+echo "targetedalleleLoad application in update mode completed successfully" >> ${LOG_PROC}
 
-postload
+if [ ${JOBKEY} -gt 0 ]
+then
+    echo "End the job stream" >> ${LOG_PROC}
+    ${JOBEND_CSH} ${JOBKEY} ${STAT}
+fi
 
 
 #########################################################################
@@ -187,11 +191,23 @@ fi
 . ${CONFIG_LOAD_MODE}
 
 #
-#  Perform pre-load tasks.
+# Preload tasks, but don't start a new log file
 #
-preload ${OUTPUTDIR} ${INPUTDIR} ${LOGDIR}
-#preload
 
+#
+# Start a new job stream and get the job stream key.
+#
+echo "targetedalleleLoad application starting in load mode" >> ${LOG_PROC}
+echo "Start a new job stream" >> ${LOG_PROC}
+JOBKEY=`${JOBSTART_CSH} ${JOBSTREAM}`
+if [ $? -ne 0 ]
+then
+    echo "Could not start a new job stream for this load" >> ${LOG_PROC}
+    postload
+    exit 1
+fi
+echo "JOBKEY=${JOBKEY}" >> ${LOG_PROC}
+    
 #
 #  Run the load application.
 #
@@ -203,12 +219,12 @@ ${JAVA} ${JAVARUNTIMEOPTS} -classpath ${CLASSPATH} \
 STAT=$?
 if [ ${STAT} -ne 0 ]
 then
-    echo "targetedalleleLoad application failed.  Return status: ${STAT}" >> ${LOG_PROC}
+    echo "targetedalleleLoad application in load mode failed.  Return status: ${STAT}" >> ${LOG_PROC}
     postload
     exit 1
 fi
 
-echo "targetedalleleLoad application completed successfully" >> ${LOG_PROC}
+echo "targetedalleleLoad application in load mode completed successfully" >> ${LOG_PROC}
 
 postload
 
