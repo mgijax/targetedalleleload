@@ -146,7 +146,7 @@ public class AlleleLookupByCellLine extends FullCachedLookup {
 				+ "and acc2.preferred=1 "
 				+ "and acc2.private=1 "
 				+ "and acc2._Object_key = a._Allele_key "
-				+ "and acc2._LogicalDB_key in (125,126,138) "
+				+ "and acc2._LogicalDB_key in (125,126,138,143) "
 				+ "and acc2._MGIType_key=11 "
 				+ "and n._Object_key =* a._Allele_key "
 				+ "and n._MGIType_key = 11 "
