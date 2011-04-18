@@ -1,6 +1,7 @@
 package org.jax.mgi.app.targetedalleleload;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -52,12 +53,12 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 	}
 
 	/**
-	 * Parse one line. Split the line apart on comma and remove the double
-	 * quotes from each piece. Also remove trailing whitespace
+	 * Parse one line. Split the line apart on tab
 	 * 
 	 * @return List of Strings
 	 */
 	public List parse(String line) {
+		/*
 		List list = new ArrayList();
 		Matcher m = csvRE.matcher(line);
 
@@ -77,6 +78,8 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 				match = match.trim();
 			list.add(match);
 		}
+		*/
+		List list = Arrays.asList(line.split("\t"));
 		return list;
 	}
 
