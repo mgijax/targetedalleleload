@@ -210,6 +210,10 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 		List list = parse(rec);
 		String[] parts = (String[]) list.toArray(new String[0]);
 
+		if (parts[0].equals("")) {
+			// Skip any missing ES Cell IDs
+			return false;
+		}
 		if (parts[0].equals("MGI ACCESSION ID")) {
 			// Ignore header line
 			return false;
@@ -221,7 +225,6 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 		if (!parts[3].replaceAll("\"", "").matches(pipeline)) {
 			// Wrong project
 			return false;
-
 		}
 		if (parts[6].indexOf(",") != -1) {
 			// strangely formatted ES Cell (parental)
