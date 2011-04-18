@@ -222,6 +222,13 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 			// Ignore any comment lines which start with a "#" character
 			return false;
 		}
+		try {
+			Integer.parseInt(parts[1]);
+		} catch (NumberFormatException e) {
+			// Sanger IKMC project IDs are Integers, but this record
+			// is not an integer
+			return false;
+		}
 		if (!parts[3].replaceAll("\"", "").matches(pipeline)) {
 			// Wrong project
 			return false;
