@@ -50,7 +50,7 @@ INTERPRETER=org.jax.mgi.app.targetedalleleload.SangerInterpreter
 #
 # Pipeline this configuration file is for
 #
-PIPELINE='KOMP'
+PIPELINE='KOMP-CSD'
 
 #
 # Provider this configuration file is for
