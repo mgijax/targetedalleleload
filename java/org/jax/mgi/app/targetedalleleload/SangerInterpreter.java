@@ -3,9 +3,9 @@ package org.jax.mgi.app.targetedalleleload;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Set;
 
 import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
 import org.jax.mgi.shr.dla.log.DLALogger;
@@ -25,11 +25,15 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 	// QC string constants
 	private static final String NUM_UNKNOWN_MUTATION = "Input record(s) with unknown mutation type skipped";
 	private static final String NUM_UNKNOWN_PARENT = "Input record(s) with unknown parental cell line skipped";
+	private static final Set alleleTypes = new HashSet();
+	static {
+		alleleTypes.add("conditional_ready");
+		alleleTypes.add("targeted_non_conditional");
+		alleleTypes.add("deletion");
+	}
 
 	// The minimum length of a valid input record (including NL character).
 	private static final int MIN_REC_LENGTH = 50;
-	public static final String CSV_PATTERN = "\"([^\"]+?)\",?|([^,]+),?|,";
-	private static Pattern csvRE;
 	private TargetedAlleleLoadCfg cfg = null;
 	private List allowedCelllines = null;
 	private List knownCelllines = null;
@@ -44,7 +48,6 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 	 * @effects Nothing
 	 */
 	public SangerInterpreter() throws MGIException {
-		csvRE = Pattern.compile(CSV_PATTERN);
 		cfg = new TargetedAlleleLoadCfg();
 		allowedCelllines = cfg.getAllowedCelllines();
 		knownCelllines = cfg.getKnownCelllines();
@@ -139,25 +142,70 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 		inputData.setProjectId(fields[4]);
 		inputData.setESCellName(fields[5]);
 		inputData.setParentESCellName(fields[6]);
-		inputData.setMutationType(fields[8]);
+		
+		if(fields[8].equals("conditional_ready")) {
+			inputData.setMutationType("Conditional");
+		} else if (fields[8].equals("targeted_non_conditional")) {
+			inputData.setMutationType("Targeted non-conditional");
+		} else if (fields[8].equals("deletion")) {
+			inputData.setMutationType("Deletion");
+		}
 		
 		// Check if this is a negative strand gene by comparing the
 		// orientation of the coordinates
-		List coords = getCoords(fields[9], fields[10]);
+		String c1 = fields[9].concat("-").concat(fields[10]);
+		String c2 = fields[11].concat("-").concat(fields[12]);
+		List coords = getCoords(c1, c2);
 		inputData.setLocus1((String) coords.get(0));
 		inputData.setLocus2((String) coords.get(1));
 
 		// Return the populated inputData object.
 		return inputData;
 	}
-
+//	
+//	private List getCoords(String cStart, String cEnd, String lStart, String lEnd) {
+//
+//		int coord1 = Integer.valueOf(cStart).intValue();
+//		int coord2 = Integer.valueOf(cEnd).intValue();
+//
+//		List coords = new ArrayList();
+//
+//		if (lStart.equals("")) {
+//			// There is only one set of coordinates
+//			coords.add(0, cStart);
+//			coords.add(1, cEnd);
+//		} else {
+//			// Two sets of coordinates
+//			int coord3 = Integer.valueOf(lStart).intValue();
+//			int coord4 = Integer.valueOf(lEnd).intValue();
+//			Integer[] cds = {Integer.valueOf(coord1), 
+//					Integer.valueOf(coord2), 
+//					Integer.valueOf(coord3), 
+//					Integer.valueOf(coord4)};
+//			int min = ((Integer)Collections.min(Arrays.asList(cds))).intValue();
+//			int max = ((Integer)Collections.max(Arrays.asList(cds))).intValue();
+//			
+//
+//			if (coord1 > coord2) {
+//				// Negative strand gene
+//				coords.add(0, new Integer(max).toString());
+//				coords.add(1, new Integer(min).toString());
+//			} else {
+//				// positive strand gene
+//				coords.add(0, new Integer(min).toString());
+//				coords.add(1, new Integer(max).toString());
+//			}			
+//		}
+//
+//
+//		return coords;
+//	}
 	/**
 	 * Determine if the record encodes a positive of negative strand
 	 * gene (negative strand genes are reported with the genomic 
 	 * coordinates swapped)
 	 * @param coordinates the dash separated coordinates of the first feature
-	 * @return 1 (for array element 1) if it is in the negative strand
-	 *         else 0.   
+	 * @return list of coordinates in the correct order
 	 */
 	private List getCoords(String locus1, String locus2) {
 		List genomic = new ArrayList();
@@ -241,8 +289,7 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 			qcStatistics.record("WARNING", NUM_UNKNOWN_PARENT);
 			return false;
 		}
-		if (!parts[8].replaceAll("\"", "").matches(
-				"Conditional|Targeted non-conditional|Deletion")) {
+		if (!alleleTypes.contains(parts[8])) {
 			// unknown mutation type
 			qcStatistics.record("WARNING", NUM_UNKNOWN_MUTATION);
 			return false;
