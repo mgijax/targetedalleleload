@@ -55,33 +55,24 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 		this.logger = DLALogger.getInstance();
 	}
 
+	public SangerInterpreter(
+			List allowedCelllines, 
+			List knownCelllines, 
+			String pipeline) 
+	throws MGIException {
+		cfg = new TargetedAlleleLoadCfg();
+		this.allowedCelllines = allowedCelllines;
+		this.knownCelllines = knownCelllines;
+		this.pipeline = pipeline;
+		this.logger = DLALogger.getInstance();
+	}
+
 	/**
-	 * Parse one line. Split the line apart on tab
+	 * Parse one line. Split the line apart on tab character
 	 * 
 	 * @return List of Strings
 	 */
 	public List parse(String line) {
-		/*
-		List list = new ArrayList();
-		Matcher m = csvRE.matcher(line);
-
-		while (m.find()) {
-			String match = m.group();
-			if (match == null)
-				break;
-			if (match.endsWith(",")) { // trim trailing ,
-				match = match.substring(0, match.length() - 1);
-			}
-			if (match.startsWith("\"")) { // assume also ends with
-				match = match.substring(1, match.length() - 1);
-			}
-			if (match.length() == 0)
-				match = null;
-			else
-				match = match.trim();
-			list.add(match);
-		}
-		*/
 		List list = Arrays.asList(line.split("\t"));
 		return list;
 	}
@@ -153,8 +144,9 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 		
 		// Check if this is a negative strand gene by comparing the
 		// orientation of the coordinates
-		String c1 = fields[9].concat("-").concat(fields[10]);
-		String c2 = fields[11].concat("-").concat(fields[12]);
+		String c1 = fields[9] + "-" + fields[10];
+		String c2 = fields[11] + "-" + fields[12];
+		
 		List coords = getCoords(c1, c2);
 		inputData.setLocus1((String) coords.get(0));
 		inputData.setLocus2((String) coords.get(1));
@@ -274,7 +266,7 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 			return false;
 		}
 		try {
-			Integer.parseInt(parts[1]);
+			Integer.parseInt(parts[4]);
 		} catch (NumberFormatException e) {
 			// Sanger IKMC project IDs are Integers, but this record
 			// is not an integer
@@ -296,6 +288,9 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 		}
 
 		// The first letter of the cell line ID indicates what lab created it
+		if (parts[5].length() < 1) {
+			return false;
+		}
 		String firstLetter = parts[5].substring(0, 1);
 
 		if (!knownCelllines.contains(firstLetter)) {
@@ -308,6 +303,32 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 		}
 		if (!allowedCelllines.contains(firstLetter)) {
 			return false;
+		}
+
+		try {
+			if(Integer.valueOf(parts[9]) == null) {return false;}
+			if(Integer.valueOf(parts[10]) == null) {return false;}
+		} catch (NumberFormatException e) {
+			return false;
+		}
+		
+		if (parts.length > 11) {
+			if(parts.length == 12 ) {
+				// Missing one of a pair of coords
+				return false;
+			}
+			if ((parts[11].length() < 1 && parts[12].length() > 1) ||
+				(parts[11].length() > 1 && parts[12].length() < 1)
+				) {
+					return false;
+			} else {
+				try {
+					if(Integer.valueOf(parts[11]) == null) {return false;}
+					if(Integer.valueOf(parts[12]) == null) {return false;}
+				} catch (NumberFormatException e) {
+					return false;
+				}
+			}
 		}
 
 		// Default action is to indicate this record as valid

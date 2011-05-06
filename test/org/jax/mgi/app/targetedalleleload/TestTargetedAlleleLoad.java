@@ -11,8 +11,8 @@ public class TestTargetedAlleleLoad
     public static void main(String[] args)
     throws Exception
     {
-        TargetedAlleleLoad load = new TargetedAlleleLoad();
-        load.run();
+        //TargetedAlleleLoad load = new TargetedAlleleLoad();
+        //load.run();
     }
 
     public TestTargetedAlleleLoad(String name)
@@ -25,7 +25,7 @@ public class TestTargetedAlleleLoad
     {
         super.setUp();
         /**@todo verify the constructors*/
-        taLoad = new TargetedAlleleLoad();
+        //taLoad = new TargetedAlleleLoad();
     }
 
     protected void tearDown()
@@ -38,7 +38,7 @@ public class TestTargetedAlleleLoad
     public void testRun()
         throws MGIException
     {
-        taLoad.load();
+        //taLoad.load();
     }
 
 }

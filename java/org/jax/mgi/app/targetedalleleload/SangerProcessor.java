@@ -51,7 +51,7 @@ public class SangerProcessor extends KnockoutAlleleProcessor {
 	private String PROMOTER_DRIVEN = "";
 	private String PROMOTER_LESS = "";
 
-	private Pattern alleleSequencePattern;
+	private Pattern alleleSequencePattern = Pattern.compile(".*tm(\\d{1,2})[ae]{0,1}.*");
 	private Matcher regexMatcher;
 
 	/**
@@ -80,10 +80,24 @@ public class SangerProcessor extends KnockoutAlleleProcessor {
 		parentStrainLookupByParentKey = new ParentStrainLookupByParentKey();
 		strainKeyLookup = new StrainKeyLookup();
 		alleleLookupByKey = AlleleLookupByKey.getInstance();
-
-		alleleSequencePattern = Pattern.compile(".*tm(\\d{1,2})[ae]{0,1}.*");
 	}
+	public SangerProcessor(TargetedAlleleLoadCfg cfg,
+		String PROMOTER_DRIVEN,
+		String PROMOTER_LESS,
+		AlleleLookupByProjectId alleleLookupByProjectId,
+		AlleleLookupByMarker alleleLookupByMarker,
+		MarkerLookupByMGIID markerLookup,
+		VocabKeyLookup vocabLookup,
+		ParentStrainLookupByParentKey parentStrainLookupByParentKey,
+		StrainKeyLookup strainKeyLookup,
+		AlleleLookupByKey alleleLookupByKey
+		) throws MGIException {
+		
+		// Stub for testing
+		this.PROMOTER_DRIVEN = PROMOTER_DRIVEN;
+		this.PROMOTER_LESS = PROMOTER_LESS;
 
+	}
 	/**
 	 * Set all the attributes of the clone object by parsing the given input
 	 * record and providing Sanger Specific constant values.
@@ -216,16 +230,16 @@ public class SangerProcessor extends KnockoutAlleleProcessor {
 
 					if (allele != null) {
 						String extProjID = existingKoAllele.getProjectId();
-						String inProjID  = in.getProjectId();
-						Integer extParentKey = 
-							(Integer) allele.get("parentCellLineKey");
-						Integer inParentKey = 
-							cfg.getParentalKey(in.getParentCellLine());
+						String inProjID = in.getProjectId();
+						Integer extParentKey = (Integer) allele
+								.get("parentCellLineKey");
+						Integer inParentKey = cfg.getParentalKey(in
+								.getParentCellLine());
 
 						// Check if the project ID and the parental is the
 						// same as the allele being constructed
-						if (extProjID.equals(inProjID) &&
-							extParentKey.equals(inParentKey)) {
+						if (extProjID.equals(inProjID)
+								&& extParentKey.equals(inParentKey)) {
 							// If the project IDs and parental match, then
 							// use this allele sequence number as the default
 							regexMatcher = alleleSequencePattern
@@ -291,7 +305,7 @@ public class SangerProcessor extends KnockoutAlleleProcessor {
 		return koAllele;
 	}
 
-	private int getDeletionSize(SangerAlleleInput in) throws MGIException {
+	protected int getDeletionSize(SangerAlleleInput in) throws MGIException {
 		int delSize = 0;
 
 		// Calculate the deletion size
@@ -309,7 +323,7 @@ public class SangerProcessor extends KnockoutAlleleProcessor {
 		return delSize;
 	}
 
-	private String getNoteTemplate(SangerAlleleInput in)
+	protected String getNoteTemplate(SangerAlleleInput in)
 			throws ConfigException, MGIException {
 		String note = "";
 
@@ -317,6 +331,7 @@ public class SangerProcessor extends KnockoutAlleleProcessor {
 		// all other cassettes are treated equally
 
 		if (in.getMutationType().equals("Conditional")) {
+			System.out.println(in.getCassette());
 			if (in.getCassette().equals("L1L2_Del_BactPneo_FFL")) {
 				note = cfg.getNoteTemplateCondDel_BactPneo_FFL();
 			} else if (in.getCassette().matches(PROMOTER_DRIVEN)) {

@@ -139,4 +139,47 @@ public class SangerAlleleInput implements KnockoutAlleleInput {
 		return inputPipeline;
 	}
 
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final SangerAlleleInput other = (SangerAlleleInput) obj;
+        if ((this.geneId == null) ? (other.geneId != null) : !this.geneId.equals(other.geneId)) {
+            return false;
+        }
+        if ((this.build == null) ? (other.build != null) : !this.build.equals(other.build)) {
+            return false;
+        }
+        if ((this.cassette == null) ? (other.cassette != null) : !this.cassette.equals(other.cassette)) {
+            return false;
+        }
+        if ((this.inputPipeline == null) ? (other.inputPipeline != null) : !this.inputPipeline.equals(other.inputPipeline)) {
+            return false;
+        }
+        if (this.projectId != other.projectId && (this.projectId == null || !this.projectId.equals(other.projectId))) {
+            return false;
+        }
+        if (this.esCellName != other.esCellName && (this.esCellName == null || !this.esCellName.equals(other.esCellName))) {
+            return false;
+        }
+        if (this.parentESCellName != other.parentESCellName && (this.parentESCellName == null || !this.parentESCellName.equals(other.parentESCellName))) {
+            return false;
+        }
+        if ((this.mutationType == null) ? (other.mutationType != null) : !this.mutationType.equals(other.mutationType)) {
+            return false;
+        }
+        if (this.locus1 != other.locus1 && (this.locus1 == null || !this.locus1.equals(other.locus1))) {
+            return false;
+        }
+        if (this.locus2 != other.locus2 && (this.locus2 == null || !this.locus2.equals(other.locus2))) {
+            return false;
+        }
+        return true;
+    }
+	
+	
+
 }

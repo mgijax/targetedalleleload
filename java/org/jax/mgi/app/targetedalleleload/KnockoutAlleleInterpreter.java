@@ -17,7 +17,7 @@ import org.jax.mgi.shr.ioutils.RecordDataInterpreter;
  * @author jmason
  */
 
-abstract class KnockoutAlleleInterpreter implements RecordDataInterpreter {
+public abstract class KnockoutAlleleInterpreter implements RecordDataInterpreter {
 
 	protected QualityControlStatistics qcStatistics = new QualityControlStatistics();
 
