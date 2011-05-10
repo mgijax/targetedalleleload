@@ -250,88 +250,94 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 	 *         (false)
 	 */
 	public boolean isValid(String rec) {
-		List list = parse(rec);
-		String[] parts = (String[]) list.toArray(new String[0]);
-
-		if (parts[0].equals("")) {
-			// Skip any missing ES Cell IDs
-			return false;
-		}
-		if (parts[0].equals("MGI ACCESSION ID")) {
-			// Ignore header line
-			return false;
-		}
-		if (parts[0].substring(0, 1).equals("#")) {
-			// Ignore any comment lines which start with a "#" character
-			return false;
-		}
-		try {
-			Integer.parseInt(parts[4]);
-		} catch (NumberFormatException e) {
-			// Sanger IKMC project IDs are Integers, but this record
-			// is not an integer
-			return false;
-		}
-		if (!parts[3].replaceAll("\"", "").matches(pipeline)) {
-			// Wrong project
-			return false;
-		}
-		if (parts[6].indexOf(",") != -1) {
-			// strangely formatted ES Cell (parental)
-			qcStatistics.record("WARNING", NUM_UNKNOWN_PARENT);
-			return false;
-		}
-		if (!alleleTypes.contains(parts[8])) {
-			// unknown mutation type
-			qcStatistics.record("WARNING", NUM_UNKNOWN_MUTATION);
-			return false;
-		}
-
-		// The first letter of the cell line ID indicates what lab created it
-		if (parts[5].length() < 1) {
-			return false;
-		}
-		String firstLetter = parts[5].substring(0, 1);
-
-		if (!knownCelllines.contains(firstLetter)) {
-			// A new provider!
-			qcStatistics.record("ERROR", "Records with a new provider ("
-					+ firstLetter + ")");
-			logger.logInfo("Cell line record with a new provider (" + parts[5]
-					+ ")");
-			return false;
-		}
-		if (!allowedCelllines.contains(firstLetter)) {
-			return false;
-		}
-
-		try {
-			if(Integer.valueOf(parts[9]) == null) {return false;}
-			if(Integer.valueOf(parts[10]) == null) {return false;}
-		} catch (NumberFormatException e) {
-			return false;
-		}
 		
-		if (parts.length > 11) {
-			if(parts.length == 12 ) {
-				// Missing one of a pair of coords
+		try {
+			List list = parse(rec);
+			String[] parts = (String[]) list.toArray(new String[0]);
+
+			if (parts[0].equals("")) {
+				// Skip any missing ES Cell IDs
 				return false;
 			}
-			if ((parts[11].length() < 1 && parts[12].length() > 1) ||
-				(parts[11].length() > 1 && parts[12].length() < 1)
-				) {
-					return false;
-			} else {
-				try {
-					if(Integer.valueOf(parts[11]) == null) {return false;}
-					if(Integer.valueOf(parts[12]) == null) {return false;}
-				} catch (NumberFormatException e) {
+			if (parts[0].equals("MGI ACCESSION ID")) {
+				// Ignore header line
+				return false;
+			}
+			if (parts[0].substring(0, 1).equals("#")) {
+				// Ignore any comment lines which start with a "#" character
+				return false;
+			}
+			try {
+				Integer.parseInt(parts[4]);
+			} catch (NumberFormatException e) {
+				// Sanger IKMC project IDs are Integers, but this record
+				// is not an integer
+				return false;
+			}
+			if (!parts[3].replaceAll("\"", "").matches(pipeline)) {
+				// Wrong project
+				return false;
+			}
+			if (parts[6].indexOf(",") != -1) {
+				// strangely formatted ES Cell (parental)
+				qcStatistics.record("WARNING", NUM_UNKNOWN_PARENT);
+				return false;
+			}
+			if (!alleleTypes.contains(parts[8])) {
+				// unknown mutation type
+				qcStatistics.record("WARNING", NUM_UNKNOWN_MUTATION);
+				return false;
+			}
+
+			// The first letter of the cell line ID indicates what lab created it
+			if (parts[5].length() < 1) {
+				return false;
+			}
+			String firstLetter = parts[5].substring(0, 1);
+
+			if (!knownCelllines.contains(firstLetter)) {
+				// A new provider!
+				qcStatistics.record("ERROR", "Records with a new provider ("
+						+ firstLetter + ")");
+				logger.logInfo("Cell line record with a new provider (" + parts[5]
+						+ ")");
+				return false;
+			}
+			if (!allowedCelllines.contains(firstLetter)) {
+				return false;
+			}
+
+			try {
+				if(Integer.valueOf(parts[9]) == null) {return false;}
+				if(Integer.valueOf(parts[10]) == null) {return false;}
+			} catch (NumberFormatException e) {
+				return false;
+			}
+			
+			if (parts.length > 11) {
+				if(parts.length == 12 ) {
+					// Missing one of a pair of coords
 					return false;
 				}
+				if ((parts[11].length() < 1 && parts[12].length() > 1) ||
+					(parts[11].length() > 1 && parts[12].length() < 1)
+					) {
+						return false;
+				} else {
+					try {
+						if(Integer.valueOf(parts[11]) == null) {return false;}
+						if(Integer.valueOf(parts[12]) == null) {return false;}
+					} catch (NumberFormatException e) {
+						return false;
+					}
+				}
 			}
-		}
 
-		// Default action is to indicate this record as valid
-		return true;
+			// Default action is to indicate this record as valid
+			return true;			
+		} catch (Exception e) {
+			logger.logdInfo("Malformed record"+rec, false);
+			return false;
+		}
 	}
 }
