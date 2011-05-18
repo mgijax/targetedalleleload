@@ -392,10 +392,10 @@ public class TargetedAlleleLoad extends DLALoader {
 			} catch (KeyNotFoundException e) {
 				qcStats.record("ERROR", NUM_BAD_ALLELE_PROCESSING);
 
-				String m = "Allele creation error (bad key), check: "
+				String m = "Could not create allele (bad key), check: "
 						+ in.getMutantCellLine() + "\n";
 				logger.logdInfo(m, false);
-				m = "An error occured while processing the input record for: "
+				m = "Could not process the input record for: "
 						+ in.getMutantCellLine() + "\n"
 						+ "The provider might be using a secondary MGI ID ("
 						+ in.getGeneId() + ")\n";
@@ -414,7 +414,7 @@ public class TargetedAlleleLoad extends DLALoader {
 							new StringReader(e.getMessage()));
 					m += reader.readLine();
 				} catch (IOException e1) {
-					m = "An error occured processing "+ in.getMutantCellLine() +
+					m = "Could not process "+ in.getMutantCellLine() +
 						" then another error occured trying to get that error.";
 				}
 
@@ -620,7 +620,7 @@ public class TargetedAlleleLoad extends DLALoader {
 									new StringReader(e.getMessage()));
 							m += reader.readLine();
 						} catch (IOException e1) {
-							m = "An error occured processing "+ in.getMutantCellLine() +
+							m = "Could not process "+ in.getMutantCellLine() +
 								" then another error occured trying to get that error.";
 						}
 						logger.logdInfo(m, false);
@@ -659,7 +659,7 @@ public class TargetedAlleleLoad extends DLALoader {
 					// if an appropriate allele cannot be found or created,
 					// report the error and skip on to the next record
 					if (alleleKey == null) {
-						String m = "An error occured creating allele: ";
+						String m = "Could not create allele: ";
 						m += constructed + "\n";
 						m += in + "\n";
 						logger.logdInfo(m, false);
