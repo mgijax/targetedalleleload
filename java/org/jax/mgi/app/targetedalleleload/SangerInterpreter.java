@@ -73,7 +73,7 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 	 * @return List of Strings
 	 */
 	public List parse(String line) {
-		List list = Arrays.asList(line.split("\t"));
+		List list = Arrays.asList(line.replaceAll("\\r|\\n", "").split("\t"));
 		return list;
 	}
 
@@ -145,7 +145,11 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 		// Check if this is a negative strand gene by comparing the
 		// orientation of the coordinates
 		String c1 = fields[9] + "-" + fields[10];
-		String c2 = fields[11] + "-" + fields[12];
+        String c2 = "-";
+        if (fields.length < 10) {
+            c2 = fields[11] + "-" + fields[12];
+        }
+                              
 		
 		List coords = getCoords(c1, c2);
 		inputData.setLocus1((String) coords.get(0));
@@ -154,44 +158,7 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 		// Return the populated inputData object.
 		return inputData;
 	}
-//	
-//	private List getCoords(String cStart, String cEnd, String lStart, String lEnd) {
-//
-//		int coord1 = Integer.valueOf(cStart).intValue();
-//		int coord2 = Integer.valueOf(cEnd).intValue();
-//
-//		List coords = new ArrayList();
-//
-//		if (lStart.equals("")) {
-//			// There is only one set of coordinates
-//			coords.add(0, cStart);
-//			coords.add(1, cEnd);
-//		} else {
-//			// Two sets of coordinates
-//			int coord3 = Integer.valueOf(lStart).intValue();
-//			int coord4 = Integer.valueOf(lEnd).intValue();
-//			Integer[] cds = {Integer.valueOf(coord1), 
-//					Integer.valueOf(coord2), 
-//					Integer.valueOf(coord3), 
-//					Integer.valueOf(coord4)};
-//			int min = ((Integer)Collections.min(Arrays.asList(cds))).intValue();
-//			int max = ((Integer)Collections.max(Arrays.asList(cds))).intValue();
-//			
-//
-//			if (coord1 > coord2) {
-//				// Negative strand gene
-//				coords.add(0, new Integer(max).toString());
-//				coords.add(1, new Integer(min).toString());
-//			} else {
-//				// positive strand gene
-//				coords.add(0, new Integer(min).toString());
-//				coords.add(1, new Integer(max).toString());
-//			}			
-//		}
-//
-//
-//		return coords;
-//	}
+
 	/**
 	 * Determine if the record encodes a positive of negative strand
 	 * gene (negative strand genes are reported with the genomic 
