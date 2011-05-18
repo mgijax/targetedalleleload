@@ -331,7 +331,6 @@ public class SangerProcessor extends KnockoutAlleleProcessor {
 		// all other cassettes are treated equally
 
 		if (in.getMutationType().equals("Conditional")) {
-			System.out.println(in.getCassette());
 			if (in.getCassette().equals("L1L2_Del_BactPneo_FFL")) {
 				note = cfg.getNoteTemplateCondDel_BactPneo_FFL();
 			} else if (in.getCassette().matches(PROMOTER_DRIVEN)) {
