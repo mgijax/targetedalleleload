@@ -34,7 +34,7 @@ public class AlleleLookupByCellLine extends FullCachedLookup {
 
 	private MarkerLookupByMGIID markerLookup;
 	private TargetedAlleleLoadCfg cfg;
-	private DLALogger logger;
+	private static DLALogger logger;
 
 	/**
 	 * constructor
@@ -112,7 +112,8 @@ public class AlleleLookupByCellLine extends FullCachedLookup {
 		try {
 			provider = cfg.getProvider();
 		} catch (ConfigException e) {
-			System.out.println("Config Exception retrieving JNUMBER");
+			logger.logdInfo("Config Exception retrieving JNUMBER", false);
+			return "";
 		}
 		return "SELECT alleleKey=a._Allele_key, alleleName=a.name, "
 				+ "alleleSymbol=a.symbol, alleleType=a._Allele_Type_key, "

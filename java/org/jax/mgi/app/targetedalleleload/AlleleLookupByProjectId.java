@@ -18,6 +18,7 @@ import org.jax.mgi.shr.dbutils.MultiRowInterpreter;
 import org.jax.mgi.shr.dbutils.RowDataInterpreter;
 import org.jax.mgi.shr.dbutils.RowReference;
 import org.jax.mgi.shr.dbutils.SQLDataManagerFactory;
+import org.jax.mgi.shr.dla.log.DLALogger;
 import org.jax.mgi.shr.dla.log.DLALoggingException;
 import org.jax.mgi.shr.exception.MGIException;
 
@@ -36,6 +37,7 @@ public class AlleleLookupByProjectId extends FullCachedLookup {
 
 	private TargetedAlleleLoadCfg cfg;
 	private Integer logicalDb;
+	private static DLALogger logger;
 
 	private static AlleleLookupByProjectId _instance;
 
@@ -47,6 +49,7 @@ public class AlleleLookupByProjectId extends FullCachedLookup {
 	 * @throws MGIException
 	 */
 	public static AlleleLookupByProjectId getInstance() throws MGIException {
+		logger = DLALogger.getInstance();
 		if (_instance == null) {
 			_instance = new AlleleLookupByProjectId();
 		}
@@ -169,7 +172,7 @@ public class AlleleLookupByProjectId extends FullCachedLookup {
 				try {
 					alleles = lookup(projectId);
 				} catch (Exception e) {
-					System.out.println(e);
+					logger.logdInfo(e.toString(), false);
 				}
 
 				if (alleles == null) {

@@ -34,8 +34,11 @@ import org.jax.mgi.shr.exception.MGIException;
 public class AlleleLookupByKey extends FullCachedLookup {
 
 	private static AlleleLookupByKey _instance;
+	private static DLALogger logger;
+
 
 	public static AlleleLookupByKey getInstance() throws MGIException {
+		logger = DLALogger.getInstance();
 		if (_instance == null) {
 			_instance = new AlleleLookupByKey();
 		}
@@ -109,7 +112,7 @@ public class AlleleLookupByKey extends FullCachedLookup {
 			TargetedAlleleLoadCfg cfg = new TargetedAlleleLoadCfg();
 			provider = cfg.getProvider();
 		} catch (MGIException e) {
-			System.out.println("Config exception retrieving JNUMBER");
+			logger.logdInfo("Config Exception retrieving JNUMBER", false);
 			return null;
 		}
 

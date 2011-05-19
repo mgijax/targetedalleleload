@@ -18,7 +18,9 @@ import org.jax.mgi.shr.dbutils.MultiRowInterpreter;
 import org.jax.mgi.shr.dbutils.RowDataInterpreter;
 import org.jax.mgi.shr.dbutils.RowReference;
 import org.jax.mgi.shr.dbutils.SQLDataManagerFactory;
+import org.jax.mgi.shr.dla.log.DLALogger;
 import org.jax.mgi.shr.dla.log.DLALoggingException;
+import org.jax.mgi.shr.exception.MGIException;
 
 /**
  * 
@@ -34,9 +36,10 @@ import org.jax.mgi.shr.dla.log.DLALoggingException;
 public class AlleleLookupByMarker extends FullCachedLookup {
 
 	private static AlleleLookupByMarker _instance;
+	private static DLALogger logger;
 
-	public static AlleleLookupByMarker getInstance() throws ConfigException,
-			DBException, CacheException {
+	public static AlleleLookupByMarker getInstance() throws MGIException {
+		logger = DLALogger.getInstance();
 		if (_instance == null) {
 			_instance = new AlleleLookupByMarker();
 		}
@@ -120,7 +123,7 @@ public class AlleleLookupByMarker extends FullCachedLookup {
 		try {
 			provider = cfg.getProvider();
 		} catch (ConfigException e) {
-			System.out.println("Config Exception retrieving JNUMBER");
+			logger.logdInfo("Config Exception retrieving JNUMBER", false);
 		}
 
 		return "SELECT av._allele_key 'alleleKey', av.markerSymbol 'markerSymbol' "

@@ -87,9 +87,9 @@ public class TargetedAlleleLoad extends DLALoader {
 			+ "Existing Marker: ~~EXISTING_MARKER~~\n"
 			+ "Changed to: ~~INPUT_MARKER~~\n";
 	private static final String LOG_ALLELE_TRANSMISSION_CHANGED = "ALLELE GERMLINE TRANSMISSION\n"
-		+ "An attempt to change Mutant Cell line ~~INPUT_MCL~~ from allele\n"
-		+ "~~EXISTING_ALLELE~~ to allele ~~CONSTRUCTED_ALLELE~~ failed because\n"
-		+ "the transmission is germline.  Not further automated action can be taken on ~~EXISTING_ALLELE~~.\n";
+			+ "An attempt to change Mutant Cell line ~~INPUT_MCL~~ from allele\n"
+			+ "~~EXISTING_ALLELE~~ to allele ~~CONSTRUCTED_ALLELE~~ failed because\n"
+			+ "the transmission is germline.  Not further automated action can be taken on ~~EXISTING_ALLELE~~.\n";
 	private static final String LOG_CELLLINE_TYPE_CHANGED = "MUTANT ES CELL CHANGED TYPE\n"
 			+ "Mutant Cell line: ~~INPUT_MCL~~\n"
 			+ "Existing allele symbol: ~~EXISTING_SYMBOL~~\n"
@@ -165,8 +165,7 @@ public class TargetedAlleleLoad extends DLALoader {
 	 * @throws DLALoaderException
 	 *             thrown if the super class cannot be instantiated
 	 */
-	public TargetedAlleleLoad() 
-	throws MGIException {
+	public TargetedAlleleLoad() throws MGIException {
 		// Instance the configuration object
 		cfg = new TargetedAlleleLoadCfg();
 		sqlDBMgr = SQLDataManagerFactory.getShared(SchemaConstants.MGD);
@@ -220,10 +219,8 @@ public class TargetedAlleleLoad extends DLALoader {
 	 * @throws CacheException
 	 *             if the lookup fails
 	 */
-	private void filterProjectIds(
-			Set databaseProjectIds, 
-			String loadProvider)
-	throws DBException, CacheException {
+	private void filterProjectIds(Set databaseProjectIds, String loadProvider)
+			throws DBException, CacheException {
 		Iterator it = alleleLookupByProjectId.getKeySet().iterator();
 		while (it.hasNext()) {
 			String label = (String) it.next();
@@ -254,10 +251,8 @@ public class TargetedAlleleLoad extends DLALoader {
 	 * @throws CacheException
 	 *             if the lookup fails
 	 */
-	private void filterCellLines(
-			Set databaseCellLines, 
-			String loadProvider)
-	throws DBException, CacheException {
+	private void filterCellLines(Set databaseCellLines, String loadProvider)
+			throws DBException, CacheException {
 		// Add only cell lines appropriate for this pipeline and provider
 		// to the QC pool (cell lines for other pipeline don't need QC
 		// during this run)
@@ -278,8 +273,7 @@ public class TargetedAlleleLoad extends DLALoader {
 	 * @assumes nothing
 	 * @effects internal structures including database caching is initialized
 	 */
-	protected void initialize() 
-	throws MGIException {
+	protected void initialize() throws MGIException {
 		sqlDBMgr.setLogger(logger);
 		logger.logdDebug("TargetedAlleleLoader sqlDBMgr.server "
 				+ sqlDBMgr.getServer());
@@ -311,8 +305,7 @@ public class TargetedAlleleLoad extends DLALoader {
 	 * @effects nothing
 	 * @throws nothing
 	 */
-	protected void preprocess() 
-	throws MGIException {
+	protected void preprocess() throws MGIException {
 		// Initialize the statistics for alleles and cell lines created
 		// by the load so far
 		qcStats.record("SUMMARY", NUM_ALLELES_CREATED, 0);
@@ -330,8 +323,7 @@ public class TargetedAlleleLoad extends DLALoader {
 	 *             thrown if there is an error accessing the input file or
 	 *             writing output data
 	 */
-	protected void run() 
-	throws MGIException {
+	protected void run() throws MGIException {
 
 		// Keep track of which alleles we've updated the notes for
 		// so we only update it once
@@ -358,7 +350,7 @@ public class TargetedAlleleLoad extends DLALoader {
 			// If this record is not appropriate to be handled by this
 			// processor, skip it. The only reason we included it in the
 			// first place was to assist in the QC of all cell lines
-			if ( ! in.getInputPipeline().equals(cfg.getPipeline())) {
+			if (!in.getInputPipeline().equals(cfg.getPipeline())) {
 				continue;
 			}
 
@@ -393,7 +385,7 @@ public class TargetedAlleleLoad extends DLALoader {
 				qcStats.record("ERROR", NUM_BAD_ALLELE_PROCESSING);
 
 				String m = "Could not create allele (bad key), check: "
-						+ in.getMutantCellLine() + "\n";
+						+ in.getMutantCellLine() + "\n" + in + "\n";
 				logger.logdInfo(m, false);
 				m = "Could not process the input record for: "
 						+ in.getMutantCellLine() + "\n"
@@ -405,8 +397,7 @@ public class TargetedAlleleLoad extends DLALoader {
 				qcStats.record("ERROR", NUM_BAD_ALLELE_PROCESSING);
 
 				String m = "General error, skipping record: "
-						+ in.getMutantCellLine() 
-						+ "\n";
+						+ in.getMutantCellLine() + "\n" + in + "\n";
 				try {
 					// Just the first message of the exception needs
 					// to be reported
@@ -414,8 +405,9 @@ public class TargetedAlleleLoad extends DLALoader {
 							new StringReader(e.getMessage()));
 					m += reader.readLine();
 				} catch (IOException e1) {
-					m = "Could not process "+ in.getMutantCellLine() +
-						" then another error occured trying to get that error.";
+					m = "Could not process "
+							+ in.getMutantCellLine()
+							+ " then another error occured trying to get that error.";
 				}
 
 				logger.logdInfo(m, false);
@@ -435,173 +427,179 @@ public class TargetedAlleleLoad extends DLALoader {
 			// cache (database or recently created)?
 			MutantCellLine esCell = koMutantCellLineLookup.lookup(in
 					.getMutantCellLine());
-			
+
 			// Update mode or create mode
 			if (cfg.getUpdateOnlyMode()) {
 				if (esCell != null) {
-				// Mutant ES Cell found in MGI, check the associated allele
+					// Mutant ES Cell found in MGI, check the associated allele
 
-				// Find the existing associated allele
-				KnockoutAllele existing = alleleLookupByCellLine.lookup(in
-						.getMutantCellLine());
+					// Find the existing associated allele
+					KnockoutAllele existing = alleleLookupByCellLine.lookup(in
+							.getMutantCellLine());
 
-				// If the associated allele can't be found, there's a major
-				// problem. The caches are out of synch, or the cell line to
-				// allele association is missing. Regardless, we can't
-				// process this record further, report the error and continue
-				if (existing == null) {
-					// Report this to the diagnostic log
-					String m = LOG_ALLELE_NOT_FOUND.replaceAll("~~INPUT_MCL~~",
-							in.getMutantCellLine());
-					logger.logdInfo(m, true);
-					qcStats.record("ERROR", NUM_CELLINES_MISSING_ALLELE);
-					continue;
-				}
-
-				// ********************************************************
-				// BEGIN QC CHECKS
-				// ********************************************************
-
-				if ( ! isMatchingGene(existing, constructed)) {
-					// Check the allele to marker association, if it has changed,
-					// report to the log for manual curation.
-					logMarkerChanged(in, constructed, existing);
-				} else if (alleleProjects.get(existing.getKey()) != null ||
-						( ! existing.getProjectId().equals(
-						constructed.getProjectId())
-						&& ! isTypeChange(existing, constructed)
-						&& ! isGroupChange(existing, constructed)
-						&& ! isCreatorChange(existing, constructed)
-						&& ! isDerivationChange(esCell, in)
-						)) {
-					// We can only update the project ID once all cell lines
-					// for the allele have been
-					// verified to require the same change
-
-					// The extra "alleleProjects.get(existing) != null ||"
-					// check is to see if there are project IDs that have
-					// NOT
-					// changed from the original, when others have. The
-					// existence of an entry in alleleProjects means we've
-					// updated this project ID before.
-
-					// The project ID changed, but the type, group,
-					// creator, derivation and marker didn't change, we
-					// can just try to update the allele project ID
-					// in place
-
-					if (alleleProjects.get(existing.getKey()) == null) {
-						alleleProjects.put(existing.getKey(), new HashSet());
+					// If the associated allele can't be found, there's a major
+					// problem. The caches are out of synch, or the cell line to
+					// allele association is missing. Regardless, we can't
+					// process this record further, report the error and
+					// continue
+					if (existing == null) {
+						// Report this to the diagnostic log
+						String m = LOG_ALLELE_NOT_FOUND.replaceAll(
+								"~~INPUT_MCL~~", in.getMutantCellLine());
+						logger.logdInfo(m, true);
+						qcStats.record("ERROR", NUM_CELLINES_MISSING_ALLELE);
+						continue;
 					}
 
-					// Record the updated project ID for this allele symbol
-					Set projSet = (Set) alleleProjects.get(existing.getKey());
-					projSet.add(constructed.getProjectId());
-					alleleProjects.put(existing.getKey(), projSet);
+					// ********************************************************
+					// BEGIN QC CHECKS
+					// ********************************************************
 
-					// save the new project ID for this allele symbol
-					String m = existing.getSymbol() + "\t"
-							+ existing.getProjectId() + "\t"
-							+ constructed.getProjectId() + "\t"
-							+ in.getMutantCellLine();
-					alleleProjectIdUpdated.add(m);
-				} else if ( ! existing.getSymbol()
-						.equals(constructed.getSymbol())) {
-					// If the associated allele symbol has changed at all,
-					// then we need to change it and update the derivation
+					if (!isMatchingGene(existing, constructed)) {
+						// Check the allele to marker association, if it has
+						// changed,
+						// report to the log for manual curation.
+						logMarkerChanged(in, constructed, existing);
+					} else if (alleleProjects.get(existing.getKey()) != null
+							|| (!existing.getProjectId().equals(
+									constructed.getProjectId())
+									&& !isTypeChange(existing, constructed)
+									&& !isGroupChange(existing, constructed)
+									&& !isCreatorChange(existing, constructed) && !isDerivationChange(
+									esCell, in))) {
+						// We can only update the project ID once all cell lines
+						// for the allele have been
+						// verified to require the same change
 
-					// Symbols don't match
-					// The marker didn't change (checked previously)
-					// so one of these attributes changed.
-					// 1- Parental cell line
-					// 2- Type
-					// 3- IKMC group
-					// 4- Creator
-					// 5- Vector
+						// The extra "alleleProjects.get(existing) != null ||"
+						// check is to see if there are project IDs that have
+						// NOT
+						// changed from the original, when others have. The
+						// existence of an entry in alleleProjects means we've
+						// updated this project ID before.
 
-					if (isTypeChange(existing, constructed)) {
-						logTypeChange(in, constructed, existing);
-					}
+						// The project ID changed, but the type, group,
+						// creator, derivation and marker didn't change, we
+						// can just try to update the allele project ID
+						// in place
 
-					if (isGroupChange(existing, constructed)) {
-						logGroupChange(in, constructed, existing);
-					}
-
-					if (isCreatorChange(existing, constructed)) {
-						logCreatorChange(in, constructed, existing);
-					}
-
-					if (isNumberChange(existing, constructed)) {
-						logNumberChange(in, constructed, existing);
-					}
-
-					// Re-associate the cell line to a new allele
-					logAlleleChanged(in, constructed, esCell, existing);
-					changeMutantCellLineAssociation(in, esCell, existing,
-							constructed);
-				} else if ( ! esCell.getDerivationKey().equals(
-						getDerivationKey(in))) {
-					// Check the derivation (this implicitly checks the
-					// parental cell line, the creator, the vector and the
-					// allele type)
-					
-					// This QC check is a street sweeper.  Derivation 
-					// changes, by themselves, should not happen.
-					// If ONLY the derivation changed and nothing else
-					// (which was checked previously in the if-then)
-					// then we can go ahead and change the derivation
-					// association, but we will skip updating the note
-					// if it also changed.
-
-					logDerivationChange(in, esCell, existing);
-					changeDerivationKey(getDerivationKey(in), esCell);
-
-				} else {
-
-					// Compress the note fields to discount any extra spaces
-					// that
-					// might have snuck in
-					String existingNote = existing.getNote()
-							.replaceAll("\\n", "").replaceAll(" ", "");
-					String constructedNote = constructed.getNote()
-							.replaceAll("\\n", "").replaceAll(" ", "");
-
-					// The extra "|| alleleNotes.get(existing) != null"
-					// check is to see if there are notes that have NOT
-					// changed from the original, when others have. The
-					// existence of an entry in alleleNotes means we've
-					// updated this note before.
-					if ( ! existingNote.equals(constructedNote)
-							|| alleleNotes.get(existing.getKey()) != null) {
-						// If we get this far in the QC checks, then
-						// we can be sure that the creator, the type,
-						// the vector, and the parental cell line are all
-						// the same. The only thing left that could have
-						// changed are the coordinates
-
-						if (alleleNotes.get(existing.getKey()) == null) {
-							alleleNotes.put(existing.getKey(), new HashSet());
+						if (alleleProjects.get(existing.getKey()) == null) {
+							alleleProjects
+									.put(existing.getKey(), new HashSet());
 						}
 
-						// save the new molecular note for this allele symbol
-						Set notes = (Set) alleleNotes.get(existing.getKey());
-						notes.add(constructed.getNote());
-						alleleNotes.put(existing.getKey(), notes);
-					}
-				}
+						// Record the updated project ID for this allele symbol
+						Set projSet = (Set) alleleProjects.get(existing
+								.getKey());
+						projSet.add(constructed.getProjectId());
+						alleleProjects.put(existing.getKey(), projSet);
 
-				// ********************************************************
-				// END QC CHECKS
-				// ********************************************************
-				// done with QC checks. skip on to the next record
-				continue;
+						// save the new project ID for this allele symbol
+						String m = existing.getSymbol() + "\t"
+								+ existing.getProjectId() + "\t"
+								+ constructed.getProjectId() + "\t"
+								+ in.getMutantCellLine();
+						alleleProjectIdUpdated.add(m);
+					} else if (!existing.getSymbol().equals(
+							constructed.getSymbol())) {
+						// If the associated allele symbol has changed at all,
+						// then we need to change it and update the derivation
+
+						// Symbols don't match
+						// The marker didn't change (checked previously)
+						// so one of these attributes changed.
+						// 1- Parental cell line
+						// 2- Type
+						// 3- IKMC group
+						// 4- Creator
+						// 5- Vector
+
+						if (isTypeChange(existing, constructed)) {
+							logTypeChange(in, constructed, existing);
+						}
+
+						if (isGroupChange(existing, constructed)) {
+							logGroupChange(in, constructed, existing);
+						}
+
+						if (isCreatorChange(existing, constructed)) {
+							logCreatorChange(in, constructed, existing);
+						}
+
+						if (isNumberChange(existing, constructed)) {
+							logNumberChange(in, constructed, existing);
+						}
+
+						// Re-associate the cell line to a new allele
+						logAlleleChanged(in, constructed, esCell, existing);
+						changeMutantCellLineAssociation(in, esCell, existing,
+								constructed);
+					} else if (!esCell.getDerivationKey().equals(
+							getDerivationKey(in))) {
+						// Check the derivation (this implicitly checks the
+						// parental cell line, the creator, the vector and the
+						// allele type)
+
+						// This QC check is a street sweeper. Derivation
+						// changes, by themselves, should not happen.
+						// If ONLY the derivation changed and nothing else
+						// (which was checked previously in the if-then)
+						// then we can go ahead and change the derivation
+						// association, but we will skip updating the note
+						// if it also changed.
+
+						logDerivationChange(in, esCell, existing);
+						changeDerivationKey(getDerivationKey(in), esCell);
+
+					} else {
+
+						// Compress the note fields to discount any extra spaces
+						// that
+						// might have snuck in
+						String existingNote = existing.getNote()
+								.replaceAll("\\n", "").replaceAll(" ", "");
+						String constructedNote = constructed.getNote()
+								.replaceAll("\\n", "").replaceAll(" ", "");
+
+						// The extra "|| alleleNotes.get(existing) != null"
+						// check is to see if there are notes that have NOT
+						// changed from the original, when others have. The
+						// existence of an entry in alleleNotes means we've
+						// updated this note before.
+						if (!existingNote.equals(constructedNote)
+								|| alleleNotes.get(existing.getKey()) != null) {
+							// If we get this far in the QC checks, then
+							// we can be sure that the creator, the type,
+							// the vector, and the parental cell line are all
+							// the same. The only thing left that could have
+							// changed are the coordinates
+
+							if (alleleNotes.get(existing.getKey()) == null) {
+								alleleNotes.put(existing.getKey(),
+										new HashSet());
+							}
+
+							// save the new molecular note for this allele
+							// symbol
+							Set notes = (Set) alleleNotes
+									.get(existing.getKey());
+							notes.add(constructed.getNote());
+							alleleNotes.put(existing.getKey(), notes);
+						}
+					}
+
+					// ********************************************************
+					// END QC CHECKS
+					// ********************************************************
+					// done with QC checks. skip on to the next record
+					continue;
 				}
 			} else { // end of if (cfg.getUpdateOnlyMode())
-				
+
 				// Only create anything if the cell line doesn't exist
 				// the QC checking process (which occurs if this load
 				// is run when the cfg.getUpdateOnlyMode() is true)
-				
+
 				// If the cell line was not found in the database,
 				// create a new cell line and associated objects
 				if (esCell == null) {
@@ -620,8 +618,9 @@ public class TargetedAlleleLoad extends DLALoader {
 									new StringReader(e.getMessage()));
 							m += reader.readLine();
 						} catch (IOException e1) {
-							m = "Could not process "+ in.getMutantCellLine() +
-								" then another error occured trying to get that error.";
+							m = "Could not process "
+									+ in.getMutantCellLine()
+									+ " then another error occured trying to get that error.";
 						}
 						logger.logdInfo(m, false);
 						continue;
@@ -635,7 +634,7 @@ public class TargetedAlleleLoad extends DLALoader {
 						logger.logdInfo(m, false);
 						continue;
 					}
-	
+
 					// lookup existing alleles for this project
 					String projectId = in.getProjectId();
 					Map alleles = alleleLookupByProjectId.lookup(projectId);
@@ -649,13 +648,13 @@ public class TargetedAlleleLoad extends DLALoader {
 							alleleKey = (Integer) allele.get("key");
 						}
 					}
-	
+
 					if (alleleKey == null) {
 						// did not find appropriate allele. create a new allele
 						createAllele(constructed, in, alleles);
 						alleleKey = constructed.getKey();
 					}
-	
+
 					// if an appropriate allele cannot be found or created,
 					// report the error and skip on to the next record
 					if (alleleKey == null) {
@@ -665,7 +664,7 @@ public class TargetedAlleleLoad extends DLALoader {
 						logger.logdInfo(m, false);
 						continue;
 					}
-	
+
 					associateCellLineToAllele(alleleKey, mclKey);
 				}
 			} // end if (cfg.getUpdateOnlyMode())
@@ -673,30 +672,22 @@ public class TargetedAlleleLoad extends DLALoader {
 	} // end protected void run()
 
 	// Logging helper functions
-	private void logMarkerChanged(
-			KnockoutAlleleInput in,
-			KnockoutAllele constructed, 
-			KnockoutAllele existing) {
+	private void logMarkerChanged(KnockoutAlleleInput in,
+			KnockoutAllele constructed, KnockoutAllele existing) {
 		String m = LOG_MARKER_CHANGED
-				.replaceAll("~~INPUT_MCL~~", 
-						in.getMutantCellLine())
-				.replaceAll("~~EXISTING_MARKER~~",
-						existing.getSymbol())
-				.replaceAll("~~INPUT_MARKER~~",
-						constructed.getSymbol());
+				.replaceAll("~~INPUT_MCL~~", in.getMutantCellLine())
+				.replaceAll("~~EXISTING_MARKER~~", existing.getSymbol())
+				.replaceAll("~~INPUT_MARKER~~", constructed.getSymbol());
 
 		logger.logcInfo(m, false);
 		qcStats.record("SUMMARY", NUM_CELLINES_CHANGED_MARKER);
 	}
-	private void logDerivationChange(
-			KnockoutAlleleInput in,
-			MutantCellLine esCell,
-			KnockoutAllele existing) 
-	throws MGIException {
+
+	private void logDerivationChange(KnockoutAlleleInput in,
+			MutantCellLine esCell, KnockoutAllele existing) throws MGIException {
 		String m = LOG_CELLLINE_DERIVATION_CHANGED
 				.replaceAll("~~INPUT_MCL~~", in.getMutantCellLine())
-				.replaceAll("~~EXISTING_SYMBOL~~",
-						existing.getSymbol())
+				.replaceAll("~~EXISTING_SYMBOL~~", existing.getSymbol())
 				.replaceAll("~~EXISTING_DERIVATION~~",
 						esCell.getDerivationKey().toString())
 				.replaceAll("~~INPUT_DERIVATION~~",
@@ -704,18 +695,14 @@ public class TargetedAlleleLoad extends DLALoader {
 		logger.logcInfo(m, false);
 		qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_DERIVATION);
 	}
-	private void logAlleleChanged(
-			KnockoutAlleleInput in,
-			KnockoutAllele constructed, 
-			MutantCellLine esCell,
-			KnockoutAllele existing) 
-	throws MGIException {
+
+	private void logAlleleChanged(KnockoutAlleleInput in,
+			KnockoutAllele constructed, MutantCellLine esCell,
+			KnockoutAllele existing) throws MGIException {
 		String m = LOG_CELLLINE_ALLELE_CHANGED
 				.replaceAll("~~INPUT_MCL~~", in.getMutantCellLine())
-				.replaceAll("~~EXISTING_SYMBOL~~",
-						existing.getSymbol())
-				.replaceAll("~~INPUT_SYMBOL~~",
-						constructed.getSymbol())
+				.replaceAll("~~EXISTING_SYMBOL~~", existing.getSymbol())
+				.replaceAll("~~INPUT_SYMBOL~~", constructed.getSymbol())
 				.replaceAll("~~EXISTING_DERIVATION~~",
 						esCell.getDerivationKey().toString())
 				.replaceAll("~~INPUT_DERIVATION~~",
@@ -724,60 +711,43 @@ public class TargetedAlleleLoad extends DLALoader {
 		qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_DERIVATION);
 		qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_ALLELE);
 	}
-	private void logNumberChange(
-			KnockoutAlleleInput in,
-			KnockoutAllele constructed, 
-			KnockoutAllele existing) {
+
+	private void logNumberChange(KnockoutAlleleInput in,
+			KnockoutAllele constructed, KnockoutAllele existing) {
 		String m = LOG_CELLLINE_NUMBER_CHANGED
-				.replaceAll("~~INPUT_MCL~~",
-						in.getMutantCellLine())
-				.replaceAll("~~EXISTING_SYMBOL~~",
-						existing.getSymbol())
-				.replaceAll("~~INPUT_SYMBOL~~",
-						constructed.getSymbol());
+				.replaceAll("~~INPUT_MCL~~", in.getMutantCellLine())
+				.replaceAll("~~EXISTING_SYMBOL~~", existing.getSymbol())
+				.replaceAll("~~INPUT_SYMBOL~~", constructed.getSymbol());
 		logger.logcInfo(m, false);
 		qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_NUMBER);
 	}
-	private void logCreatorChange(
-			KnockoutAlleleInput in,
-			KnockoutAllele constructed, 
-			KnockoutAllele existing) {
+
+	private void logCreatorChange(KnockoutAlleleInput in,
+			KnockoutAllele constructed, KnockoutAllele existing) {
 		String m = LOG_CELLLINE_CREATOR_CHANGED
-				.replaceAll("~~INPUT_MCL~~",
-						in.getMutantCellLine())
-				.replaceAll("~~EXISTING_SYMBOL~~",
-						existing.getSymbol())
-				.replaceAll("~~INPUT_SYMBOL~~",
-						constructed.getSymbol());
+				.replaceAll("~~INPUT_MCL~~", in.getMutantCellLine())
+				.replaceAll("~~EXISTING_SYMBOL~~", existing.getSymbol())
+				.replaceAll("~~INPUT_SYMBOL~~", constructed.getSymbol());
 		logger.logcInfo(m, false);
 		qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_CREATOR);
 	}
-	private void logGroupChange(
-			KnockoutAlleleInput in,
-			KnockoutAllele constructed, 
-			KnockoutAllele existing) {
+
+	private void logGroupChange(KnockoutAlleleInput in,
+			KnockoutAllele constructed, KnockoutAllele existing) {
 		String m = LOG_CELLLINE_GROUP_CHANGED
-				.replaceAll("~~INPUT_MCL~~",
-						in.getMutantCellLine())
-				.replaceAll("~~EXISTING_SYMBOL~~",
-						existing.getSymbol())
-				.replaceAll("~~INPUT_SYMBOL~~",
-						constructed.getSymbol());
+				.replaceAll("~~INPUT_MCL~~", in.getMutantCellLine())
+				.replaceAll("~~EXISTING_SYMBOL~~", existing.getSymbol())
+				.replaceAll("~~INPUT_SYMBOL~~", constructed.getSymbol());
 		logger.logcInfo(m, false);
-		qcStats.record("SUMMARY",
-				NUM_CELLLINES_CHANGED_PIPELINE);
+		qcStats.record("SUMMARY", NUM_CELLLINES_CHANGED_PIPELINE);
 	}
-	private void logTypeChange(
-			KnockoutAlleleInput in,
-			KnockoutAllele constructed, 
-			KnockoutAllele existing) {
+
+	private void logTypeChange(KnockoutAlleleInput in,
+			KnockoutAllele constructed, KnockoutAllele existing) {
 		String m = LOG_CELLLINE_TYPE_CHANGED
-				.replaceAll("~~INPUT_MCL~~",
-						in.getMutantCellLine())
-				.replaceAll("~~EXISTING_SYMBOL~~",
-						existing.getSymbol())
-				.replaceAll("~~INPUT_SYMBOL~~",
-						constructed.getSymbol());
+				.replaceAll("~~INPUT_MCL~~", in.getMutantCellLine())
+				.replaceAll("~~EXISTING_SYMBOL~~", existing.getSymbol())
+				.replaceAll("~~INPUT_SYMBOL~~", constructed.getSymbol());
 		logger.logcInfo(m, false);
 		qcStats.record("SUMMARY", NUM_CELLLINES_CHANGE_TYPE);
 	}
@@ -797,9 +767,7 @@ public class TargetedAlleleLoad extends DLALoader {
 	 * @param second
 	 * @return true if both alleles have the same creator, false otherwise
 	 */
-	private boolean isCreatorChange(
-			KnockoutAllele first, 
-			KnockoutAllele second) {
+	private boolean isCreatorChange(KnockoutAllele first, KnockoutAllele second) {
 		Matcher regexMatcher;
 		String firstCreator;
 		String secondCreator;
@@ -843,9 +811,7 @@ public class TargetedAlleleLoad extends DLALoader {
 	 * @param second
 	 * @return true if both alleles have the same sequence, false otherwise
 	 */
-	private boolean isNumberChange(
-			KnockoutAllele first, 
-			KnockoutAllele second) {
+	private boolean isNumberChange(KnockoutAllele first, KnockoutAllele second) {
 		Matcher regexMatcher;
 		String firstNumber;
 		String secondNumber;
@@ -874,32 +840,31 @@ public class TargetedAlleleLoad extends DLALoader {
 	}
 
 	/**
-	 * Returns the type of an IKMC allele based on a letter code defined
-	 * by the International nomenclature committee
+	 * Returns the type of an IKMC allele based on a letter code defined by the
+	 * International nomenclature committee
 	 * 
-	 * @param allele 
+	 * @param allele
 	 * @return the type of allele passed in
 	 */
-	private String getAlleleType(
-			KnockoutAllele allele) {
-        Matcher regexMatcher;
-        String type;
+	private String getAlleleType(KnockoutAllele allele) {
+		Matcher regexMatcher;
+		String type;
 
-        regexMatcher = alleleTypePattern.matcher(allele.getSymbol());
-        if (regexMatcher.find()) {
-            if (regexMatcher.group(1).equals("a")) {
-                type = "Conditional";
-            } else if (regexMatcher.group(1).equals("e")) {
-                type = "Targeted non-conditional";
-            } else if (regexMatcher.group(1).equals("")) {
-                type = "Deletion";
-            } else {
-                type = "Unknown";
-            }
-        } else {
-            type = "Deletion";
-        }
-        return type;
+		regexMatcher = alleleTypePattern.matcher(allele.getSymbol());
+		if (regexMatcher.find()) {
+			if (regexMatcher.group(1).equals("a")) {
+				type = "Conditional";
+			} else if (regexMatcher.group(1).equals("e")) {
+				type = "Targeted non-conditional";
+			} else if (regexMatcher.group(1).equals("")) {
+				type = "Deletion";
+			} else {
+				type = "Unknown";
+			}
+		} else {
+			type = "Deletion";
+		}
+		return type;
 	}
 
 	/**
@@ -915,9 +880,7 @@ public class TargetedAlleleLoad extends DLALoader {
 	 * @param second
 	 * @return true if both alleles have the same type, false otherwise
 	 */
-	private boolean isTypeChange(
-			KnockoutAllele first, 
-			KnockoutAllele second) {
+	private boolean isTypeChange(KnockoutAllele first, KnockoutAllele second) {
 		String firstType = getAlleleType(first);
 		String secondType = getAlleleType(second);
 
@@ -946,9 +909,7 @@ public class TargetedAlleleLoad extends DLALoader {
 	 * @param second
 	 * @return true if different IKMC groups, false if same group
 	 */
-	private boolean isGroupChange(
-			KnockoutAllele first, 
-			KnockoutAllele second) {
+	private boolean isGroupChange(KnockoutAllele first, KnockoutAllele second) {
 		String firstIkmcGroup;
 		String secondIkmcGroup;
 		Matcher regexMatcher;
@@ -984,13 +945,11 @@ public class TargetedAlleleLoad extends DLALoader {
 	 * @param in
 	 * @return true if different derivation key, false if same
 	 */
-	private boolean isDerivationChange(
-			MutantCellLine esCell,
-			KnockoutAlleleInput in) 
-	throws MGIException {
+	private boolean isDerivationChange(MutantCellLine esCell,
+			KnockoutAlleleInput in) throws MGIException {
 		Integer key = esCell.getDerivationKey();
 		Integer newKey = getDerivationKey(in);
-		if ( key.equals(newKey)) {
+		if (key.equals(newKey)) {
 			// is not different
 			return false;
 		}
@@ -1006,9 +965,7 @@ public class TargetedAlleleLoad extends DLALoader {
 	 * @param second
 	 * @return
 	 */
-	private boolean isMatchingGene(
-			KnockoutAllele first, 
-			KnockoutAllele second) {
+	private boolean isMatchingGene(KnockoutAllele first, KnockoutAllele second) {
 		Integer existingGeneKey = first.getMarkerKey();
 		Integer constructedGeneKey = second.getMarkerKey();
 		if (existingGeneKey.equals(constructedGeneKey)) {
@@ -1017,10 +974,8 @@ public class TargetedAlleleLoad extends DLALoader {
 		return false;
 	}
 
-
-	private Integer getDerivationKey(
-			KnockoutAlleleInput in)
-	throws MGIException {
+	private Integer getDerivationKey(KnockoutAlleleInput in)
+			throws MGIException {
 
 		// Find the derivation key for this ES Cell
 		// The correct derivation is found by combining:
@@ -1099,10 +1054,8 @@ public class TargetedAlleleLoad extends DLALoader {
 		return derivationKey;
 	}
 
-	private void changeDerivationKey(
-			Integer newDerivationKey,
-			MutantCellLine esCell) 
-	throws MGIException {
+	private void changeDerivationKey(Integer newDerivationKey,
+			MutantCellLine esCell) throws MGIException {
 		// Update the derivation key for this cell line
 		String query = "UPDATE ALL_Cellline SET ";
 		query += "_derivation_key = " + newDerivationKey;
@@ -1111,27 +1064,20 @@ public class TargetedAlleleLoad extends DLALoader {
 		qcStats.record("WARNING", NUM_CELLLINES_CHANGED_DERIVATION);
 	}
 
-	private void changeMutantCellLineAssociation(
-			KnockoutAlleleInput in,
-			MutantCellLine esCell, 
-			KnockoutAllele oldAllele,
-			KnockoutAllele newAllele) 
-	throws MGIException {
+	private void changeMutantCellLineAssociation(KnockoutAlleleInput in,
+			MutantCellLine esCell, KnockoutAllele oldAllele,
+			KnockoutAllele newAllele) throws MGIException {
 
 		// Prevent the cell line from being moved to a different
 		// allele if the transmission has changed
-		if ((oldAllele.getTransmissionKey().intValue() 
-				!= Constants.ALLELE_TRANSMISSION_CELLLINE) &&
-				! oldAllele.getSymbol().equals(newAllele.getSymbol())) {
+		if ((oldAllele.getTransmissionKey().intValue() != Constants.ALLELE_TRANSMISSION_CELLLINE)
+				&& !oldAllele.getSymbol().equals(newAllele.getSymbol())) {
 			// Check the allele to marker association, if it has changed,
 			// report to the log for manual curation.
 			String m = LOG_ALLELE_TRANSMISSION_CHANGED
-					.replaceAll("~~INPUT_MCL~~", 
-							in.getMutantCellLine())
-					.replaceAll("~~EXISTING_ALLELE~~",
-							oldAllele.getSymbol())
-					.replaceAll("~~CONSTRUCTED_ALLELE~~",
-							newAllele.getSymbol());
+					.replaceAll("~~INPUT_MCL~~", in.getMutantCellLine())
+					.replaceAll("~~EXISTING_ALLELE~~", oldAllele.getSymbol())
+					.replaceAll("~~CONSTRUCTED_ALLELE~~", newAllele.getSymbol());
 
 			logger.logcInfo(m, false);
 			qcStats.record("SUMMARY", NUM_ALLELES_CHANGED_TRANS);
@@ -1188,9 +1134,9 @@ public class TargetedAlleleLoad extends DLALoader {
 				// Guarantee that the ES cell logical DB is correct
 				updateAccessionLogicalDb(esCell);
 
-				// This may occur multiple times when an orphaned 
-				// allele is brought back from deleted status.  It's 
-				// okay. This action is idempotent (it can be applied 
+				// This may occur multiple times when an orphaned
+				// allele is brought back from deleted status. It's
+				// okay. This action is idempotent (it can be applied
 				// multiple times without changing the result).
 				setAlleleApproved(alleleLookupByKey.lookup(alleleKey));
 
@@ -1198,7 +1144,7 @@ public class TargetedAlleleLoad extends DLALoader {
 			}
 		}
 
-		// Turns out that the cellline didn't match any existing alleles, 
+		// Turns out that the cellline didn't match any existing alleles,
 		// create a new allele and association the cellline
 		createAllele(newAllele, in, alleles);
 		associateCellLineToAllele(newAllele.getKey(), esCell.getMCLKey());
@@ -1212,51 +1158,45 @@ public class TargetedAlleleLoad extends DLALoader {
 	/**
 	 * Update the allele status to approved (TR 10492)
 	 * 
-	 * @param allele the allele to update. Must be a KnockoutAllele object
+	 * @param allele
+	 *            the allele to update. Must be a KnockoutAllele object
 	 * @throws ConfigException
 	 * @throws DBException
 	 */
-	private void setAlleleApproved(
-			KnockoutAllele allele)
-	throws ConfigException, DBException {
-		
+	private void setAlleleApproved(KnockoutAllele allele)
+			throws ConfigException, DBException {
+
 		// Only update the status if it is not approved already
-		if (allele.getStatus().intValue() 
-			!= Constants.ALLELE_STATUS_APPROVED) {
+		if (allele.getStatus().intValue() != Constants.ALLELE_STATUS_APPROVED) {
 			String q = "UPDATE ALL_Allele SET _Allele_Status_key = "
-				+ Constants.ALLELE_STATUS_APPROVED
-				+ " WHERE _Allele_key = "
-				+ allele.getKey();
-			executeQuery(q);					
+					+ Constants.ALLELE_STATUS_APPROVED
+					+ " WHERE _Allele_key = " + allele.getKey();
+			executeQuery(q);
 		}
 	}
 
 	/**
-	 * Update the logical DB of the accession id to match the current
-	 * pipeline
+	 * Update the logical DB of the accession id to match the current pipeline
 	 * 
-	 * @param esCell the esCell to update
+	 * @param esCell
+	 *            the esCell to update
 	 * @throws ConfigException
 	 * @throws DBException
 	 */
-	private void updateAccessionLogicalDb(
-			MutantCellLine esCell)
-	throws ConfigException, DBException {
+	private void updateAccessionLogicalDb(MutantCellLine esCell)
+			throws ConfigException, DBException {
 		String query;
 		query = "UPDATE ACC_Accession SET _LogicalDB_key = ";
 		query += cfg.getEsCellLogicalDb();
-		query += " WHERE _object_key = "+esCell.getMCLKey();
-		query += " AND _MGIType_key = "+Constants.ESCELL_MGITYPE_KEY;
-		query += " AND accID = '"+esCell.getCellLine()+"'";
+		query += " WHERE _object_key = " + esCell.getMCLKey();
+		query += " AND _MGIType_key = " + Constants.ESCELL_MGITYPE_KEY;
+		query += " AND accID = '" + esCell.getCellLine() + "'";
 
 		executeQuery(query);
 	}
 
-
-	private void createOrphanMCL(
-			MutantCellLine esCell,
-			KnockoutAllele oldAllele)
-	throws MGIException {
+	private void createOrphanMCL(MutantCellLine esCell, KnockoutAllele oldAllele)
+			throws MGIException {
 		// Create the mutant cell line
 		MutantCellLine mcl = new MutantCellLine();
 		mcl.setCellLine("Orphaned");
@@ -1271,26 +1211,22 @@ public class TargetedAlleleLoad extends DLALoader {
 		ALL_CellLineDAO mclDAO = new ALL_CellLineDAO(mcl.getState());
 		loadStream.insert(mclDAO);
 
-		associateCellLineToAllele(oldAllele.getKey(), 
-				mclDAO.getKey().getKey());
+		associateCellLineToAllele(oldAllele.getKey(), mclDAO.getKey().getKey());
 
 		// Set the old allele to deleted status
-		String query = "UPDATE ALL_Allele SET _Allele_Status_key = "+
-			Constants.ALLELE_STATUS_DELETED + " WHERE _Allele_key = "+
-			oldAllele.getKey();
-		
+		String query = "UPDATE ALL_Allele SET _Allele_Status_key = "
+				+ Constants.ALLELE_STATUS_DELETED + " WHERE _Allele_key = "
+				+ oldAllele.getKey();
+
 		executeQuery(query);
 
 		qcStats.record("WARNING", NUM_ORPHANED_ALLELES);
-		logger.logcInfo("Orphaned allele " 
-				+ oldAllele.getSymbol() 
-				+ "\n", false);
+		logger.logcInfo("Orphaned allele " + oldAllele.getSymbol() + "\n",
+				false);
 	}
 
-	private Integer createMutantCellLine(
-			KnockoutAlleleInput in, 
-			boolean orphan)
-	throws MGIException {
+	private Integer createMutantCellLine(KnockoutAlleleInput in, boolean orphan)
+			throws MGIException {
 		Integer derivationKey = getDerivationKey(in);
 
 		// Create the mutant cell line
@@ -1319,7 +1255,7 @@ public class TargetedAlleleLoad extends DLALoader {
 
 		// Only record the new accession entry and cached version of this
 		// cell line if it is not an orphan MCL
-		if ( ! orphan) {
+		if (!orphan) {
 			// Add the recently created cell line to the cache
 			koMutantCellLineLookup.addToCache(in.getMutantCellLine(), mcl);
 
@@ -1342,25 +1278,20 @@ public class TargetedAlleleLoad extends DLALoader {
 	}
 
 	// Create the allele to cell line association
-	private void associateCellLineToAllele(
-			Integer alleleKey,
-			Integer celllineKey)
-	throws MGIException {
+	private void associateCellLineToAllele(Integer alleleKey,
+			Integer celllineKey) throws MGIException {
 		ALL_Allele_CellLineState aclState = new ALL_Allele_CellLineState();
 		aclState.setMutantCellLineKey(celllineKey);
 		aclState.setAlleleKey(alleleKey);
 		ALL_Allele_CellLineDAO aclDAO = new ALL_Allele_CellLineDAO(aclState);
 		loadStream.insert(aclDAO);
 
-		// Update the allele status 
+		// Update the allele status
 		setAlleleApproved(alleleLookupByKey.lookup(alleleKey));
 	}
 
-	private KnockoutAllele createAllele(
-			KnockoutAllele constructed,
-			KnockoutAlleleInput in, 
-			Map alleles) 
-	throws MGIException {
+	private KnockoutAllele createAllele(KnockoutAllele constructed,
+			KnockoutAlleleInput in, Map alleles) throws MGIException {
 		// Persist the constructed allele
 		constructed.insert(loadStream);
 
@@ -1415,7 +1346,6 @@ public class TargetedAlleleLoad extends DLALoader {
 	 */
 	protected void postprocess() throws MGIException {
 
-
 		// After processing ALL the input records, there is now enough
 		// data to determine if the allele level attributes can be changed.
 		if (alleleProjects.size() > 0) {
@@ -1431,7 +1361,7 @@ public class TargetedAlleleLoad extends DLALoader {
 				if (projects.size() != 1) {
 					logger.logdInfo("Project for " + existing.getSymbol()
 							+ " could NOT be updated to " + projects, false);
-				} else if ( ! existing.getProjectId().equals(projects.get(0))) {
+				} else if (!existing.getProjectId().equals(projects.get(0))) {
 					logger.logdInfo("Project for " + existing.getSymbol()
 							+ " updated to " + projects, false);
 
@@ -1447,7 +1377,7 @@ public class TargetedAlleleLoad extends DLALoader {
 					executeQuery(query);
 				}
 			}
-	
+
 			// These alleles need to have their molecular note updated
 			if (alleleNotes.size() > 0) {
 				Iterator noteIt = alleleNotes.entrySet().iterator();
@@ -1456,28 +1386,28 @@ public class TargetedAlleleLoad extends DLALoader {
 					Integer key = (Integer) entry.getKey();
 					KnockoutAllele a = alleleLookupByKey.lookup(key);
 					List notes = new ArrayList((Set) entry.getValue());
-	
+
 					if (notes.size() != 1) {
-	
+
 						// Multiple notes for this allele!
-	
+
 						logger.logdInfo("Molecular note for " + a.getSymbol()
 								+ " could NOT be updated to:\n" + notes, false);
-					} else if ( ! a.getNote().equals(notes.get(0))) {
-	
+					} else if (!a.getNote().equals(notes.get(0))) {
+
 						// The MCLs all agree that there should be a new note
 						logger.logdInfo("Molecular note for " + a.getSymbol()
 								+ " updated to:\n" + notes, false);
-	
+
 						// If a note exists
 						// Delete the existing note
 						if (a.getNoteKey() != null) {
 							String query = "DELETE FROM MGI_Note WHERE ";
 							query += "_Note_key = ";
 							query += a.getNoteKey();
-	
+
 							executeQuery(query);
-	
+
 							// Attach the new note to the existing allele
 							a.updateNote(loadStream, (String) notes.get(0));
 							qcStats.record("SUMMARY", NUM_ALLELES_NOTE_CHANGE);
@@ -1489,7 +1419,7 @@ public class TargetedAlleleLoad extends DLALoader {
 				}
 			}
 		}
-		
+
 		// LOG THE RESULTS OF THE LOAD
 
 		TreeMap qc = null;
@@ -1647,7 +1577,6 @@ public class TargetedAlleleLoad extends DLALoader {
 			}
 		}
 
-
 		// Empty line to the log files
 		logger.logdInfo("\n", false);
 		logger.logcInfo("\n", false);
@@ -1666,14 +1595,12 @@ public class TargetedAlleleLoad extends DLALoader {
 
 	// Helper function to log queries when run in debug mode
 	// otherwise execute the query.
-	private void executeQuery(String query) 
-	throws ConfigException, DBException {
+	private void executeQuery(String query) throws ConfigException, DBException {
 		if (cfg.getPreventBcpExecute()) {
 			logger.logdInfo("SQL prevented by CFG. Would have run: " + query,
 					false);
 		} else {
-			logger.logdInfo("Ran: " + query,
-					false);
+			logger.logdInfo("Ran: " + query, false);
 			sqlDBMgr.executeUpdate(query);
 		}
 	}
