@@ -180,6 +180,21 @@ public class SangerAlleleInput implements KnockoutAlleleInput {
         return true;
     }
 	
+    public String toString() {
+    	String s = "SangerAlleleInput<"+geneId+", ";
+    	s += build+", ";
+    	s += cassette+", ";
+    	s += inputPipeline+", ";
+    	s += projectId+", ";
+    	s += esCellName+", ";
+    	s += parentESCellName+", ";
+    	s += mutationType+", ";
+    	s += locus1+", ";
+    	s += locus2;
+    	s += ">";
+		return s;
+    	
+    }
 	
 
 }

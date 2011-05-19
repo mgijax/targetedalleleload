@@ -142,5 +142,21 @@ public class RegeneronAlleleInput implements KnockoutAlleleInput {
 	public String getInputPipeline() {
 		return inputPipeline;
 	}
-
+    public String toString() {
+    	String s = "SangerAlleleInput<"+geneSymbol+", ";
+    	s += esCellName + ", ";
+    	s += parentalESCellName + ", ";
+    	s += strainName + ", ";
+    	s += projectId + ", ";
+    	s += geneMgiId + ", ";
+    	s += delStart + ", ";
+    	s += delEnd + ", ";
+    	s += delSize + ", ";
+    	s += build + ", ";
+    	s += cassette + ", ";
+    	s += inputPipeline;
+    	s += ">";
+		return s;
+    	
+    }
 }
