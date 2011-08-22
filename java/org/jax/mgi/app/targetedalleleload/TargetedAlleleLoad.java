@@ -396,7 +396,7 @@ public class TargetedAlleleLoad extends DLALoader {
 			} catch (MGIException e) {
 				qcStats.record("ERROR", NUM_BAD_ALLELE_PROCESSING);
 
-				String m = "General error, skipping record: "
+				String m = "Could not process, skipping record: "
 						+ in.getMutantCellLine() + "\n" + in + "\n";
 				try {
 					// Just the first message of the exception needs
@@ -407,7 +407,7 @@ public class TargetedAlleleLoad extends DLALoader {
 				} catch (IOException e1) {
 					m = "Could not process "
 							+ in.getMutantCellLine()
-							+ " then another error occured trying to get that error.";
+							+ " then something bad happened trying to report what happened.";
 				}
 
 				logger.logdInfo(m, false);
@@ -608,7 +608,7 @@ public class TargetedAlleleLoad extends DLALoader {
 						mclKey = createMutantCellLine(in, false);
 					} catch (MGIException e) {
 						qcStats.record("ERROR", NUM_BAD_CELLLINE_PROCESSING);
-						String m = "Exception creating mutant cell line, "
+						String m = "Could not create mutant cell line, "
 								+ "skipping record: " + in.getMutantCellLine()
 								+ "\n" + in + "\n";
 						try {
@@ -620,7 +620,7 @@ public class TargetedAlleleLoad extends DLALoader {
 						} catch (IOException e1) {
 							m = "Could not process "
 									+ in.getMutantCellLine()
-									+ " then another error occured trying to get that error.";
+									+ " then something bad happened trying to report what happened.";
 						}
 						logger.logdInfo(m, false);
 						continue;
