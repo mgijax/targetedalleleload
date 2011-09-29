@@ -455,137 +455,141 @@ public class TargetedAlleleLoad extends DLALoader {
 					// BEGIN QC CHECKS
 					// ********************************************************
 
-					if (!isMatchingGene(existing, constructed)) {
-						// Check the allele to marker association, if it has
-						// changed,
-						// report to the log for manual curation.
-						logMarkerChanged(in, constructed, existing);
-					} else if (alleleProjects.get(existing.getKey()) != null
-							|| (!existing.getProjectId().equals(
-									constructed.getProjectId())
-									&& !isTypeChange(existing, constructed)
-									&& !isGroupChange(existing, constructed)
-									&& !isCreatorChange(existing, constructed) && !isDerivationChange(
-									esCell, in))) {
-						// We can only update the project ID once all cell lines
-						// for the allele have been
-						// verified to require the same change
-
-						// The extra "alleleProjects.get(existing) != null ||"
-						// check is to see if there are project IDs that have
-						// NOT
-						// changed from the original, when others have. The
-						// existence of an entry in alleleProjects means we've
-						// updated this project ID before.
-
-						// The project ID changed, but the type, group,
-						// creator, derivation and marker didn't change, we
-						// can just try to update the allele project ID
-						// in place
-
-						if (alleleProjects.get(existing.getKey()) == null) {
-							alleleProjects
-									.put(existing.getKey(), new HashSet());
-						}
-
-						// Record the updated project ID for this allele symbol
-						Set projSet = (Set) alleleProjects.get(existing
-								.getKey());
-						projSet.add(constructed.getProjectId());
-						alleleProjects.put(existing.getKey(), projSet);
-
-						// save the new project ID for this allele symbol
-						String m = existing.getSymbol() + "\t"
-								+ existing.getProjectId() + "\t"
-								+ constructed.getProjectId() + "\t"
-								+ in.getMutantCellLine();
-						alleleProjectIdUpdated.add(m);
-					} else if (!existing.getSymbol().equals(
-							constructed.getSymbol())) {
-						// If the associated allele symbol has changed at all,
-						// then we need to change it and update the derivation
-
-						// Symbols don't match
-						// The marker didn't change (checked previously)
-						// so one of these attributes changed.
-						// 1- Parental cell line
-						// 2- Type
-						// 3- IKMC group
-						// 4- Creator
-						// 5- Vector
-
-						if (isTypeChange(existing, constructed)) {
-							logTypeChange(in, constructed, existing);
-						}
-
-						if (isGroupChange(existing, constructed)) {
-							logGroupChange(in, constructed, existing);
-						}
-
-						if (isCreatorChange(existing, constructed)) {
-							logCreatorChange(in, constructed, existing);
-						}
-
-						if (isNumberChange(existing, constructed)) {
-							logNumberChange(in, constructed, existing);
-						}
-
-						// Re-associate the cell line to a new allele
-						logAlleleChanged(in, constructed, esCell, existing);
-						changeMutantCellLineAssociation(in, esCell, existing,
-								constructed);
-					} else if (!esCell.getDerivationKey().equals(
-							getDerivationKey(in))) {
-						// Check the derivation (this implicitly checks the
-						// parental cell line, the creator, the vector and the
-						// allele type)
-
-						// This QC check is a street sweeper. Derivation
-						// changes, by themselves, should not happen.
-						// If ONLY the derivation changed and nothing else
-						// (which was checked previously in the if-then)
-						// then we can go ahead and change the derivation
-						// association, but we will skip updating the note
-						// if it also changed.
-
-						logDerivationChange(in, esCell, existing);
-						changeDerivationKey(getDerivationKey(in), esCell);
-
-					} else {
-
-						// Compress the note fields to discount any extra spaces
-						// that
-						// might have snuck in
-						String existingNote = existing.getNote()
-								.replaceAll("\\n", "").replaceAll(" ", "");
-						String constructedNote = constructed.getNote()
-								.replaceAll("\\n", "").replaceAll(" ", "");
-
-						// The extra "|| alleleNotes.get(existing) != null"
-						// check is to see if there are notes that have NOT
-						// changed from the original, when others have. The
-						// existence of an entry in alleleNotes means we've
-						// updated this note before.
-						if (!existingNote.equals(constructedNote)
-								|| alleleNotes.get(existing.getKey()) != null) {
-							// If we get this far in the QC checks, then
-							// we can be sure that the creator, the type,
-							// the vector, and the parental cell line are all
-							// the same. The only thing left that could have
-							// changed are the coordinates
-
-							if (alleleNotes.get(existing.getKey()) == null) {
-								alleleNotes.put(existing.getKey(),
-										new HashSet());
+					try {
+						if (!isMatchingGene(existing, constructed)) {
+							// Check the allele to marker association, if it has
+							// changed,
+							// report to the log for manual curation.
+							logMarkerChanged(in, constructed, existing);
+						} else if (alleleProjects.get(existing.getKey()) != null
+								|| (!existing.getProjectId().equals(
+										constructed.getProjectId())
+										&& !isTypeChange(existing, constructed)
+										&& !isGroupChange(existing, constructed)
+										&& !isCreatorChange(existing, constructed) && !isDerivationChange(
+										esCell, in))) {
+							// We can only update the project ID once all cell lines
+							// for the allele have been
+							// verified to require the same change
+	
+							// The extra "alleleProjects.get(existing) != null ||"
+							// check is to see if there are project IDs that have
+							// NOT
+							// changed from the original, when others have. The
+							// existence of an entry in alleleProjects means we've
+							// updated this project ID before.
+	
+							// The project ID changed, but the type, group,
+							// creator, derivation and marker didn't change, we
+							// can just try to update the allele project ID
+							// in place
+	
+							if (alleleProjects.get(existing.getKey()) == null) {
+								alleleProjects
+										.put(existing.getKey(), new HashSet());
 							}
-
-							// save the new molecular note for this allele
-							// symbol
-							Set notes = (Set) alleleNotes
-									.get(existing.getKey());
-							notes.add(constructed.getNote());
-							alleleNotes.put(existing.getKey(), notes);
+	
+							// Record the updated project ID for this allele symbol
+							Set projSet = (Set) alleleProjects.get(existing
+									.getKey());
+							projSet.add(constructed.getProjectId());
+							alleleProjects.put(existing.getKey(), projSet);
+	
+							// save the new project ID for this allele symbol
+							String m = existing.getSymbol() + "\t"
+									+ existing.getProjectId() + "\t"
+									+ constructed.getProjectId() + "\t"
+									+ in.getMutantCellLine();
+							alleleProjectIdUpdated.add(m);
+						} else if (!existing.getSymbol().equals(
+								constructed.getSymbol())) {
+							// If the associated allele symbol has changed at all,
+							// then we need to change it and update the derivation
+	
+							// Symbols don't match
+							// The marker didn't change (checked previously)
+							// so one of these attributes changed.
+							// 1- Parental cell line
+							// 2- Type
+							// 3- IKMC group
+							// 4- Creator
+							// 5- Vector
+	
+							if (isTypeChange(existing, constructed)) {
+								logTypeChange(in, constructed, existing);
+							}
+	
+							if (isGroupChange(existing, constructed)) {
+								logGroupChange(in, constructed, existing);
+							}
+	
+							if (isCreatorChange(existing, constructed)) {
+								logCreatorChange(in, constructed, existing);
+							}
+	
+							if (isNumberChange(existing, constructed)) {
+								logNumberChange(in, constructed, existing);
+							}
+	
+							// Re-associate the cell line to a new allele
+							logAlleleChanged(in, constructed, esCell, existing);
+							changeMutantCellLineAssociation(in, esCell, existing,
+									constructed);
+						} else if (!esCell.getDerivationKey().equals(
+								getDerivationKey(in))) {
+							// Check the derivation (this implicitly checks the
+							// parental cell line, the creator, the vector and the
+							// allele type)
+	
+							// This QC check is a street sweeper. Derivation
+							// changes, by themselves, should not happen.
+							// If ONLY the derivation changed and nothing else
+							// (which was checked previously in the if-then)
+							// then we can go ahead and change the derivation
+							// association, but we will skip updating the note
+							// if it also changed.
+	
+							logDerivationChange(in, esCell, existing);
+							changeDerivationKey(getDerivationKey(in), esCell);
+	
+						} else {
+	
+							// Compress the note fields to discount any extra spaces
+							// that
+							// might have snuck in
+							String existingNote = existing.getNote()
+									.replaceAll("\\n", "").replaceAll(" ", "");
+							String constructedNote = constructed.getNote()
+									.replaceAll("\\n", "").replaceAll(" ", "");
+	
+							// The extra "|| alleleNotes.get(existing) != null"
+							// check is to see if there are notes that have NOT
+							// changed from the original, when others have. The
+							// existence of an entry in alleleNotes means we've
+							// updated this note before.
+							if (!existingNote.equals(constructedNote)
+									|| alleleNotes.get(existing.getKey()) != null) {
+								// If we get this far in the QC checks, then
+								// we can be sure that the creator, the type,
+								// the vector, and the parental cell line are all
+								// the same. The only thing left that could have
+								// changed are the coordinates
+	
+								if (alleleNotes.get(existing.getKey()) == null) {
+									alleleNotes.put(existing.getKey(),
+											new HashSet());
+								}
+	
+								// save the new molecular note for this allele
+								// symbol
+								Set notes = (Set) alleleNotes
+										.get(existing.getKey());
+								notes.add(constructed.getNote());
+								alleleNotes.put(existing.getKey(), notes);
+							}
 						}
+					} catch (MGIException e) {
+						logger.logdInfo(e.getMessage(), false);
 					}
 
 					// ********************************************************
