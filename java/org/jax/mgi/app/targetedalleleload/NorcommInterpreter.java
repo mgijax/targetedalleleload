@@ -111,50 +111,50 @@ public class NorcommInterpreter extends KnockoutAlleleInterpreter {
 	 */
 	public boolean isValid(String rec) {
 
-		if (rec.length() < MIN_REC_LENGTH) {
-			return false;
-		}
-
-		// Get fields from the input (TAB delim) and trim whitespace
-		String[] fields = rec.split("\t");
-		for (int i=0; i<fields.length; i++) {
-			fields[i] = fields[i].trim();
-		}
-
-		if (fields[1].equals("")) {
-			qcStatistics.record("WARNING", "Poorly formated input record(s)");
-			logger.logInfo("Missing project ID (" + fields[2] + ")");
-			return false;
-		}
-
-		String center = "";
-		regexMatcher = centerPattern.matcher(fields[2]);
-
-		if (regexMatcher.find()) {
-
-			center = regexMatcher.group(1);
-
-			try {
-				if (center.equals("T") && !cfg.getProvider().equals("Cmhd")) {
-					// This input record is not valid for this provider 
-					return false;
-				}
-				if (center.equals("W") && !cfg.getProvider().equals("Mfgc")) {
-					// This input record is not valid for this provider 
-					return false;
-				}
-			} catch (ConfigException e) {
-				logger.logInfo("cannot retreive configuration for record: \n" + rec);
+		try {
+			if (rec.length() < MIN_REC_LENGTH) {
 				return false;
 			}
+	
+			// Get fields from the input (TAB delim) and trim whitespace
+			String[] fields = rec.split("\t");
+			for (int i=0; i<fields.length; i++) {
+				fields[i] = fields[i].trim();
+			}
+	
+			if (fields[1].equals("")) {
+				qcStatistics.record("WARNING", "Poorly formated input record(s)");
+				logger.logInfo("Missing project ID (" + fields[2] + ")");
+				return false;
+			}
+	
+			String center = "";
+			regexMatcher = centerPattern.matcher(fields[2]);
+	
+			if (regexMatcher.find()) {
+				center = regexMatcher.group(1);
+				try {
+					if (center.equals("T") && !cfg.getProvider().equals("Cmhd")) {
+						// This input record is not valid for this provider 
+						return false;
+					}
+					if (center.equals("W") && !cfg.getProvider().equals("Mfgc")) {
+						// This input record is not valid for this provider 
+						return false;
+					}
+				} catch (ConfigException e) {
+					logger.logInfo("cannot retreive configuration for record: \n" + rec);
+					return false;
+				}
+			} else {
+				return false;
+			}
+	
+			return true;
 
-		} else {
-			
+		} catch (Exception e) {
+			logger.logdInfo("Malformed record "+rec, false);
 			return false;
-			
 		}
-		
-
-		return true;
 	}
 }

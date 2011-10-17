@@ -303,7 +303,7 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 			// Default action is to indicate this record as valid
 			return true;			
 		} catch (Exception e) {
-			logger.logdInfo("Malformed record"+rec, false);
+			logger.logdInfo("Malformed record "+rec, false);
 			return false;
 		}
 	}
