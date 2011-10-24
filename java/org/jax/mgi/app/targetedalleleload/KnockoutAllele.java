@@ -215,7 +215,7 @@ public class KnockoutAllele implements Comparable {
 	public String toString() {
 		return "Allele key: " + this.key + "\n" + "name: " + this.name + "\n"
 				+ "symbol: " + this.symbol + "\n" + "note: " + this.note + "\n"
-				+ "J Numbers: " + Arrays.toString(this.jNumbers) + "\n";
+				+ "J Numbers: " + this.jNumbers.toString() + "\n";
 	}
 
 	// @Override
