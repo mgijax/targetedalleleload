@@ -37,16 +37,18 @@ import org.jax.mgi.shr.exception.MGIException;
  * @version 1.0
  */
 
-public class SangerProcessor extends KnockoutAlleleProcessor {
+public class SangerProcessor 
+extends KnockoutAlleleProcessor 
+{
 
 	private TargetedAlleleLoadCfg cfg;
-	private MarkerLookupByMGIID markerLookup;
+	private LookupMarkerByMGIID lookupMarkerByMGIID;
 	private VocabKeyLookup vocabLookup;
-	private AlleleLookupByProjectId alleleLookupByProjectId;
-	private AlleleLookupByMarker alleleLookupByMarker;
+	private LookupAllelesByProjectId lookupAllelesByProjectId;
+	private LookupAllelesByMarker lookupAllelesByMarker;
 	private ParentStrainLookupByParentKey parentStrainLookupByParentKey;
 	private StrainKeyLookup strainKeyLookup;
-	private AlleleLookupByKey alleleLookupByKey;
+	private LookupAlleleByKey lookupAlleleByKey;
 
 	private String PROMOTER_DRIVEN = "";
 	private String PROMOTER_LESS = "";
@@ -67,31 +69,36 @@ public class SangerProcessor extends KnockoutAlleleProcessor {
 	 * @throws CacheException
 	 * @throws TranslationException
 	 */
-	public SangerProcessor() throws MGIException {
+	public SangerProcessor() 
+	throws MGIException 
+	{
 		cfg = new TargetedAlleleLoadCfg();
 
 		PROMOTER_DRIVEN = cfg.getPromoterDrivenCassettes();
 		PROMOTER_LESS = cfg.getPromoterLessCassettes();
 
-		alleleLookupByProjectId = AlleleLookupByProjectId.getInstance();
-		alleleLookupByMarker = AlleleLookupByMarker.getInstance();
-		markerLookup = new MarkerLookupByMGIID();
+		lookupAllelesByProjectId = LookupAllelesByProjectId.getInstance();
+		lookupAllelesByMarker = LookupAllelesByMarker.getInstance();
+		lookupMarkerByMGIID = new LookupMarkerByMGIID();
 		vocabLookup = new VocabKeyLookup(Constants.ALLELE_VOCABULARY);
 		parentStrainLookupByParentKey = new ParentStrainLookupByParentKey();
 		strainKeyLookup = new StrainKeyLookup();
-		alleleLookupByKey = AlleleLookupByKey.getInstance();
+		lookupAlleleByKey = LookupAlleleByKey.getInstance();
 	}
+	
 	public SangerProcessor(TargetedAlleleLoadCfg cfg,
 		String PROMOTER_DRIVEN,
 		String PROMOTER_LESS,
-		AlleleLookupByProjectId alleleLookupByProjectId,
-		AlleleLookupByMarker alleleLookupByMarker,
-		MarkerLookupByMGIID markerLookup,
+		LookupAllelesByProjectId lookupAllelesByProjectId,
+		LookupAllelesByMarker lookupAllelesByMarker,
+		LookupMarkerByMGIID markerLookup,
 		VocabKeyLookup vocabLookup,
 		ParentStrainLookupByParentKey parentStrainLookupByParentKey,
 		StrainKeyLookup strainKeyLookup,
-		AlleleLookupByKey alleleLookupByKey
-		) throws MGIException {
+		LookupAlleleByKey lookupAlleleByKey
+		) 
+	throws MGIException 
+	{
 		
 		// Stub for testing
 		this.PROMOTER_DRIVEN = PROMOTER_DRIVEN;
@@ -114,15 +121,15 @@ public class SangerProcessor extends KnockoutAlleleProcessor {
 	 * @throws TranslationException
 	 */
 	public KnockoutAllele process(KnockoutAlleleInput inputData)
-			throws RecordFormatException, ConfigException,
-			KeyNotFoundException, DBException, CacheException,
-			TranslationException, MGIException {
+	throws MGIException 
+	{
+
 		SangerAlleleInput in = (SangerAlleleInput) inputData;
 
 		KnockoutAllele koAllele = new KnockoutAllele();
 
 		// Get the external dependencies referenced in this row
-		Marker marker = markerLookup.lookup(in.getGeneId());
+		Marker marker = lookupMarkerByMGIID.lookup(in.getGeneId());
 		Integer strainKey = strainKeyLookup
 				.lookup(parentStrainLookupByParentKey.lookup(cfg
 						.getParentalKey(in.getParentCellLine())));
@@ -141,9 +148,9 @@ public class SangerProcessor extends KnockoutAlleleProcessor {
 		}
 		koAllele.setMutationTypes(mutationTypeKeys);
 
-		// ///////////////////////////////////////////////////////////////////
+		// //////////////////////////////////////////////////////////////
 		// get the NEXT allele symbol sequence number and letter
-		// ///////////////////////////////////////////////////////////////////
+		// //////////////////////////////////////////////////////////////
 
 		// Setup the default allele string
 		// Default the allele sequence letter, the allele note, the deletion
@@ -182,17 +189,18 @@ public class SangerProcessor extends KnockoutAlleleProcessor {
 		} else if (mutType.equals("Deletion")) {
 			let = ""; // Empty string for Deletion alleles
 			koAllele.setTypeKey(cfg.getAlleleType("DELETION"));
-			qcStatistics
-					.record("SUMMARY", "Number of deletion input record(s)");
+			qcStatistics.record(
+				"SUMMARY", 
+				"Number of deletion input record(s)");
 		} else {
 			qcStatistics.record("ERROR",
-					"Number of records with unknown mutation type");
-			throw new MGIException("Unknown mutation type\n" + mutType + " | "
-					+ koAllele);
+				"Number of records with unknown mutation type");
+			throw new MGIException(
+				"Unknown mutation type\n" + mutType + " | " + koAllele);
 		}
 
 		int seq = 1;
-		HashSet existingAlleles = alleleLookupByMarker.lookup(marker
+		HashSet existingAlleles = lookupAllelesByMarker.lookup(marker
 				.getSymbol());
 
 		// If this marker has existing alleles already, default
@@ -203,7 +211,7 @@ public class SangerProcessor extends KnockoutAlleleProcessor {
 			Iterator alleleSetIt = existingAlleles.iterator();
 			while (alleleSetIt.hasNext()) {
 				Integer nextKey = (Integer) alleleSetIt.next();
-				KnockoutAllele existingKoAllele = alleleLookupByKey
+				KnockoutAllele existingKoAllele = lookupAlleleByKey
 						.lookup(nextKey);
 				if (existingKoAllele == null) {
 					throw new MGIException("Unable to create allele for "
@@ -212,7 +220,7 @@ public class SangerProcessor extends KnockoutAlleleProcessor {
 				String allSymbol = existingKoAllele.getSymbol();
 
 				// Get the map version of the allele
-				Map alleles = alleleLookupByProjectId.lookup(in.getProjectId());
+				Map alleles = lookupAllelesByProjectId.lookup(in.getProjectId());
 				Map allele = null;
 
 				// Find the matching allele record in the alleleByProject
@@ -252,9 +260,8 @@ public class SangerProcessor extends KnockoutAlleleProcessor {
 					}
 				}
 
-				// Ok, bump up the sequence if this allele is larger than the
-				// largest
-				// seen so far
+				// bump up the sequence if this allele is larger than the
+				// largest seen so far
 				regexMatcher = alleleSequencePattern.matcher(allSymbol);
 				if (regexMatcher.find()) {
 					if (Integer.parseInt(regexMatcher.group(1)) >= seq) {
@@ -279,8 +286,7 @@ public class SangerProcessor extends KnockoutAlleleProcessor {
 		alleleSymbol = alleleSymbol.replaceAll("~~SEQUENCE~~", finalSequence);
 		koAllele.setSymbol(alleleSymbol);
 
-		String jNumber = cfg.getJNumber();
-		koAllele.setJNumber(jNumber);
+		koAllele.setJNumbers(cfg.getJNumbers());
 
 		if (note == "") {
 			qcStatistics.record("ERROR",
@@ -305,7 +311,9 @@ public class SangerProcessor extends KnockoutAlleleProcessor {
 		return koAllele;
 	}
 
-	protected int getDeletionSize(SangerAlleleInput in) throws MGIException {
+	protected int getDeletionSize(SangerAlleleInput in) 
+	throws MGIException 
+	{
 		int delSize = 0;
 
 		// Calculate the deletion size
@@ -324,51 +332,56 @@ public class SangerProcessor extends KnockoutAlleleProcessor {
 	}
 
 	protected String getNoteTemplate(SangerAlleleInput in)
-			throws ConfigException, MGIException {
+	throws MGIException 
+	{
 		String note = "";
 
 		// There is a special case for L1L2_Del_BactPneo_FFL cassettes
 		// all other cassettes are treated equally
+		
+		String cassette = in.getCassette();
 
 		if (in.getMutationType().equals("Conditional")) {
-			if (in.getCassette().equals("L1L2_Del_BactPneo_FFL")) {
+			if (cassette.equals("L1L2_Del_BactPneo_FFL")) {
 				note = cfg.getNoteTemplateCondDel_BactPneo_FFL();
-			} else if (in.getCassette().matches(PROMOTER_DRIVEN)) {
+			} else if (cassette.matches(PROMOTER_DRIVEN)) {
 				note = cfg.getNoteTemplateCondPromoter();
-			} else if (in.getCassette().matches(PROMOTER_LESS)) {
+			} else if (cassette.matches(PROMOTER_LESS)) {
 				note = cfg.getNoteTemplateCondPromoterless();
 			} else {
-				qcStatistics.record("ERROR",
-						"Number of records missing cassette in CFG file");
-				throw new MGIException("Missing cassette type in CFG file: "
-						+ in.getCassette());
+				qcStatistics.record(
+					"ERROR",
+					"Number of records missing cassette in CFG file");
+				throw new MGIException(
+					"Missing cassette type in CFG file: " + cassette);
 			}
 		} else if (in.getMutationType().equals("Targeted non-conditional")) {
-			if (in.getCassette().equals("L1L2_Del_BactPneo_FFL")) {
+			if (cassette.equals("L1L2_Del_BactPneo_FFL")) {
 				note = cfg.getNoteTemplateNonCondDel_BactPneo_FFL();
-			} else if (in.getCassette().matches(PROMOTER_DRIVEN)) {
+			} else if (cassette.matches(PROMOTER_DRIVEN)) {
 				note = cfg.getNoteTemplateNonCondPromoter();
-			} else if (in.getCassette().matches(PROMOTER_LESS)) {
+			} else if (cassette.matches(PROMOTER_LESS)) {
 				note = cfg.getNoteTemplateNonCondPromoterless();
 			} else {
-				qcStatistics.record("ERROR",
-						"Number of records missing cassette in CFG file");
-				throw new MGIException("Missing cassette type in CFG file: "
-						+ in.getCassette());
+				qcStatistics.record(
+					"ERROR",
+					"Number of records missing cassette in CFG file");
+				throw new MGIException(
+					"Missing cassette type in CFG file: " + cassette);
 			}
 		} else if (in.getMutationType().equals("Deletion")) {
-			if (in.getCassette().matches(PROMOTER_DRIVEN)) {
+			if (cassette.matches(PROMOTER_DRIVEN)) {
 				note = cfg.getNoteTemplateDeletionPromoter();
-			} else if (in.getCassette().matches(PROMOTER_LESS)) {
+			} else if (cassette.matches(PROMOTER_LESS)) {
 				note = cfg.getNoteTemplateDeletionPromoterless();
 			} else {
-				qcStatistics.record("ERROR",
-						"Number of records missing cassette in CFG file");
-				throw new MGIException("Missing cassette type in CFG file: "
-						+ in.getCassette());
+				qcStatistics.record(
+					"ERROR",
+					"Number of records missing cassette in CFG file");
+				throw new MGIException(
+					"Missing cassette type in CFG file: " + cassette);
 			}
 		}
 		return note;
 	}
-
 }

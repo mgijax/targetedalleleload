@@ -69,7 +69,8 @@ public class Constants {
 	/*
 	 * MGI_RefAssocType keys for reference types (Original, Molecular)
 	 */
-	public static final int[] REFERENCE_ASSOC = { 1011, 1012 };
+	public static final int ORIGINAL_REFERENCE = 1011;
+	public static final int MOLECULAR_REFERENCE = 1012;
 
 	/*
 	 * VOC_Term key for Marker-Allele Association Qualifier "Not Specified"

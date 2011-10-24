@@ -13,17 +13,20 @@ import org.jax.mgi.shr.dbutils.RowReference;
 import org.jax.mgi.shr.dbutils.SQLDataManagerFactory;
 
 /**
- * @is a FullCachedLookup for caching cell line strain keys by their cell line
- *     key
- * @has a RowDataCacheStrategy of type FULL_CACHE used for creating the cache
- *      and performing the cache lookup
+ * @is a FullCachedLookup for caching cell line strain keys by their 
+ * 		cell line key
+ * @has a RowDataCacheStrategy of type FULL_CACHE used for creating the 
+ * 		cache and performing the cache lookup
  * @does provides a lookup method to return a cell line strain key
  *       (ALL_CellLine._Strain_key) given a cell line key
  * @company The Jackson Laboratory
  * @author sc
  * @version 1.0
  */
-public class CellLineStrainKeyLookupByCellLineKey extends FullCachedLookup {
+public class LookupStrainKeyByCellLineKey 
+extends FullCachedLookup 
+{
+
 	// provide a static cache so that all instances share one cache
 	private static HashMap cache = new HashMap();
 
@@ -38,10 +41,11 @@ public class CellLineStrainKeyLookupByCellLineKey extends FullCachedLookup {
 	 * @throws DBException
 	 *             thrown if there is an error accessing the db
 	 * @throws ConfigException
-	 *             thrown if there is an error accessing the configuration file
+	 *             thrown if there is an error accessing the cfg file
 	 */
-	public CellLineStrainKeyLookupByCellLineKey() throws CacheException,
-			DBException, ConfigException {
+	public LookupStrainKeyByCellLineKey() 
+	throws CacheException, DBException, ConfigException 
+	{
 		super(SQLDataManagerFactory.getShared(SchemaConstants.MGD));
 		// since cache is static make sure you do not reinit
 		if (!hasBeenInitialized) {
@@ -59,38 +63,45 @@ public class CellLineStrainKeyLookupByCellLineKey extends FullCachedLookup {
 	 * @throws CacheException
 	 *             thrown if there is an error accessing the cache
 	 * @throws ConfigException
-	 *             thrown if there is an error accessing the configuration
+	 *             thrown if there is an error accessing the cfg
 	 * @throws DBException
 	 *             thrown if there is an error accessing the database
 	 */
-	public Integer lookup(Integer key) throws CacheException, DBException,
-			ConfigException {
+	public Integer lookup(Integer key) 
+	throws CacheException, DBException, ConfigException 
+	{
 		return (Integer) super.lookupNullsOk(key);
 	}
 
 	/**
-	 * get the full initialization query which is called by the CacheStrategy
-	 * class when performing cache initialization
+	 * get the full initialization query which is called by the 
+	 * CacheStrategy class when performing cache initialization
 	 * 
 	 * @assumes nothing
 	 * @effects nothing
 	 * @return the full initialization query
 	 */
-	public String getFullInitQuery() {
+	public String getFullInitQuery() 
+	{
 		return "SELECT _CellLine_key, _Strain_key FROM ALL_CellLine";
 	}
 
 	/**
-	 * get the RowDataInterpreter which is required by the CacheStrategy to read
-	 * the results of a database query.
+	 * get the RowDataInterpreter which is required by the CacheStrategy 
+	 * to read the results of a database query.
 	 * 
 	 * @assumes nothing
 	 * @effects nothing
 	 * @return the partial initialization query
 	 */
-	public RowDataInterpreter getRowDataInterpreter() {
-		class Interpreter implements RowDataInterpreter {
-			public Object interpret(RowReference row) throws DBException {
+	public RowDataInterpreter getRowDataInterpreter() 
+	{
+		class Interpreter 
+		implements RowDataInterpreter 
+		{
+			public Object interpret(RowReference row) 
+			throws DBException 
+			{
 				return new KeyValue(row.getInt(1), row.getInt(2));
 			}
 		}

@@ -22,7 +22,7 @@ import org.jax.mgi.shr.dbutils.SQLDataManagerFactory;
  * 
  */
 
-public class MarkerLookupByMGIID extends FullCachedLookup {
+public class LookupMarkerByMGIID extends FullCachedLookup {
 
 	/**
 	 * constructor
@@ -34,7 +34,7 @@ public class MarkerLookupByMGIID extends FullCachedLookup {
 	 * @throws CacheException
 	 *             thrown if there is an error accessing the cache
 	 */
-	public MarkerLookupByMGIID() throws ConfigException, DBException,
+	public LookupMarkerByMGIID() throws ConfigException, DBException,
 			CacheException {
 		super(SQLDataManagerFactory.getShared(SchemaConstants.MGD));
 	}

@@ -13,7 +13,8 @@ import org.jax.mgi.shr.dbutils.SQLDataManagerFactory;
 
 /**
  * 
- * is a FullCachedLookup storing es cell line name associations to project id
+ * is a FullCachedLookup storing ES cell line name associations to 
+ * project id
  * 
  * @has internal cache of set objects indexed by project id
  * @does provides a lookup for accessing the cache
@@ -22,7 +23,9 @@ import org.jax.mgi.shr.dbutils.SQLDataManagerFactory;
  * 
  */
 
-public class VectorLookup extends FullCachedLookup {
+public class LookupVectorKeyByTerm 
+extends FullCachedLookup 
+{
 
 	/**
 	 * constructor
@@ -34,7 +37,9 @@ public class VectorLookup extends FullCachedLookup {
 	 * @throws CacheException
 	 *             thrown if there is an error accessing the cache
 	 */
-	public VectorLookup() throws ConfigException, DBException, CacheException {
+	public LookupVectorKeyByTerm() 
+	throws ConfigException, DBException, CacheException 
+	{
 		super(SQLDataManagerFactory.getShared(SchemaConstants.MGD));
 	}
 
@@ -49,7 +54,9 @@ public class VectorLookup extends FullCachedLookup {
 	 * @throws CacheException
 	 *             thrown if there is an error accessing the configuration
 	 */
-	public Integer lookup(String vectorName) throws DBException, CacheException {
+	public Integer lookup(String vectorName) 
+	throws DBException, CacheException 
+	{
 		return (Integer) super.lookupNullsOk(vectorName);
 	}
 
@@ -64,8 +71,9 @@ public class VectorLookup extends FullCachedLookup {
 	 * @throws CacheException
 	 *             thrown if there is an error accessing the configuration
 	 */
-	public String lookupExisting(String vectorName) throws DBException,
-			CacheException, KeyNotFoundException {
+	public String lookupExisting(String vectorName) 
+	throws DBException, CacheException, KeyNotFoundException 
+	{
 		return (String) super.lookup(vectorName);
 	}
 
@@ -75,8 +83,10 @@ public class VectorLookup extends FullCachedLookup {
 	 * 
 	 * @return the initialization query
 	 */
-	public String getFullInitQuery() {
-		return "SELECT _term_key, term FROM VOC_Term WHERE _Vocab_key = 72";
+	public String getFullInitQuery() 
+	{
+		return 
+			"SELECT _term_key, term FROM VOC_Term WHERE _Vocab_key = 72";
 	}
 
 	/**
@@ -84,14 +94,21 @@ public class VectorLookup extends FullCachedLookup {
 	 * 
 	 * @return the RowDataInterpreter
 	 */
-	public RowDataInterpreter getRowDataInterpreter() {
+	public RowDataInterpreter getRowDataInterpreter() 
+	{
 		return new Interpreter();
 	}
 
-	private class Interpreter implements RowDataInterpreter {
+	private class Interpreter 
+	implements RowDataInterpreter 
+	{
 
-		public Object interpret(RowReference row) throws DBException {
-			return new KeyValue(row.getString("term"), row.getInt("_term_key"));
+		public Object interpret(RowReference row) 
+		throws DBException 
+		{
+			return new KeyValue(
+				row.getString("term"), 
+				row.getInt("_term_key"));
 		}
 	}
 

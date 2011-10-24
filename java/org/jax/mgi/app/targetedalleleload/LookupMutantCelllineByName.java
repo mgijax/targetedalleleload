@@ -14,6 +14,7 @@ import org.jax.mgi.shr.dbutils.RowDataInterpreter;
 import org.jax.mgi.shr.dbutils.RowReference;
 import org.jax.mgi.shr.dbutils.SQLDataManagerFactory;
 import org.jax.mgi.shr.dla.log.DLALoggingException;
+import org.jax.mgi.shr.exception.MGIException;
 
 /**
  * @is a FullCachedLookup for caching MutantCellLine objects by their cell line
@@ -26,7 +27,9 @@ import org.jax.mgi.shr.dla.log.DLALoggingException;
  * @author jmason
  */
 
-public class KOMutantCellLineLookup extends FullCachedLookup {
+public class LookupMutantCelllineByName 
+extends FullCachedLookup 
+{
 
 	/**
 	 * constructor
@@ -38,8 +41,9 @@ public class KOMutantCellLineLookup extends FullCachedLookup {
 	 * @throws ConfigException
 	 *             thrown if there is an error accessing the configuration file
 	 */
-	public KOMutantCellLineLookup(Integer cellLineLogicalDB)
-			throws CacheException, DBException, ConfigException {
+	public LookupMutantCelllineByName(Integer cellLineLogicalDB)
+	throws CacheException, DBException, ConfigException 
+	{
 		super(SQLDataManagerFactory.getShared(SchemaConstants.MGD));
 		initCache(cache);
 	}
@@ -53,53 +57,57 @@ public class KOMutantCellLineLookup extends FullCachedLookup {
 	 * @throws CacheException
 	 *             thrown if there is an error accessing the cache
 	 * @throws ConfigException
-	 *             thrown if there is an error accessing the configuration
+	 *             thrown if there is an error accessing the cfg
 	 * @throws CacheException
 	 *             thrown if there is an error accessing the cache
 	 * @throws DBException
 	 *             thrown if there is an error accessing the database
 	 * @throws ConfigException
-	 *             thrown if there is an error accessing the configuration file
+	 *             thrown if there is an error accessing the cfg file
 	 * @throws KeyNotFoundException
 	 *             thrown if the key is not found
 	 */
-	public MutantCellLine lookup(String cellLineID) throws CacheException,
-			DBException, ConfigException, KeyNotFoundException {
+	public MutantCellLine lookup(String cellLineID) 
+	throws MGIException 
+	{
 		return (MutantCellLine) super.lookupNullsOk(cellLineID);
 	}
 
 	/**
-	 * get the full initialization query which is called by the CacheStrategy
-	 * class when performing cache initialization. This query restricts
-	 * celllines to the logical databases for KOMP-Regeneron, KOMP-CSD, EUCOMM,
-	 * and NorCOMM (108,109,137,142)
+	 * get the full initialization query which is called by the 
+	 * CacheStrategy class when performing cache initialization. 
+	 * This query restricts cell lines to the logical databases 
+	 * for KOMP-Regeneron, KOMP-CSD, EUCOMM, and NorCOMM 
+	 * (108,109,137,142)
 	 * 
 	 * @return the full initialization query
 	 */
 	public String getFullInitQuery() {
-		return "SELECT a.accID, a._logicalDB_key, ldb.name as ldbName, "
-				+ "c._CellLine_key, c.cellLine, c._CellLine_Type_key, "
-				+ "v.term as cellLineType, c._Strain_key, s.strain, "
-				+ "c._Derivation_key, c.isMutant, c.creation_date, "
-				+ "c.modification_date, "
-				+ "c._CreatedBy_key, c._ModifiedBy_key "
-				+ "FROM ACC_Accession a, ALL_CellLine_View c, "
-				+ "VOC_Term v, PRB_Strain s, ACC_LogicalDB ldb "
-				+ "WHERE a._MGIType_key = " + MGITypeConstants.CELLLINE + " "
-				+ "AND a._LogicalDB_key = ldb._LogicalDB_key "
-				+ "AND a._Object_key = c._CellLine_key "
-				+ "AND c.isMutant = 1 "
-				+ "AND c._CellLine_Type_key = v._Term_key "
-				+ "AND c._Strain_key = s._Strain_key "
-				+ "AND c._Derivation_key != null "
-				+ "AND a._LogicalDB_Key in (108,109,137,142)";
+		return "SELECT a.accID, a._logicalDB_key, ldb.name as ldbName, " +
+				"c._CellLine_key, c.cellLine, c._CellLine_Type_key, " +
+				"v.term as cellLineType, c._Strain_key, s.strain, " +
+				"c._Derivation_key, c.isMutant, c.creation_date, " +
+				"c.modification_date, " +
+				"c._CreatedBy_key, c._ModifiedBy_key " +
+				"FROM ACC_Accession a, ALL_CellLine_View c, " +
+				"VOC_Term v, PRB_Strain s, ACC_LogicalDB ldb " +
+				"WHERE a._MGIType_key = " +
+				MGITypeConstants.CELLLINE + " " +
+				"AND a._LogicalDB_key = ldb._LogicalDB_key " +
+				"AND a._Object_key = c._CellLine_key " +
+				"AND c.isMutant = 1 " +
+				"AND c._CellLine_Type_key = v._Term_key " +
+				"AND c._Strain_key = s._Strain_key " +
+				"AND c._Derivation_key != null " +
+				"AND a._LogicalDB_Key in (108,109,137,142)" ;
 	}
 
 	/**
 	 * add a new entry to the cache
 	 * 
 	 * @assumes nothing
-	 * @effects the value identified by key 'accId' will be added or replaced
+	 * @effects the value identified by key 'accId' will be 
+	 * 			added or replaced
 	 * @param accId
 	 *            the accId
 	 * @param mcl
@@ -110,21 +118,26 @@ public class KOMutantCellLineLookup extends FullCachedLookup {
 	 *             thrown if there is an error with the cache
 	 */
 	protected void addToCache(String accId, MutantCellLine mcl)
-			throws DBException, CacheException {
+	throws DBException, CacheException 
+	{
 		// Replace the current value if it exists
 		super.cache.put(accId.toLowerCase(), mcl);
 	}
 
 	/**
-	 * get the RowDataInterpreter which is required by the CacheStrategy to read
-	 * the results of a database query.
+	 * get the RowDataInterpreter which is required by the CacheStrategy 
+	 * to read the results of a database query.
 	 * 
 	 * @return the partial initialization query
 	 */
-	public RowDataInterpreter getRowDataInterpreter() {
-		class Interpreter implements RowDataInterpreter {
-			public Object interpret(RowReference row) throws DBException,
-					InterpretException {
+	public RowDataInterpreter getRowDataInterpreter() 
+	{
+		class Interpreter 
+		implements RowDataInterpreter 
+		{
+			public Object interpret(RowReference row) 
+			throws DBException, InterpretException 
+			{
 				String accID = row.getString(1);
 				Integer ldbKey = row.getInt(2);
 				MutantCellLine mcl = null;

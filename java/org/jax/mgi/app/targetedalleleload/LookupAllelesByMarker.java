@@ -33,15 +33,15 @@ import org.jax.mgi.shr.exception.MGIException;
  * 
  */
 
-public class AlleleLookupByMarker extends FullCachedLookup {
+public class LookupAllelesByMarker extends FullCachedLookup {
 
-	private static AlleleLookupByMarker _instance;
+	private static LookupAllelesByMarker _instance;
 	private static DLALogger logger;
 
-	public static AlleleLookupByMarker getInstance() throws MGIException {
+	public static LookupAllelesByMarker getInstance() throws MGIException {
 		logger = DLALogger.getInstance();
 		if (_instance == null) {
-			_instance = new AlleleLookupByMarker();
+			_instance = new LookupAllelesByMarker();
 		}
 		return _instance;
 	}
@@ -64,7 +64,7 @@ public class AlleleLookupByMarker extends FullCachedLookup {
 	 * @throws CacheException
 	 *             thrown if there is an error accessing the cache
 	 */
-	public AlleleLookupByMarker() throws ConfigException, DBException,
+	public LookupAllelesByMarker() throws ConfigException, DBException,
 			CacheException {
 		super(SQLDataManagerFactory.getShared(SchemaConstants.MGD));
 

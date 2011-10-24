@@ -23,21 +23,23 @@ import org.jax.mgi.shr.dbutils.SQLDataManagerFactory;
  * 
  */
 
-public class AlleleCellLineCount extends FullCachedLookup {
+public class LookupCellLineCountByAlleleSymbol extends FullCachedLookup {
 
 	// Singleton pattern implementation
-	private static AlleleCellLineCount _instance;
+	private static LookupCellLineCountByAlleleSymbol _instance;
 
-	public static AlleleCellLineCount getInstance() throws MGIException {
+	public static LookupCellLineCountByAlleleSymbol getInstance() 
+	throws MGIException 
+	{
 		if (_instance == null) {
-			_instance = new AlleleCellLineCount();
+			_instance = new LookupCellLineCountByAlleleSymbol();
 		}
 		return _instance;
 	}
 
 	/**
-	 * constructor (singleton guarantees that this is only called the first time
-	 * an instance of AlleleCellLineCount is created)
+	 * constructor (singleton guarantees that this is only called 
+	 * the first time an instance of AlleleCellLineCount is created)
 	 * 
 	 * @throws ConfigException
 	 *             thrown if there is an error accessing the configuration
@@ -46,7 +48,9 @@ public class AlleleCellLineCount extends FullCachedLookup {
 	 * @throws CacheException
 	 *             thrown if there is an error accessing the cache
 	 */
-	private AlleleCellLineCount() throws MGIException {
+	private LookupCellLineCountByAlleleSymbol() 
+	throws MGIException 
+	{
 		super(SQLDataManagerFactory.getShared(SchemaConstants.MGD));
 		initCache(cache);
 	}
@@ -62,7 +66,9 @@ public class AlleleCellLineCount extends FullCachedLookup {
 	 * @throws CacheException
 	 *             thrown if there is an error accessing the configuration
 	 */
-	public Integer lookup(String symbol) throws DBException, CacheException {
+	public Integer lookup(String symbol) 
+	throws DBException, CacheException 
+	{
 		return (Integer) lookupNullsOk(symbol);
 	}
 
@@ -72,7 +78,8 @@ public class AlleleCellLineCount extends FullCachedLookup {
 	 * 
 	 * @return the initialization query
 	 */
-	public String getFullInitQuery() {
+	public String getFullInitQuery() 
+	{
 		return "SELECT a.symbol, COUNT(ac._mutantcellline_key) as cnt "
 				+ "FROM All_allele a, All_allele_cellline ac "
 				+ "WHERE a._allele_key *= ac._allele_key "
@@ -90,13 +97,14 @@ public class AlleleCellLineCount extends FullCachedLookup {
 	 * @assumes nothing
 	 * @effects nothing
 	 */
-	public Set getKeySet() {
+	public Set getKeySet() 
+	{
 		return cache.keySet();
 	}
 
 	/**
-	 * Decrement (or set to 0 if it doesn't exist) the count associated with the
-	 * the allele symbol
+	 * Decrement (or set to 0 if it doesn't exist) the count 
+	 * associated with the the allele symbol
 	 * 
 	 * @assumes nothing
 	 * @effects the value identified by symbol will be decremented by 1
@@ -107,22 +115,25 @@ public class AlleleCellLineCount extends FullCachedLookup {
 	 * @throws CacheException
 	 *             thrown if there is an error with the cache
 	 */
-	protected void decrement(String symbol) throws MGIException {
+	protected void decrement(String symbol) 
+	throws MGIException 
+	{
 		// Increment the count, or if the symbol didn't exist
 		// add it and initialize the count to 1
 		Integer i = lookup(symbol.toLowerCase());
 		if (i == null) {
-			throw new MGIException(this.getClass().getName()
-					+ ": Trying to decrement a non existing allele (" 
-					+ symbol + ")");
+			throw new MGIException(this.getClass().getName() +
+				": Trying to decrement a non existing allele (" +
+				symbol + ")"
+				);
 		}
 
 		i = new Integer(i.intValue() - 1);
 
 		if (i.intValue() < 0) {
-			throw new MGIException(this.getClass().getName()
-					+ ": Trying to decrement an allele lower than 0 (" 
-					+ symbol + ")");
+			throw new MGIException(this.getClass().getName() +
+				": Trying to decrement an allele lower than 0 (" + 
+				symbol + ")");
 		}
 
 		// Replace the current value if it exists
@@ -130,8 +141,8 @@ public class AlleleCellLineCount extends FullCachedLookup {
 	}
 
 	/**
-	 * Increment (or set to 1 if it doesn't exist) the count associated with the
-	 * the allele symbol
+	 * Increment (or set to 1 if it doesn't exist) the count associated 
+	 * with the the allele symbol
 	 * 
 	 * @assumes nothing
 	 * @effects the value identified by symbol will be incremented by 1
@@ -142,7 +153,9 @@ public class AlleleCellLineCount extends FullCachedLookup {
 	 * @throws CacheException
 	 *             thrown if there is an error with the cache
 	 */
-	protected void increment(String symbol) throws MGIException {
+	protected void increment(String symbol) 
+	throws MGIException 
+	{
 		// Increment the count, or if the symbol didn't exist
 		// add it and initialize the count to 1
 		Integer i = lookup(symbol.toLowerCase());
@@ -156,7 +169,8 @@ public class AlleleCellLineCount extends FullCachedLookup {
 	 * add a new map to the cache
 	 * 
 	 * @assumes nothing
-	 * @effects the value identified by 'projectId' will be added or replaced
+	 * @effects the value identified by 'projectId' will be added or 
+	 * 			replaced
 	 * @param symbol
 	 *            the allele symbol
 	 * @param count
@@ -166,8 +180,9 @@ public class AlleleCellLineCount extends FullCachedLookup {
 	 * @throws CacheException
 	 *             thrown if there is an error with the cache
 	 */
-	protected void addToCache(String symbol, Integer count) throws DBException,
-			CacheException {
+	protected void addToCache(String symbol, Integer count) 
+	throws DBException, CacheException 
+	{
 		// Replace the current value if it exists
 		cache.put(symbol.toLowerCase(), count);
 	}
@@ -177,16 +192,24 @@ public class AlleleCellLineCount extends FullCachedLookup {
 	 * 
 	 * @return the RowDataInterpreter
 	 */
-	public RowDataInterpreter getRowDataInterpreter() {
+	public RowDataInterpreter getRowDataInterpreter() 
+	{
 		return new Interpreter();
 	}
 
-	private class Interpreter implements RowDataInterpreter {
-		public Interpreter() {
+	private class Interpreter 
+	implements RowDataInterpreter 
+	{
+		public Interpreter() 
+		{
 		}
 
-		public Object interpret(RowReference row) throws DBException {
-			return new KeyValue(row.getString("symbol"), row.getInt("cnt"));
+		public Object interpret(RowReference row) 
+		throws DBException 
+		{
+			String symbol = row.getString("symbol");
+			Integer count = row.getInt("cnt");
+			return new KeyValue(symbol, count);
 		}
 	}
 }

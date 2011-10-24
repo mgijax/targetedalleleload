@@ -30,9 +30,12 @@ import org.jax.mgi.shr.exception.MGIException;
  * 
  */
 
-public class AlleleLookupByCellLine extends FullCachedLookup {
+public class LookupAlleleByCellLine 
+extends FullCachedLookup 
+{
 
-	private MarkerLookupByMGIID markerLookup;
+	private static LookupJNumbersByAlleleKey lookupJNumbersByAlleleKey;
+	private static LookupMarkerByMGIID lookupMarkerByMGIID;
 	private TargetedAlleleLoadCfg cfg;
 	private static DLALogger logger;
 
@@ -46,10 +49,13 @@ public class AlleleLookupByCellLine extends FullCachedLookup {
 	 * @throws CacheException
 	 *             thrown if there is an error accessing the cache
 	 */
-	public AlleleLookupByCellLine() throws MGIException {
+	public LookupAlleleByCellLine() 
+	throws MGIException 
+	{
 		super(SQLDataManagerFactory.getShared(SchemaConstants.MGD));
-		markerLookup = new MarkerLookupByMGIID();
-		markerLookup.initCache();
+
+		lookupMarkerByMGIID = new LookupMarkerByMGIID();
+		lookupJNumbersByAlleleKey = new LookupJNumbersByAlleleKey();
 
 		logger = DLALogger.getInstance();
 		cfg = new TargetedAlleleLoadCfg();
@@ -66,8 +72,9 @@ public class AlleleLookupByCellLine extends FullCachedLookup {
 	 * @throws CacheException
 	 *             thrown if there is an error accessing the configuration
 	 */
-	public KnockoutAllele lookup(String name) throws DBException,
-			CacheException {
+	public KnockoutAllele lookup(String name) 
+	throws DBException, CacheException 
+	{
 		return (KnockoutAllele) super.lookupNullsOk(name);
 	}
 
@@ -77,7 +84,8 @@ public class AlleleLookupByCellLine extends FullCachedLookup {
 	 * @assumes nothing
 	 * @effects nothing
 	 */
-	public Set getKeySet() {
+	public Set getKeySet() 
+	{
 		return cache.keySet();
 	}
 
@@ -96,64 +104,61 @@ public class AlleleLookupByCellLine extends FullCachedLookup {
 	 *             thrown if there is an error with the cache
 	 */
 	protected void addToCache(String cellLine, KnockoutAllele koAllele)
-			throws DBException, CacheException {
+	throws DBException, CacheException 
+	{
 		// Replace the current value if it exists
 		super.cache.put(cellLine.toLowerCase(), koAllele);
 	}
 
 	/**
-	 * get the query for fully initializing the cache mouse KnockoutAlleles by
-	 * name
+	 * the lookup initialization query is constructed to fulfill 
+	 * the requirement that the "tm" (targeted mutation) allele 
+	 * number be incremented with respect to all "tm" alleles
+	 * that already existing MGD from this PROVIDER
 	 * 
 	 * @return the initialization query
 	 */
-	public String getFullInitQuery() {
+	public String getFullInitQuery() 
+	{
 		String provider = null;
 		try {
 			provider = cfg.getProvider();
 		} catch (ConfigException e) {
-			logger.logdInfo("Config Exception retrieving JNUMBER", false);
+			logger.logdInfo("Config Exception retrieving provider", false);
 			return "";
 		}
-		return "SELECT alleleKey=a._Allele_key, alleleName=a.name, "
-				+ "alleleSymbol=a.symbol, alleleType=a._Allele_Type_key, "
-				+ "geneSymbol=mrk.symbol, chr=mrk.chromosome, "
-				+ "geneKey=mrk._Marker_key, geneMgiid=acc.accID, "
-				+ "alleleNote=nc.note, alleleTrans=a._Transmission_key, "
-				+ "alleleNoteSeq=nc.sequenceNum, alleleNoteKey=nc._note_key, "
-				+ "alleleNoteModifiedBy=n._ModifiedBy_key, "
-				+ "alleleNoteCreatedBy=n._CreatedBy_key, "
-				+ "jNumber=bc.jnumID, projectId=acc2.accId, "
-				+ "aacv._MutantCellLine_key, aacv.cellLine "
-				+ "FROM ALL_Allele a, BIB_Citation_Cache bc, "
-				+ "MGI_Reference_Assoc ra,MGI_RefAssocType rat, "
-				+ "MRK_Marker mrk, ALL_Allele_CellLine_View aacv, "
-				+ "MGI_Note n, MGI_NoteChunk nc, ACC_Accession acc, "
-				+ "ACC_Accession acc2 " + "WHERE a.symbol like '%<tm%"
-				+ provider
-				+ ">' "
-				+ "AND aacv._Allele_key = a._Allele_key "
-				+ "AND ra._Refs_key = bc._Refs_key "
-				+ "AND ra._Object_key = a._Allele_key "
-				+ "and ra._RefAssocType_key = rat._RefAssocType_key "
-				+ "and ra._MGIType_key = rat._MGIType_key "
-				+ "and rat.assocType = 'Original' "
-				+ "and a._Marker_key = mrk._Marker_key "
-				+ "and acc.preferred=1 "
-				+ "and acc._Object_key = mrk._Marker_key "
-				+ "and acc.prefixpart='MGI:' "
-				+ "and acc._LogicalDB_key=1 "
-				+ "and acc._MGIType_key=2 "
-				+ "and acc2.preferred=1 "
-				+ "and acc2.private=1 "
-				+ "and acc2._Object_key = a._Allele_key "
-				+ "and acc2._LogicalDB_key in (125,126,138,143) "
-				+ "and acc2._MGIType_key=11 "
-				+ "and n._Object_key =* a._Allele_key "
-				+ "and n._MGIType_key = 11 "
-				+ "and n._NoteType_key = 1021 "
-				+ "and n._Note_key *= nc._Note_key "
-				+ "order by alleleKey, cellLine, alleleNoteSeq ";
+		return "SELECT alleleKey=a._Allele_key, alleleName=a.name, " +
+		    "alleleSymbol=a.symbol, alleleType=a._Allele_Type_key, " +
+		    "geneSymbol=mrk.symbol, chr=mrk.chromosome, " +
+		    "geneKey=mrk._Marker_key, geneMgiid=acc.accID, " +
+		    "alleleNote=nc.note, alleleTrans=a._Transmission_key, " +
+		    "alleleNoteSeq=nc.sequenceNum, alleleNoteKey=nc._note_key, " +
+		    "alleleNoteModifiedBy=n._ModifiedBy_key, " +
+		    "alleleNoteCreatedBy=n._CreatedBy_key, " +
+		    "projectId=acc2.accId, " +
+		    "aacv._MutantCellLine_key, aacv.cellLine " +
+		    "FROM ALL_Allele a, " +
+		    "MRK_Marker mrk, ALL_Allele_CellLine_View aacv, " +
+		    "MGI_Note n, MGI_NoteChunk nc, ACC_Accession acc, " +
+		    "ACC_Accession acc2 "  +
+		    "WHERE a.symbol like '%<tm%" + provider + ">' " +
+		    "AND aacv._Allele_key = a._Allele_key " +
+		    "and a._Marker_key = mrk._Marker_key " +
+		    "and acc.preferred=1 " +
+		    "and acc._Object_key = mrk._Marker_key " +
+		    "and acc.prefixpart='MGI:' " +
+		    "and acc._LogicalDB_key=1 " +
+		    "and acc._MGIType_key=2 " +
+		    "and acc2.preferred=1 " +
+		    "and acc2.private=1 " +
+		    "and acc2._Object_key = a._Allele_key " +
+		    "and acc2._LogicalDB_key in (125,126,138,143) " +
+		    "and acc2._MGIType_key=11 " +
+		    "and n._Object_key =* a._Allele_key " +
+		    "and n._MGIType_key = 11 " +
+		    "and n._NoteType_key = 1021 " +
+		    "and n._Note_key *= nc._Note_key " +
+		    "order by alleleKey, cellLine, alleleNoteSeq " ;
 	}
 
 	/**
@@ -162,17 +167,25 @@ public class AlleleLookupByCellLine extends FullCachedLookup {
 	 * 
 	 * @return the RowDataInterpreter for this query
 	 */
-	public RowDataInterpreter getRowDataInterpreter() {
-		class Interpreter implements MultiRowInterpreter {
-			public Object interpret(RowReference ref) throws DBException {
+	public RowDataInterpreter getRowDataInterpreter() 
+	{
+		class Interpreter 
+		implements MultiRowInterpreter 
+		{
+			public Object interpret(RowReference ref) 
+			throws DBException 
+			{
 				return new RowData(ref);
 			}
 
-			public Object interpretKey(RowReference row) throws DBException {
+			public Object interpretKey(RowReference row) 
+			throws DBException 
+			{
 				return row.getString("cellLine");
 			}
 
-			public Object interpretRows(Vector v) {
+			public Object interpretRows(Vector v) 
+			{
 				// All rows return the same values for every columns EXCEPT
 				// for the alleleNote column (one row per note chunk)
 				RowData rd = (RowData) v.get(0);
@@ -197,21 +210,31 @@ public class AlleleLookupByCellLine extends FullCachedLookup {
 				koAllele.setNote(rd.alleleNote);
 				koAllele.setNoteKey(rd.alleleNoteKey);
 				koAllele.setNoteModifiedByKey(rd.alleleNoteModifiedBy);
-				koAllele.setJNumber(rd.jNumber);
 				koAllele.setCellLineKey(rd.mutantCellLineKey);
+
+				// Lookup the jnumber in the database, if we can't find
+				// any there, this allele is BAD, report the exception
+				// and skip
+				try {
+					koAllele.setJNumbers(
+						lookupJNumbersByAlleleKey.lookup(rd.alleleKey));
+				} catch (MGIException e) {
+					logger.logdInfo(e.getMessage(), true);
+					return null;
+				}
 
 				for (Iterator it = v.iterator(); it.hasNext();) {
 					rd = (RowData) it.next();
 
-					// Concat all the notechunks together in the allele note
+					// combine all the note chunks together in the allele note
 					completeNote += rd.alleleNote;
 				}
 
 				koAllele.setNote(completeNote.trim());
 
 				try {
-					koAllele.setMarkerKey(markerLookup.lookup(rd.geneMgiid)
-							.getKey());
+					koAllele.setMarkerKey(
+						lookupMarkerByMGIID.lookup(rd.geneMgiid).getKey());
 				} catch (MGIException e) {
 					logger.logdInfo(e.getMessage(), true);
 					return null;
@@ -227,7 +250,8 @@ public class AlleleLookupByCellLine extends FullCachedLookup {
 	/**
 	 * Simple data object representing a row of data from the query
 	 */
-	class RowData {
+	class RowData 
+	{
 		protected Integer alleleKey;
 		protected String projectId;
 		protected Integer alleleType;
@@ -238,12 +262,13 @@ public class AlleleLookupByCellLine extends FullCachedLookup {
 		protected Integer alleleNoteKey;
 		protected Integer alleleNoteCreatedBy;
 		protected Integer alleleNoteModifiedBy;
-		protected String jNumber;
 		protected String geneMgiid;
 		protected Integer mutantCellLineKey;
 		private String cellLine;
 
-		public RowData(RowReference row) throws DBException {
+		public RowData(RowReference row) 
+		throws DBException 
+		{
 			alleleKey = row.getInt("alleleKey");
 			projectId = row.getString("projectId");
 			alleleType = row.getInt("alleleType");
@@ -254,7 +279,6 @@ public class AlleleLookupByCellLine extends FullCachedLookup {
 			alleleNoteKey = row.getInt("alleleNoteKey");
 			alleleNoteCreatedBy = row.getInt("alleleNoteCreatedBy");
 			alleleNoteModifiedBy = row.getInt("alleleNoteModifiedBy");
-			jNumber = row.getString("jNumber");
 			geneMgiid = row.getString("geneMgiid");
 			mutantCellLineKey = row.getInt("_MutantCellLine_key");
 			cellLine = row.getString("cellLine");

@@ -136,21 +136,21 @@ public class TargetedAlleleLoad extends DLALoader {
 	private Timestamp currentTime;
 
 	// Cached DB Lookups
-	private KOMutantCellLineLookup koMutantCellLineLookup;
-	private AlleleLookupByKey alleleLookupByKey;
-	private AlleleLookupByProjectId alleleLookupByProjectId;
-	private AlleleLookupByMarker alleleLookupByMarker;
-	private DerivationLookupByVectorCreatorParentType derivationLookup;
-	private VectorLookup vectorLookup;
-	private MarkerLookupByMGIID markerLookup;
+	private LookupMutantCelllineByName koMutantCellLineLookup;
+	private LookupAlleleByKey lookupAlleleByKey;
+	private LookupAllelesByProjectId lookupAllelesByProjectId;
+	private LookupAllelesByMarker lookupAllelesByMarker;
+	private LookupDerivationByVectorCreatorParentType derivationLookup;
+	private LookupVectorKeyByTerm lookupVectorKeyByTerm;
+	private LookupMarkerByMGIID lookupMarkerByMGIID;
 	private ParentStrainLookupByParentKey parentStrainLookupByParentKey;
 	private StrainKeyLookup strainKeyLookup;
-	private AlleleLookupByCellLine alleleLookupByCellLine;
+	private LookupAlleleByCellLine lookupAlleleByCellLine;
 	private VocabTermLookup vocTermLookup;
 	private CellLineNameLookupByKey cellLineNameLookupByKey;
-	private CellLineStrainKeyLookupByCellLineKey cellLineStrainKeyLookupByCellLineKey;
+	private LookupStrainKeyByCellLineKey lookupStrainKeyByCellLineKey;
 	private StrainNameLookup strainNameLookup;
-	private AlleleCellLineCount alleleCellLineCount;
+	private LookupCellLineCountByAlleleSymbol lookupCellLineCountByAlleleSymbol;
 
 	// Class variables to hold global QC data
 	private Map alleleProjects = new HashMap();
@@ -171,28 +171,28 @@ public class TargetedAlleleLoad extends DLALoader {
 		sqlDBMgr = SQLDataManagerFactory.getShared(SchemaConstants.MGD);
 
 		Integer escLogicalDB = cfg.getEsCellLogicalDb();
-		koMutantCellLineLookup = new KOMutantCellLineLookup(escLogicalDB);
+		koMutantCellLineLookup = new LookupMutantCelllineByName(escLogicalDB);
 
 		// These lookups implement a Singleton pattern because
 		// they're shared across objects so updates in one object
 		// should be reflected in the other objects
-		alleleLookupByKey = AlleleLookupByKey.getInstance();
-		alleleLookupByProjectId = AlleleLookupByProjectId.getInstance();
-		alleleLookupByMarker = AlleleLookupByMarker.getInstance();
-		alleleCellLineCount = AlleleCellLineCount.getInstance();
-		derivationLookup = DerivationLookupByVectorCreatorParentType
+		lookupAlleleByKey = LookupAlleleByKey.getInstance();
+		lookupAllelesByProjectId = LookupAllelesByProjectId.getInstance();
+		lookupAllelesByMarker = LookupAllelesByMarker.getInstance();
+		lookupCellLineCountByAlleleSymbol = LookupCellLineCountByAlleleSymbol.getInstance();
+		derivationLookup = LookupDerivationByVectorCreatorParentType
 				.getInstance();
 
-		alleleLookupByCellLine = new AlleleLookupByCellLine();
-		alleleLookupByCellLine.initCache();
+		lookupAlleleByCellLine = new LookupAlleleByCellLine();
+		lookupAlleleByCellLine.initCache();
 
 		parentStrainLookupByParentKey = new ParentStrainLookupByParentKey();
 		strainKeyLookup = new StrainKeyLookup();
-		vectorLookup = new VectorLookup();
-		markerLookup = new MarkerLookupByMGIID();
+		lookupVectorKeyByTerm = new LookupVectorKeyByTerm();
+		lookupMarkerByMGIID = new LookupMarkerByMGIID();
 		vocTermLookup = new VocabTermLookup();
 		cellLineNameLookupByKey = new CellLineNameLookupByKey();
-		cellLineStrainKeyLookupByCellLineKey = new CellLineStrainKeyLookupByCellLineKey();
+		lookupStrainKeyByCellLineKey = new LookupStrainKeyByCellLineKey();
 		strainNameLookup = new StrainNameLookup();
 
 		alleleFactory = KnockoutAlleleFactory.getFactory();
@@ -221,10 +221,10 @@ public class TargetedAlleleLoad extends DLALoader {
 	 */
 	private void filterProjectIds(Set databaseProjectIds, String loadProvider)
 			throws DBException, CacheException {
-		Iterator it = alleleLookupByProjectId.getKeySet().iterator();
+		Iterator it = lookupAllelesByProjectId.getKeySet().iterator();
 		while (it.hasNext()) {
 			String label = (String) it.next();
-			Map a = alleleLookupByProjectId.lookup(label);
+			Map a = lookupAllelesByProjectId.lookup(label);
 
 			// All alleles in the project belong to the same
 			// pipeline/provider combination, so just look at the first one
@@ -256,10 +256,10 @@ public class TargetedAlleleLoad extends DLALoader {
 		// Add only cell lines appropriate for this pipeline and provider
 		// to the QC pool (cell lines for other pipeline don't need QC
 		// during this run)
-		Iterator it = alleleLookupByCellLine.getKeySet().iterator();
+		Iterator it = lookupAlleleByCellLine.getKeySet().iterator();
 		while (it.hasNext()) {
 			String label = (String) it.next();
-			KnockoutAllele a = alleleLookupByCellLine.lookup(label);
+			KnockoutAllele a = lookupAlleleByCellLine.lookup(label);
 			if (a.getSymbol().indexOf(loadProvider) >= 0) {
 				databaseCellLines.add(label);
 			}
@@ -434,7 +434,7 @@ public class TargetedAlleleLoad extends DLALoader {
 					// Mutant ES Cell found in MGI, check the associated allele
 
 					// Find the existing associated allele
-					KnockoutAllele existing = alleleLookupByCellLine.lookup(in
+					KnockoutAllele existing = lookupAlleleByCellLine.lookup(in
 							.getMutantCellLine());
 
 					// If the associated allele can't be found, there's a major
@@ -641,7 +641,7 @@ public class TargetedAlleleLoad extends DLALoader {
 
 					// lookup existing alleles for this project
 					String projectId = in.getProjectId();
-					Map alleles = alleleLookupByProjectId.lookup(projectId);
+					Map alleles = lookupAllelesByProjectId.lookup(projectId);
 					Integer alleleKey = null;
 					if (alleles != null) {
 						// try to get the allele identified by the constructed
@@ -991,7 +991,7 @@ public class TargetedAlleleLoad extends DLALoader {
 		String parent = in.getParentCellLine();
 		String aType = in.getMutationType();
 
-		Integer vectorKey = vectorLookup.lookup(cassette);
+		Integer vectorKey = lookupVectorKeyByTerm.lookup(cassette);
 
 		if (vectorKey == null) {
 			throw new MGIException("Cannot find vector for cassette: "
@@ -1028,7 +1028,7 @@ public class TargetedAlleleLoad extends DLALoader {
 			String typeName = vocTermLookup.lookup(typeKey);
 			String parentName = cellLineNameLookupByKey.lookup(parentKey);
 			String strainName = strainNameLookup
-					.lookup(cellLineStrainKeyLookupByCellLineKey
+					.lookup(lookupStrainKeyByCellLineKey
 							.lookup(parentKey));
 
 			// Derivation name is Creator+Type+Parental+Strain+Vector
@@ -1090,10 +1090,10 @@ public class TargetedAlleleLoad extends DLALoader {
 
 		// Update the count of MCL associated to this allele and create an
 		// orphan MCL record if the count drops to 0
-		alleleCellLineCount.decrement(oldAllele.getSymbol());
-		alleleCellLineCount.increment(newAllele.getSymbol());
+		lookupCellLineCountByAlleleSymbol.decrement(oldAllele.getSymbol());
+		lookupCellLineCountByAlleleSymbol.increment(newAllele.getSymbol());
 
-		Integer count = alleleCellLineCount.lookup(oldAllele.getSymbol());
+		Integer count = lookupCellLineCountByAlleleSymbol.lookup(oldAllele.getSymbol());
 		if (count.intValue() < 1) {
 			// the *last* MCL associated to the old allele has been removed
 			// create an orphaned MCL and associate it to the allele
@@ -1102,7 +1102,7 @@ public class TargetedAlleleLoad extends DLALoader {
 			// we just created a "placeholder" MCL to keep the allele
 			// associated to the correct derivation even though the last
 			// "real" MCL migrated elsewhere. increment the MCL counter
-			alleleCellLineCount.increment(oldAllele.getSymbol());
+			lookupCellLineCountByAlleleSymbol.increment(oldAllele.getSymbol());
 		}
 
 		// Change the derivation _after_ the orphan is created...
@@ -1121,7 +1121,7 @@ public class TargetedAlleleLoad extends DLALoader {
 
 		// Lookup existing alleles for this project
 		String projectId = in.getProjectId();
-		Map alleles = alleleLookupByProjectId.lookup(projectId);
+		Map alleles = lookupAllelesByProjectId.lookup(projectId);
 
 		// If there are any alleles for this project, see if one of the
 		// existing alleles is the correct one
@@ -1142,7 +1142,7 @@ public class TargetedAlleleLoad extends DLALoader {
 				// allele is brought back from deleted status. It's
 				// okay. This action is idempotent (it can be applied
 				// multiple times without changing the result).
-				setAlleleApproved(alleleLookupByKey.lookup(alleleKey));
+				setAlleleApproved(lookupAlleleByKey.lookup(alleleKey));
 
 				return;
 			}
@@ -1291,7 +1291,7 @@ public class TargetedAlleleLoad extends DLALoader {
 		loadStream.insert(aclDAO);
 
 		// Update the allele status
-		setAlleleApproved(alleleLookupByKey.lookup(alleleKey));
+		setAlleleApproved(lookupAlleleByKey.lookup(alleleKey));
 	}
 
 	private KnockoutAllele createAllele(KnockoutAllele constructed,
@@ -1317,22 +1317,22 @@ public class TargetedAlleleLoad extends DLALoader {
 
 		// Include the new allele in the cached allelesByProjectID map
 		alleles.put(constructed.getSymbol(), allele);
-		alleleLookupByProjectId.addToCache(in.getProjectId(), alleles);
+		lookupAllelesByProjectId.addToCache(in.getProjectId(), alleles);
 
 		// add the newly created allele to the allele cache
-		alleleLookupByKey.addToCache(constructed.getKey(), constructed);
+		lookupAlleleByKey.addToCache(constructed.getKey(), constructed);
 
 		// add the newly created allele to the alleleByMarker cache
-		Marker mrk = markerLookup.lookup(in.getGeneId());
+		Marker mrk = lookupMarkerByMGIID.lookup(in.getGeneId());
 		String markerSymbol = mrk.getSymbol();
 
 		Set alleleSet = null;
-		alleleSet = alleleLookupByMarker.lookup(markerSymbol);
+		alleleSet = lookupAllelesByMarker.lookup(markerSymbol);
 		if (alleleSet == null) {
 			alleleSet = new HashSet();
 		}
 		alleleSet.add(constructed.getKey());
-		alleleLookupByMarker.addToCache(markerSymbol, alleleSet);
+		lookupAllelesByMarker.addToCache(markerSymbol, alleleSet);
 
 		qcStats.record("SUMMARY", NUM_ALLELES_CREATED);
 
@@ -1358,7 +1358,7 @@ public class TargetedAlleleLoad extends DLALoader {
 			while (projectIt.hasNext()) {
 				Map.Entry entry = (Map.Entry) projectIt.next();
 				Integer key = (Integer) entry.getKey();
-				KnockoutAllele existing = alleleLookupByKey.lookup(key);
+				KnockoutAllele existing = lookupAlleleByKey.lookup(key);
 
 				List projects = new ArrayList((Set) entry.getValue());
 
@@ -1388,7 +1388,7 @@ public class TargetedAlleleLoad extends DLALoader {
 				while (noteIt.hasNext()) {
 					Map.Entry entry = (Map.Entry) noteIt.next();
 					Integer key = (Integer) entry.getKey();
-					KnockoutAllele a = alleleLookupByKey.lookup(key);
+					KnockoutAllele a = lookupAlleleByKey.lookup(key);
 					List notes = new ArrayList((Set) entry.getValue());
 
 					if (notes.size() != 1) {
@@ -1514,7 +1514,7 @@ public class TargetedAlleleLoad extends DLALoader {
 			Set s = new TreeSet();
 			while (iterator.hasNext()) {
 				String label = (String) iterator.next();
-				KnockoutAllele a = alleleLookupByCellLine.lookup(label);
+				KnockoutAllele a = lookupAlleleByCellLine.lookup(label);
 				s.add(a.getSymbol() + "\t" + a.getProjectId() + "\t"
 						+ label.toUpperCase());
 			}
@@ -1542,7 +1542,7 @@ public class TargetedAlleleLoad extends DLALoader {
 			Set s = new TreeSet();
 			while (iterator.hasNext()) {
 				String label = (String) iterator.next();
-				Map hmA = alleleLookupByProjectId.lookup(label);
+				Map hmA = lookupAllelesByProjectId.lookup(label);
 				if (hmA != null) {
 					Set entries = hmA.entrySet();
 					Iterator aIt = entries.iterator();

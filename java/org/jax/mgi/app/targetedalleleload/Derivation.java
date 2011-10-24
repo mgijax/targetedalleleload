@@ -13,13 +13,17 @@ import org.jax.mgi.shr.exception.MGIException;
  * @author jmason
  * 
  */
-public class Derivation extends org.jax.mgi.dbs.mgd.loads.Alo.Derivation {
+public class Derivation 
+extends org.jax.mgi.dbs.mgd.loads.Alo.Derivation 
+{
 
-	DerivationLookupByVectorCreatorParentType lookup;
+	LookupDerivationByVectorCreatorParentType lookup;
 
-	public Derivation() throws MGIException {
+	public Derivation() 
+	throws MGIException 
+	{
 		super();
-		lookup = DerivationLookupByVectorCreatorParentType.getInstance();
+		lookup = LookupDerivationByVectorCreatorParentType.getInstance();
 	}
 
 	/**
@@ -29,10 +33,13 @@ public class Derivation extends org.jax.mgi.dbs.mgd.loads.Alo.Derivation {
 	 *            The sql stream to write the record to.
 	 * @return Nothing
 	 */
-	public void insert(SQLStream stream) throws MGIException {
+	public void insert(SQLStream stream) 
+	throws MGIException 
+	{
+
 		// Create the Accession entry
-		//
-		ALL_CellLine_DerivationState state = new ALL_CellLine_DerivationState();
+		ALL_CellLine_DerivationState state = 
+			new ALL_CellLine_DerivationState();
 
 		state.setName(this.getName());
 		state.setDescription(this.getDescription());
@@ -43,7 +50,8 @@ public class Derivation extends org.jax.mgi.dbs.mgd.loads.Alo.Derivation {
 		state.setCreatorKey(this.getCreatorKey());
 		state.setRefsKey(this.getRefsKey());
 
-		ALL_CellLine_DerivationDAO dao = new ALL_CellLine_DerivationDAO(state);
+		ALL_CellLine_DerivationDAO dao = 
+			new ALL_CellLine_DerivationDAO(state);
 		stream.insert(dao);
 
 		// Store the key that gets generated when this object is instead
@@ -61,7 +69,8 @@ public class Derivation extends org.jax.mgi.dbs.mgd.loads.Alo.Derivation {
 	 *            the object to compare to
 	 * @return true if the two objects are equal, false otherwise
 	 */
-	public boolean equals(Object o) {
+	public boolean equals(Object o) 
+	{
 		if (!(o instanceof Derivation))
 			return false;
 		Derivation s = (Derivation) o;
@@ -76,9 +85,10 @@ public class Derivation extends org.jax.mgi.dbs.mgd.loads.Alo.Derivation {
 	 * 
 	 * @return the string representation of this instance
 	 */
-	public String toString() {
-		return "<Derivation: " + this.getName() + " (key: "
-				+ this.getDerivationKey() + ")>";
+	public String toString() 
+	{
+		return "<Derivation: " + this.getName() + 
+			" (key: " + this.getDerivationKey() + ")>";
 	}
 
 }

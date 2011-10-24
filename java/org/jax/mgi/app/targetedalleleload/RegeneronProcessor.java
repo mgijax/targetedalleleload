@@ -1,5 +1,6 @@
 package org.jax.mgi.app.targetedalleleload;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -24,16 +25,19 @@ import org.jax.mgi.shr.ioutils.RecordFormatException;
  * a RegeneronAlleleInput
  */
 
-public class RegeneronProcessor extends KnockoutAlleleProcessor {
+public class RegeneronProcessor 
+extends KnockoutAlleleProcessor 
+{
+	
 	private TargetedAlleleLoadCfg cfg;
-	private MarkerLookupByMGIID markerLookup;
+	private LookupMarkerByMGIID lookupMarkerByMGIID;
 	private StrainKeyLookup strainKeyLookup;
 	private VocabKeyLookup vocabLookup;
-	private ProjectLookupByMarker projectLookupByMarker;
-	private AlleleLookupByProjectId alleleLookpuByProjectId;
+	private LookupAllelesByProjectId lookupAllelesByProjectId;
+	private LookupAllelesByMarker lookupAllelesByMarker;
 
-	private Pattern alleleSequencePattern;
 	private Matcher regexMatcher;
+	private Pattern sequencePattern = Pattern.compile(".*tm(\\d{1,2}).*");
 
 	/**
 	 * Constructs a KnockoutAllele processor object.
@@ -48,24 +52,21 @@ public class RegeneronProcessor extends KnockoutAlleleProcessor {
 	 * @throws CacheException
 	 * @throws TranslationException
 	 */
-	public RegeneronProcessor() throws MGIException {
+	public RegeneronProcessor() 
+	throws MGIException 
+	{
 		cfg = new TargetedAlleleLoadCfg();
 
-		Integer projectLogicalDB = cfg.getProjectLogicalDb();
-
-		projectLookupByMarker = new ProjectLookupByMarker(projectLogicalDB);
-		// alleleLookpuByProjectId = new
-		// AlleleLookupByProjectId(projectLogicalDB);
-		alleleLookpuByProjectId = AlleleLookupByProjectId.getInstance();
-		markerLookup = new MarkerLookupByMGIID();
+		lookupAllelesByProjectId = LookupAllelesByProjectId.getInstance();
+		lookupAllelesByMarker = LookupAllelesByMarker.getInstance();
+		lookupMarkerByMGIID = new LookupMarkerByMGIID();
 		vocabLookup = new VocabKeyLookup(Constants.ALLELE_VOCABULARY);
 		strainKeyLookup = new StrainKeyLookup();
-		alleleSequencePattern = Pattern.compile(".*tm(\\d{1,2}).*");
 	}
 
 	/**
-	 * Set all the attributes of the clone object by parsing the given input
-	 * record and providing Regeneron Specific constant values.
+	 * Set all the attributes of the clone object by parsing the given 
+	 * input record and providing Regeneron Specific constant values.
 	 * 
 	 * @assumes Nothing
 	 * @effects Loads the clone object.
@@ -79,16 +80,15 @@ public class RegeneronProcessor extends KnockoutAlleleProcessor {
 	 * @throws TranslationException
 	 */
 	public KnockoutAllele process(KnockoutAlleleInput inputData)
-			throws RecordFormatException, ConfigException,
-			KeyNotFoundException, DBException, CacheException,
-			TranslationException, MGIException {
+	throws MGIException 
+	{
 		// Cast the input to a Regeneron specific allele input type
 		RegeneronAlleleInput in = (RegeneronAlleleInput) inputData;
 
 		KnockoutAllele koAllele = new KnockoutAllele();
 
 		// Get the external dependencies referenced in this row
-		Marker marker = markerLookup.lookup(in.getGeneId());
+		Marker marker = lookupMarkerByMGIID.lookup(in.getGeneId());
 		Integer strainKey = strainKeyLookup.lookup(in.getStrainName());
 
 		koAllele.setMarkerKey(marker.getKey());
@@ -96,7 +96,8 @@ public class RegeneronProcessor extends KnockoutAlleleProcessor {
 		koAllele.setProjectLogicalDb(cfg.getProjectLogicalDb());
 		koAllele.setStrainKey(strainKey);
 
-		// Regeneron alleles are all DELETION type alleles (Targeted Knockout)
+		// Regeneron alleles are all DELETION type alleles 
+		// (Targeted Knockout)
 		koAllele.setTypeKey(cfg.getAlleleType("DELETION"));
 
 		// Regeneron Specific Mutation types
@@ -108,69 +109,82 @@ public class RegeneronProcessor extends KnockoutAlleleProcessor {
 		}
 		koAllele.setMutationTypes(mutationTypeKeys);
 
-		// get the NEXT allele symbol sequence number which is one higher than
-		// the sum of CURRENT KOMP ALELLES attached to this marker BY THIS
-		// PROVIDER
-		int seq = 1; // Default to the first project
-		Set allProj = projectLookupByMarker.lookup(marker.getSymbol());
-		if (allProj != null && !allProj.contains(in.getProjectId())) {
-			// There is already a project (or projects) associated to this
-			// marker, and it is not tHIS project. Increment the count
-			// for this new allele symbol
-			seq = (allProj.size()) + 1;
+		////////////////////////////////////////////////////////////
+		// Get the sequence number for the allele
+		////////////////////////////////////////////////////////////
+
+		int	seq = 1;
+		
+		HashSet existingAlleles = lookupAllelesByMarker.lookup(
+			marker.getSymbol());
+
+		if (existingAlleles != null) {
+			// This lab has created alleles for this marker previously.
+			// Set the sequence number to one higher than the count of 
+			// all alleles made by this lab for this marker
+			seq = (existingAlleles.size()) + 1;
 		}
 
-		Map alleles = alleleLookpuByProjectId.lookup(in.getProjectId());
+		// If there is already an allele created that has this IKMC 
+		// project ID, associate that allele sequence number.  
+		// All alleles produced by the same project should have the 
+		// same sequence number.
+		Map alleles = lookupAllelesByProjectId.lookup(in.getProjectId());
+
 		if (alleles != null && alleles.size() > 0) {
-			Boolean alleleFound = Boolean.FALSE;
+
+			boolean alleleFound = false;
+
+			// Go through all the targeted alleles that belong to this
+			// IKMC project.  There will most likely be zero or one 
+			// alleles
 			Set entries = alleles.entrySet();
 			Iterator it = entries.iterator();
 
-			while (it.hasNext() && alleleFound != Boolean.TRUE) {
+			while (it.hasNext() && !alleleFound) {
 				Map.Entry entry = (Map.Entry) it.next();
-				Map allele = (Map) entry.getValue();
+				Map a = (Map) entry.getValue();
 
-				// The first allele with a matching project ID because there
-				// should only be one project ID per allele for Regeneron
-				// alleles
-				String allSymbol = (String) allele.get("symbol");
-				regexMatcher = alleleSequencePattern.matcher(allSymbol);
+				String allSymbol = (String) a.get("symbol");
+				regexMatcher = sequencePattern.matcher(allSymbol);
 				if (regexMatcher.find()) {
 					seq = Integer.parseInt(regexMatcher.group(1));
-					alleleFound = Boolean.TRUE;
-					qcStatistics.record("SUMMARY",
-							"Number of records that match an existing allele");
+					alleleFound = true;
+					qcStatistics.record(
+						"SUMMARY",
+						"Number of records matching an existing allele");
 				}
 			}
 		}
 
-		// Set the koAllele's constructed values
-		String alleleName = cfg.getNameTemplate();
-		alleleName = alleleName.replaceAll("~~SYMBOL~~", marker.getSymbol());
-		alleleName = alleleName.replaceAll("~~SEQUENCE~~",
-				Integer.toString(seq));
+		////////////////////////////////////////////////////////////
+		// Populate the koAllele object
+		////////////////////////////////////////////////////////////
+
+		String alleleName = cfg.getNameTemplate()
+			.replaceAll("~~SYMBOL~~", marker.getSymbol())
+			.replaceAll("~~SEQUENCE~~",	Integer.toString(seq));
 		koAllele.setName(alleleName);
 
-		String alleleSymbol = cfg.getSymbolTemplate();
-		alleleSymbol = alleleSymbol
-				.replaceAll("~~SYMBOL~~", marker.getSymbol());
-		alleleSymbol = alleleSymbol.replaceAll("~~SEQUENCE~~",
-				Integer.toString(seq));
+		String alleleSymbol = cfg.getSymbolTemplate()
+			.replaceAll("~~SYMBOL~~", marker.getSymbol())
+			.replaceAll("~~SEQUENCE~~", Integer.toString(seq));
 		koAllele.setSymbol(alleleSymbol);
 
-		String jNumber = cfg.getJNumber();
-		koAllele.setJNumber(jNumber);
+		koAllele.setJNumbers(cfg.getJNumbers());
 
 		String note = cfg.getNoteTemplate();
 
-		// If coordinates are missing, fill out the incomplete note template
-		if (in.getDelSize().toString().equals("0")
-				|| in.getDelStart().toString().equals("0")
-				|| in.getDelEnd().toString().equals("0")) {
+		// If coordinates are missing, use the incomplete note template
+		if (in.getDelSize().toString().equals("0") ||
+			in.getDelStart().toString().equals("0") ||
+			in.getDelEnd().toString().equals("0")
+			) {
 			note = cfg.getNoteTemplateMissingCoords();
 		}
 
-		note = note.replaceAll("~~CASSETTE~~", in.getCassette().toString());
+		// Build the molecular note
+		note = note.replaceAll("~~CASSETTE~~", in.getCassette());
 		note = note.replaceAll("~~SIZE~~", in.getDelSize().toString());
 		note = note.replaceAll("~~START~~", in.getDelStart().toString());
 		note = note.replaceAll("~~END~~", in.getDelEnd().toString());
@@ -178,8 +192,6 @@ public class RegeneronProcessor extends KnockoutAlleleProcessor {
 		note = note.replaceAll("~~BUILD~~", in.getBuild());
 		koAllele.setNote(note);
 
-		// Return the populated koAllele object.
-		//
 		return koAllele;
 	}
 

@@ -23,15 +23,18 @@ import org.jax.mgi.shr.exception.MGIException;
  * 
  */
 
-public class DerivationLookupByVectorCreatorParentType extends FullCachedLookup {
+public class LookupDerivationByVectorCreatorParentType 
+extends FullCachedLookup 
+{
 
 	// Singleton pattern implementation
-	private static DerivationLookupByVectorCreatorParentType _instance;
+	private static LookupDerivationByVectorCreatorParentType _instance;
 
-	public static DerivationLookupByVectorCreatorParentType getInstance()
-			throws MGIException {
+	public static LookupDerivationByVectorCreatorParentType getInstance()
+	throws MGIException 
+	{
 		if (_instance == null) {
-			_instance = new DerivationLookupByVectorCreatorParentType();
+			_instance = new LookupDerivationByVectorCreatorParentType();
 		}
 		return _instance;
 	}
@@ -46,8 +49,9 @@ public class DerivationLookupByVectorCreatorParentType extends FullCachedLookup 
 	 * @throws CacheException
 	 *             thrown if there is an error accessing the cache
 	 */
-	private DerivationLookupByVectorCreatorParentType() throws ConfigException,
-			DBException, CacheException {
+	private LookupDerivationByVectorCreatorParentType() 
+	throws ConfigException, DBException, CacheException
+	{
 		super(SQLDataManagerFactory.getShared(SchemaConstants.MGD));
 		initCache(cache);
 	}
@@ -63,7 +67,9 @@ public class DerivationLookupByVectorCreatorParentType extends FullCachedLookup 
 	 * @throws CacheException
 	 *             thrown if there is an error accessing the configuration
 	 */
-	public Integer lookup(String identifier) throws DBException, CacheException {
+	public Integer lookup(String identifier) 
+	throws DBException, CacheException 
+	{
 		return (Integer) super.lookupNullsOk(identifier);
 	}
 
@@ -78,8 +84,9 @@ public class DerivationLookupByVectorCreatorParentType extends FullCachedLookup 
 	 * @throws CacheException
 	 *             thrown if there is an error accessing the configuration
 	 */
-	public Integer lookupExisting(String identifier) throws DBException,
-			CacheException, KeyNotFoundException {
+	public Integer lookupExisting(String identifier) 
+	throws DBException, CacheException, KeyNotFoundException 
+	{
 		return (Integer) super.lookup(identifier);
 	}
 
@@ -95,7 +102,9 @@ public class DerivationLookupByVectorCreatorParentType extends FullCachedLookup 
 	 * @throws CacheException
 	 *             thrown if there is an error with the cache
 	 */
-	protected void addToCache(Derivation d) throws MGIException {
+	protected void addToCache(Derivation d) 
+	throws MGIException 
+	{
 		// Replace the current value if it exists
 		String value = d.getVectorKey().toString();
 		value += "|" + d.getCreatorKey();
@@ -111,11 +120,13 @@ public class DerivationLookupByVectorCreatorParentType extends FullCachedLookup 
 	 * 
 	 * @return the initialization query
 	 */
-	public String getFullInitQuery() {
-		return "SELECT _Derivation_key, _Vector_key 'vectorkey', "
-				+ "_ParentCellLine_key 'parentalkey', _Creator_key 'creatorkey', "
-				+ "_DerivationType_key 'typekey' "
-				+ "FROM ALL_CellLine_Derivation ";
+	public String getFullInitQuery() 
+	{
+		return "SELECT _Derivation_key, _Vector_key 'vectorkey', " +
+				"_ParentCellLine_key 'parentalkey', " +
+				"_Creator_key 'creatorkey', " +
+				"_DerivationType_key 'typekey' " +
+				"FROM ALL_CellLine_Derivation " ;
 	}
 
 	/**
@@ -123,15 +134,21 @@ public class DerivationLookupByVectorCreatorParentType extends FullCachedLookup 
 	 * 
 	 * @return the RowDataInterpreter
 	 */
-	public RowDataInterpreter getRowDataInterpreter() {
+	public RowDataInterpreter getRowDataInterpreter() 
+	{
 		return new Interpreter();
 	}
 
-	private class Interpreter implements RowDataInterpreter {
-		public Interpreter() {
+	private class Interpreter 
+	implements RowDataInterpreter 
+	{
+		public Interpreter() 
+		{
 		}
 
-		public Object interpret(RowReference row) throws DBException {
+		public Object interpret(RowReference row)
+		throws DBException 
+		{
 			String lookupkey = row.getString("vectorkey");
 			lookupkey += "|" + row.getString("creatorkey");
 			lookupkey += "|" + row.getString("parentalkey");

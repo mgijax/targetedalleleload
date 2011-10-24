@@ -33,13 +33,13 @@ import org.jax.mgi.shr.exception.MGIException;
  * 
  */
 
-public class AlleleLookupByProjectId extends FullCachedLookup {
+public class LookupAllelesByProjectId extends FullCachedLookup {
 
 	private TargetedAlleleLoadCfg cfg;
 	private Integer logicalDb;
 	private static DLALogger logger;
 
-	private static AlleleLookupByProjectId _instance;
+	private static LookupAllelesByProjectId _instance;
 
 	/**
 	 * If the lookup has not been initialized, initialize it and return,
@@ -48,10 +48,10 @@ public class AlleleLookupByProjectId extends FullCachedLookup {
 	 * @return an instance of AlleleLookupByProjectId
 	 * @throws MGIException
 	 */
-	public static AlleleLookupByProjectId getInstance() throws MGIException {
+	public static LookupAllelesByProjectId getInstance() throws MGIException {
 		logger = DLALogger.getInstance();
 		if (_instance == null) {
-			_instance = new AlleleLookupByProjectId();
+			_instance = new LookupAllelesByProjectId();
 		}
 		return _instance;
 	}
@@ -63,7 +63,7 @@ public class AlleleLookupByProjectId extends FullCachedLookup {
 	 * 
 	 * @throws MGIException
 	 */
-	private AlleleLookupByProjectId() throws MGIException {
+	private LookupAllelesByProjectId() throws MGIException {
 		super(SQLDataManagerFactory.getShared(SchemaConstants.MGD));
 
 		try {

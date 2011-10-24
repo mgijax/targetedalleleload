@@ -24,14 +24,17 @@ import org.jax.mgi.shr.exception.MGIException;
  * a NorcommAlleleInput
  */
 
-public class NorcommProcessor extends KnockoutAlleleProcessor {
+public class NorcommProcessor 
+extends KnockoutAlleleProcessor 
+{
+	
 	private TargetedAlleleLoadCfg cfg;
-	private MarkerLookupByMGIID markerLookup;
+	private LookupMarkerByMGIID lookupMarkerByMGIID;
 	private ParentStrainLookupByParentKey parentStrainLookupByParentKey;
 	private StrainKeyLookup strainKeyLookup;
 	private VocabKeyLookup vocabLookup;
-	private AlleleLookupByProjectId alleleLookpuByProjectId;
-	private AlleleLookupByMarker alleleLookupByMarker;
+	private LookupAllelesByProjectId lookupAllelesByProjectId;
+	private LookupAllelesByMarker lookupAllelesByMarker;
 
 	private Matcher regexMatcher;
 	private Pattern sequencePattern = Pattern.compile(".*tm(\\d{1,2}).*");
@@ -49,13 +52,15 @@ public class NorcommProcessor extends KnockoutAlleleProcessor {
 	 * @throws CacheException
 	 * @throws TranslationException
 	 */
-	public NorcommProcessor() throws MGIException {
+	public NorcommProcessor() 
+	throws MGIException 
+	{
 		cfg = new TargetedAlleleLoadCfg();
 
 		parentStrainLookupByParentKey = new ParentStrainLookupByParentKey();
-		alleleLookupByMarker = AlleleLookupByMarker.getInstance();
-		alleleLookpuByProjectId = AlleleLookupByProjectId.getInstance();
-		markerLookup = new MarkerLookupByMGIID();
+		lookupAllelesByMarker = LookupAllelesByMarker.getInstance();
+		lookupAllelesByProjectId = LookupAllelesByProjectId.getInstance();
+		lookupMarkerByMGIID = new LookupMarkerByMGIID();
 		vocabLookup = new VocabKeyLookup(Constants.ALLELE_VOCABULARY);
 		strainKeyLookup = new StrainKeyLookup();
 	}
@@ -65,17 +70,18 @@ public class NorcommProcessor extends KnockoutAlleleProcessor {
 	 * record and providing NorCOMM Specific constant values.
 	 */
 	public KnockoutAllele process(KnockoutAlleleInput inputData)
-			throws MGIException {
+	throws MGIException 
+	{
 		// Cast the input to a NorCOMM specific allele input type
 		NorcommAlleleInput in = (NorcommAlleleInput) inputData;
 
 		KnockoutAllele allele = new KnockoutAllele();
 
 		// Get the external dependencies referenced in this row
-		Marker marker = markerLookup.lookup(in.getGeneId());
+		Marker marker = lookupMarkerByMGIID.lookup(in.getGeneId());
 		Integer strainKey = strainKeyLookup
-		.lookup(parentStrainLookupByParentKey.lookup(cfg
-				.getParentalKey(in.getParentCellLine())));
+			.lookup(parentStrainLookupByParentKey.lookup(
+				cfg.getParentalKey(in.getParentCellLine())));
 
 		allele.setMarkerKey(marker.getKey());
 		allele.setProjectId(in.getProjectId());
@@ -94,12 +100,13 @@ public class NorcommProcessor extends KnockoutAlleleProcessor {
 		}
 		allele.setMutationTypes(mutationTypeKeys);
 
-		// get the NEXT allele symbol sequence number which is one higher than
-		// the highest sequence numbered targeted allele attached to this 
-		// marker BY THIS lab (identified by ILAR lab code)
+		// get the NEXT allele symbol sequence number which is one higher 
+		// than the highest sequence numbered targeted allele attached 
+		// to this marker BY THIS lab (identified by ILAR lab code)
 		int seq = 1;
-		HashSet existingAlleles = alleleLookupByMarker.lookup(marker
-				.getSymbol());
+		HashSet existingAlleles = lookupAllelesByMarker.lookup(marker
+			.getSymbol());
+
 		if (existingAlleles != null) {
 			// This lab has created alleles for this marker previously.
 			// Set the sequence number to one higher than the count of 
@@ -110,7 +117,7 @@ public class NorcommProcessor extends KnockoutAlleleProcessor {
 		// If there is already an allele created that has this IKMC project
 		// ID, associate that allele sequence number.  All alleles produced
 		// by the same project should have the same sequence number.
-		Map alleles = alleleLookpuByProjectId.lookup(in.getProjectId());
+		Map alleles = lookupAllelesByProjectId.lookup(in.getProjectId());
 		if (alleles != null && alleles.size() > 0) {
 			Boolean alleleFound = Boolean.FALSE;
 			Set entries = alleles.entrySet();
@@ -150,13 +157,13 @@ public class NorcommProcessor extends KnockoutAlleleProcessor {
 		allele.setSymbol(alleleSymbol);
 
 		// Set the allele reference number
-		String jNumber = cfg.getJNumber();
-		allele.setJNumber(jNumber);
+		allele.setJNumbers(cfg.getJNumbers());
 
 		String note = cfg.getNoteTemplateDeletionPromoterless();
 
+		String cassette = in.getCassette();
 		// Promotor driven clones all use the same "L1L2_GOHANU" vector
-		if (in.getCassette().equals("L1L2_GOHANU")) {
+		if (cassette.equals("L1L2_GOHANU")) {
 			// Promotor driven cassette
 			note = cfg.getNoteTemplateDeletionPromoter();
 		} else {
@@ -165,12 +172,10 @@ public class NorcommProcessor extends KnockoutAlleleProcessor {
 			// a number or letter that is the last character of the vector.
 			// "pNTARU" is included into the note template, insert just 
 			// the last letter of the vector
-			note = note.replaceAll("~~CASSETTE~~", 
-					in.getCassette()
-						.toString()
-						.substring(in
-							.getCassette()
-							.length()));			
+			note = note.replaceAll(
+				"~~CASSETTE~~", 
+				cassette.substring(cassette.length())
+				);			
 		}
 		
 		// Set the allele molecular note

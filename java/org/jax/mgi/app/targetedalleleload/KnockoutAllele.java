@@ -1,6 +1,7 @@
 package org.jax.mgi.app.targetedalleleload;
 
 import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Vector;
@@ -50,7 +51,7 @@ public class KnockoutAllele implements Comparable {
 	private Integer cellLineKey = null;
 
 	// From cfg file
-	private String jNumber = null;
+	private String[] jNumbers = null;
 	private Integer projectLogicalDb = null;
 	private Vector mutationTypes = new Vector();
 
@@ -166,12 +167,12 @@ public class KnockoutAllele implements Comparable {
 		this.projectId = projectId;
 	}
 
-	public String getJNumber() {
-		return jNumber;
+	public String[] getJNumbers() {
+		return jNumbers;
 	}
 
-	public void setJNumber(String jNumber) {
-		this.jNumber = jNumber;
+	public void setJNumbers(String[] jNumbers) {
+		this.jNumbers = jNumbers;
 	}
 
 	public Vector getMutationTypes() {
@@ -214,7 +215,7 @@ public class KnockoutAllele implements Comparable {
 	public String toString() {
 		return "Allele key: " + this.key + "\n" + "name: " + this.name + "\n"
 				+ "symbol: " + this.symbol + "\n" + "note: " + this.note + "\n"
-				+ "J Number: " + this.jNumber + "\n";
+				+ "J Numbers: " + Arrays.toString(this.jNumbers) + "\n";
 	}
 
 	// @Override
@@ -361,16 +362,35 @@ public class KnockoutAllele implements Comparable {
 
 		// Create the associations between the Allele and the reference
 		// Original and Molecular
-		for (int i = 0; i < Constants.REFERENCE_ASSOC.length; i++) {
-			MGI_Reference_AssocState raState = new MGI_Reference_AssocState();
-			raState.setRefsKey(jnumLookup.lookup(jNumber));
-			raState.setObjectKey(key);
-			raState.setMGITypeKey(new Integer(Constants.ALLELE_MGI_TYPE));
-			raState.setRefAssocTypeKey(new Integer(Constants.REFERENCE_ASSOC[i]));
 
-			MGI_Reference_AssocDAO raDAO = new MGI_Reference_AssocDAO(raState);
-			stream.insert(raDAO);
+		/*
+		 * Create Original and Molecular reference associations to the 
+		 * first J-Number in the list
+		 */
+		for (int i=0; i<jNumbers.length; i++) {
+			
+			String jNumber = jNumbers[i];
+
+			if (i==0) {
+				// Add Original reference for the first jNumber
+				createReference(stream, Constants.ORIGINAL_REFERENCE, jNumber);
+			}
+			
+			// Create Molecular references for all j numbers in the list
+			createReference(stream, Constants.MOLECULAR_REFERENCE, jNumber);
+			
 		}
+//		int[] REFERENCE_ASSOC = { 1011, 1012 };
+//		for (int i = 0; i < REFERENCE_ASSOC.length; i++) {
+//			MGI_Reference_AssocState raState = new MGI_Reference_AssocState();
+//			raState.setRefsKey(jnumLookup.lookup(jNumber));
+//			raState.setObjectKey(key);
+//			raState.setMGITypeKey(new Integer(Constants.ALLELE_MGI_TYPE));
+//			raState.setRefAssocTypeKey(new Integer(Constants.REFERENCE_ASSOC[i]));
+//
+//			MGI_Reference_AssocDAO raDAO = new MGI_Reference_AssocDAO(raState);
+//			stream.insert(raDAO);
+//		}
 
 		// Save the note to the stream
 		this.updateNote(stream, note);
@@ -388,12 +408,8 @@ public class KnockoutAllele implements Comparable {
 		alleleAccId.insert(stream);
 
 		// Create the Project (private) Accession object
-		AccessionId projectAccId = new AccessionId(projectId, // Create the
-																// private
-																// project ID
-																// for this
-																// allele
-				projectLogicalDb, // Logical DB for these types of project IDs
+		AccessionId projectAccId = new AccessionId(projectId,
+				projectLogicalDb, // Logical DB for these project IDs
 				key, // Allele object key
 				new Integer(Constants.ALLELE_MGI_TYPE), // MGI type
 				Boolean.TRUE, // Private?
@@ -402,6 +418,26 @@ public class KnockoutAllele implements Comparable {
 
 		projectAccId.insert(stream);
 
+	}
+
+	/**
+	 * @param stream
+	 * @param type type of reference
+	 * @param jNumber the reference identifier
+	 * @throws DBException
+	 * @throws CacheException
+	 * @throws ConfigException
+	 */
+	private void createReference(SQLStream stream, int type, String jNumber)
+			throws DBException, CacheException, ConfigException {
+		MGI_Reference_AssocState raState = new MGI_Reference_AssocState();
+		raState.setRefsKey(jnumLookup.lookup(jNumber));
+		raState.setObjectKey(key);
+		raState.setMGITypeKey(new Integer(Constants.ALLELE_MGI_TYPE));
+		raState.setRefAssocTypeKey(new Integer(type));
+
+		MGI_Reference_AssocDAO raDAO = new MGI_Reference_AssocDAO(raState);
+		stream.insert(raDAO);
 	}
 
 }
