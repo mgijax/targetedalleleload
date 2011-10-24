@@ -12,7 +12,7 @@ MAIL_LOADNAME="TargetedAllele Load (KOMP-CSD Mbp)"
 export MAIL_LOADNAME
 
 # Full path of the logs, reports, and archive directories
-FILEDIR=${BASEDIR}/csd_load_ucd
+FILEDIR=${BASEDIR}/csd_load_mbp
 LOGDIR=${FILEDIR}/logs
 RPTDIR=${FILEDIR}/reports
 ARCHIVEDIR=${FILEDIR}/archive

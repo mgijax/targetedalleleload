@@ -85,13 +85,13 @@ extends KnockoutAlleleProcessor
 		strainKeyLookup = new StrainKeyLookup();
 		lookupAlleleByKey = LookupAlleleByKey.getInstance();
 	}
-	
+
 	public SangerProcessor(TargetedAlleleLoadCfg cfg,
 		String PROMOTER_DRIVEN,
 		String PROMOTER_LESS,
 		LookupAllelesByProjectId lookupAllelesByProjectId,
 		LookupAllelesByMarker lookupAllelesByMarker,
-		LookupMarkerByMGIID markerLookup,
+		LookupMarkerByMGIID lookupMarkerByMGIID,
 		VocabKeyLookup vocabLookup,
 		ParentStrainLookupByParentKey parentStrainLookupByParentKey,
 		StrainKeyLookup strainKeyLookup,

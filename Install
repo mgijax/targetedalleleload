@@ -5,7 +5,7 @@
 #
 # 1) cp tal_common.config.default tal_common.config
 # 2) cp tal_regeneron.config.default tal_regeneron.config
-# 3) cp tal_csd_ucd.config.default tal_csd_ucd.config
+# 3) cp tal_csd_mbp.config.default tal_csd_mbp.config
 # 4) cp tal_csd_wtsi.config.default tal_csd_wtsi.config
 # 5) cp tal_eucomm_wtsi.config.default tal_eucomm_wtsi.config
 # 6) cp tal_eucomm_hgmu.config.default tal_eucomm_hgmu.config
@@ -51,7 +51,7 @@ cd `dirname $0`
 # establish the config file 
 REGENERON_CONFIG=tal_regeneron.config
 CSD_WTSI_CONFIG=tal_csd_wtsi.config
-CSD_UCD_CONFIG=tal_csd_ucd.config
+CSD_MBP_CONFIG=tal_csd_mbp.config
 EUCOMM_WTSI_CONFIG=tal_eucomm_wtsi.config
 EUCOMM_HMGU_CONFIG=tal_eucomm_hmgu.config
 NORCOMM_CMHD_CONFIG=tal_norcomm_cmhd.config
@@ -132,14 +132,14 @@ ${DLAINSTALL} ${DEV} ${DO_BUILD}
 
 
 #########################################################################
-# run DLAInstall for tal_csd_ucd
+# run DLAInstall for tal_csd_mbp
 #
-if [ -r ${CSD_UCD_CONFIG} ]
+if [ -r ${CSD_MBP_CONFIG} ]
 then
-    echo "Source ${CSD_UCD_CONFIG}"
-    . ${CSD_UCD_CONFIG}
+    echo "Source ${CSD_MBP_CONFIG}"
+    . ${CSD_MBP_CONFIG}
 else
-    echo "Cannot source configuration file: ${CSD_UCD_CONFIG}"
+    echo "Cannot source configuration file: ${CSD_MBP_CONFIG}"
     installFailed
 fi
 . ${COMMON_CONFIG}
