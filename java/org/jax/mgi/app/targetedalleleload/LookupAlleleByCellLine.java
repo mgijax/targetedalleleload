@@ -136,13 +136,14 @@ extends FullCachedLookup
 		    "alleleNoteModifiedBy=n._ModifiedBy_key, " +
 		    "alleleNoteCreatedBy=n._CreatedBy_key, " +
 		    "projectId=acc2.accId, " +
-		    "aacv._MutantCellLine_key, aacv.cellLine " +
+		    "aac._MutantCellLine_key, ac.cellLine " +
 		    "FROM ALL_Allele a, " +
-		    "MRK_Marker mrk, ALL_Allele_CellLine_View aacv, " +
-		    "MGI_Note n, MGI_NoteChunk nc, ACC_Accession acc, " +
-		    "ACC_Accession acc2 "  +
+		    "MRK_Marker mrk,  ALL_Allele_CellLine aac, " +
+		    "ALL_Cellline ac, MGI_Note n, MGI_NoteChunk nc, " +
+		    " ACC_Accession acc, ACC_Accession acc2 " +
 		    "WHERE a.symbol like '%<tm%" + provider + ">' " +
-		    "AND aacv._Allele_key = a._Allele_key " +
+		    "AND aac._Allele_key = a._Allele_key " +
+		    "AND aac._MutantCellLine_key = ac._cellline_key " +
 		    "and a._Marker_key = mrk._Marker_key " +
 		    "and acc.preferred=1 " +
 		    "and acc._Object_key = mrk._Marker_key " +
