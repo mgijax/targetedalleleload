@@ -1,7 +1,6 @@
 package org.jax.mgi.app.targetedalleleload;
 
 import java.sql.Timestamp;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Vector;

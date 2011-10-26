@@ -1,7 +1,6 @@
 package org.jax.mgi.app.targetedalleleload;
 
 import org.jax.mgi.dbs.SchemaConstants;
-import org.jax.mgi.dbs.mgd.MGITypeConstants;
 import org.jax.mgi.dbs.mgd.loads.Alo.MutantCellLine;
 import org.jax.mgi.shr.cache.CacheException;
 import org.jax.mgi.shr.cache.FullCachedLookup;
@@ -91,8 +90,7 @@ extends FullCachedLookup
 				"c._CreatedBy_key, c._ModifiedBy_key " +
 				"FROM ACC_Accession a, ALL_CellLine_View c, " +
 				"VOC_Term v, PRB_Strain s, ACC_LogicalDB ldb " +
-				"WHERE a._MGIType_key = " +
-				MGITypeConstants.CELLLINE + " " +
+				"WHERE a._MGIType_key = 28 " +
 				"AND a._LogicalDB_key = ldb._LogicalDB_key " +
 				"AND a._Object_key = c._CellLine_key " +
 				"AND c.isMutant = 1 " +

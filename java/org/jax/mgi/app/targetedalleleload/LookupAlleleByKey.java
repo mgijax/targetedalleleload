@@ -135,11 +135,10 @@ extends FullCachedLookup
 			"alleleNoteSeq=nc.sequenceNum, alleleNoteKey=nc._note_key, " +
 			"alleleNoteModifiedBy=n._ModifiedBy_key, " +
 			"alleleNoteCreatedBy=n._CreatedBy_key, " +
-			"jNumber=bc.jnumID, projectId=acc2.accId  " +
-			"FROM ALL_Allele a, " +
-			"MRK_Marker mrk, " +
+			"projectId=acc2.accId  " +
+			"FROM ALL_Allele a, MRK_Marker mrk, " +
 			"MGI_Note n, MGI_NoteChunk nc, ACC_Accession acc, " +
-			"ACC_Accession acc2 " + 
+			"ACC_Accession acc2 " +
 			"WHERE a.symbol LIKE '%<tm%" + provider	+ ">' " +
 			"AND a._Marker_key = mrk._Marker_key " +
 			"AND acc.preferred=1 " +

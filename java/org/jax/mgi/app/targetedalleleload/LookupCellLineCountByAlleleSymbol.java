@@ -80,15 +80,15 @@ public class LookupCellLineCountByAlleleSymbol extends FullCachedLookup {
 	 */
 	public String getFullInitQuery() 
 	{
-		return "SELECT a.symbol, COUNT(ac._mutantcellline_key) as cnt "
-				+ "FROM All_allele a, All_allele_cellline ac "
-				+ "WHERE a._allele_key *= ac._allele_key "
+		return "SELECT a.symbol, COUNT(ac._mutantcellline_key) as cnt " +
+				"FROM All_allele a, All_allele_cellline ac " +
+				"WHERE a._allele_key *= ac._allele_key " +
 				// This query cannot be pipeline specific because 
 				// alleles change between pipelines and creators, so we
 				// need the ability to lookup ALL allele cell line counts 
 				// + "AND a.symbol LIKE '%(" + pipeline + ")%' "
-				+ "GROUP BY a.symbol "
-				+ "ORDER BY COUNT(ac._mutantcellline_key) ";
+				"GROUP BY a.symbol " +
+				"ORDER BY COUNT(ac._mutantcellline_key)" ;
 	}
 
 	/**

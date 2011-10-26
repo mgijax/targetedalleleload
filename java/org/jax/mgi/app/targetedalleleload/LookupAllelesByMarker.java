@@ -19,7 +19,6 @@ import org.jax.mgi.shr.dbutils.RowDataInterpreter;
 import org.jax.mgi.shr.dbutils.RowReference;
 import org.jax.mgi.shr.dbutils.SQLDataManagerFactory;
 import org.jax.mgi.shr.dla.log.DLALogger;
-import org.jax.mgi.shr.dla.log.DLALoggingException;
 import org.jax.mgi.shr.exception.MGIException;
 
 /**
@@ -33,18 +32,12 @@ import org.jax.mgi.shr.exception.MGIException;
  * 
  */
 
-public class LookupAllelesByMarker extends FullCachedLookup {
+public class LookupAllelesByMarker 
+extends FullCachedLookup 
+{
 
 	private static LookupAllelesByMarker _instance;
 	private static DLALogger logger;
-
-	public static LookupAllelesByMarker getInstance() throws MGIException {
-		logger = DLALogger.getInstance();
-		if (_instance == null) {
-			_instance = new LookupAllelesByMarker();
-		}
-		return _instance;
-	}
 
 	// provide a static cache so that all instances share one cache
 	private static HashMap cache = new HashMap();
@@ -54,28 +47,34 @@ public class LookupAllelesByMarker extends FullCachedLookup {
 
 	private TargetedAlleleLoadCfg cfg = null;
 
+	public static LookupAllelesByMarker getInstance() 
+	throws MGIException 
+	{
+		logger = DLALogger.getInstance();
+		if (_instance == null) {
+			_instance = new LookupAllelesByMarker();
+		}
+		return _instance;
+	}
+
+
 	/**
 	 * constructor
 	 * 
-	 * @throws ConfigException
+	 * @throws MGIException
 	 *             thrown if there is an error accessing the configuration
-	 * @throws DBException
 	 *             thrown if there is an error accessing the database
-	 * @throws CacheException
 	 *             thrown if there is an error accessing the cache
+	 *             thrown if there is an error initializing the logger
 	 */
-	public LookupAllelesByMarker() throws ConfigException, DBException,
-			CacheException {
+	public LookupAllelesByMarker() 
+	throws MGIException 
+	{
 		super(SQLDataManagerFactory.getShared(SchemaConstants.MGD));
 
 		// since cache is static make sure you do not reinit
 		if (!hasBeenInitialized) {
-			try {
-				cfg = new TargetedAlleleLoadCfg();
-			} catch (DLALoggingException e) {
-				System.out
-						.println("KnockoutAlleleLookup DLALoggingException exception");
-			}
+			cfg = new TargetedAlleleLoadCfg();
 			initCache(cache);
 			hasBeenInitialized = true;
 		}
@@ -93,7 +92,9 @@ public class LookupAllelesByMarker extends FullCachedLookup {
 	 * @throws CacheException
 	 *             thrown if there is an error accessing the configuration
 	 */
-	public HashSet lookup(String symbol) throws DBException, CacheException {
+	public HashSet lookup(String symbol) 
+	throws DBException, CacheException 
+	{
 		return (HashSet) super.lookupNullsOk(symbol);
 	}
 
@@ -108,8 +109,9 @@ public class LookupAllelesByMarker extends FullCachedLookup {
 	 * @throws CacheException
 	 *             thrown if there is an error accessing the configuration
 	 */
-	public HashSet lookupExisting(String symbol) throws DBException,
-			CacheException, KeyNotFoundException {
+	public HashSet lookupExisting(String symbol) 
+	throws DBException, CacheException, KeyNotFoundException
+	{
 		return (HashSet) super.lookup(symbol);
 	}
 
@@ -118,20 +120,21 @@ public class LookupAllelesByMarker extends FullCachedLookup {
 	 * 
 	 * @return the initialization query
 	 */
-	public String getFullInitQuery() {
+	public String getFullInitQuery() 
+	{
 		String provider = null;
 		try {
 			provider = cfg.getProvider();
 		} catch (ConfigException e) {
-			logger.logdInfo("Config Exception retrieving JNUMBER", false);
+			logger.logdInfo("Config Exception retrieving PROVIDER", false);
 		}
 
-		return "SELECT av._allele_key 'alleleKey', av.markerSymbol 'markerSymbol' "
-				+ "FROM ALL_Allele_View av "
-				+ "WHERE av.symbol like '%<tm%"
-				+ provider
-				+ ">'"
-				+ "ORDER BY markerSymbol";
+		return "SELECT a._allele_key 'alleleKey', " +
+			"m.symbol 'markerSymbol' " +
+			"FROM ALL_Allele a, MRK_Marker m " +
+			"WHERE a.symbol like '%<tm%" + provider + ">' " +
+			"AND a._Marker_key = m._Marker_key " +
+			"ORDER BY m.symbol" ;
 	}
 
 	/**
@@ -148,29 +151,38 @@ public class LookupAllelesByMarker extends FullCachedLookup {
 	 * @throws CacheException
 	 *             thrown if there is an error with the cache
 	 */
-	protected void addToCache(String symbol, Set alleles) throws DBException,
-			CacheException {
+	protected void addToCache(String symbol, Set alleles) 
+	throws DBException, CacheException 
+	{
 		// Replace the current value if it exists
 		super.cache.put(symbol.toLowerCase(), alleles);
 	}
 
 	/**
-	 * return the RowDataInterpreter for creating KeyValue objects from the
-	 * query results
+	 * return the RowDataInterpreter for creating KeyValue objects from 
+	 * the query results
 	 * 
 	 * @return the RowDataInterpreter for this query
 	 */
-	public RowDataInterpreter getRowDataInterpreter() {
-		class Interpreter implements MultiRowInterpreter {
-			public Object interpret(RowReference ref) throws DBException {
+	public RowDataInterpreter getRowDataInterpreter() 
+	{
+		class Interpreter 
+		implements MultiRowInterpreter 
+		{
+			public Object interpret(RowReference ref) 
+			throws DBException 
+			{
 				return new RowData(ref);
 			}
 
-			public Object interpretKey(RowReference row) throws DBException {
+			public Object interpretKey(RowReference row) 
+			throws DBException 
+			{
 				return row.getString("markerSymbol");
 			}
 
-			public Object interpretRows(Vector v) {
+			public Object interpretRows(Vector v) 
+			{
 				RowData rd = (RowData) v.get(0);
 				String markerSymbol = rd.markerSymbol;
 				Set alleles = new HashSet();
@@ -193,7 +205,9 @@ public class LookupAllelesByMarker extends FullCachedLookup {
 		protected String markerSymbol;
 		protected Integer alleleKey;
 
-		public RowData(RowReference row) throws DBException {
+		public RowData(RowReference row) 
+		throws DBException 
+		{
 			markerSymbol = row.getString("markerSymbol");
 			alleleKey = row.getInt("alleleKey");
 		}

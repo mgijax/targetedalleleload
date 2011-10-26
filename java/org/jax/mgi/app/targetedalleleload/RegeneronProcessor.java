@@ -12,7 +12,6 @@ import org.jax.mgi.dbs.mgd.lookup.StrainKeyLookup;
 import org.jax.mgi.dbs.mgd.lookup.TranslationException;
 import org.jax.mgi.dbs.mgd.lookup.VocabKeyLookup;
 import org.jax.mgi.shr.cache.CacheException;
-import org.jax.mgi.shr.cache.KeyNotFoundException;
 import org.jax.mgi.shr.config.ConfigException;
 import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
 import org.jax.mgi.shr.dbutils.DBException;
