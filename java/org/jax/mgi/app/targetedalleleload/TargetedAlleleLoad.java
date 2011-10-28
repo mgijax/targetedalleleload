@@ -436,6 +436,7 @@ public class TargetedAlleleLoad extends DLALoader {
 			System.out.println("\n-- Cellline --------------------\n");
 			System.out.println("EXAMINING CELLLINE (" + numberChecked + " of " + numberOfCelllinesToCheck+ "): " + esCell);
 			numberChecked++;
+			if (numberChecked > 1000) break;
 
 			// Update mode or create mode
 			if (cfg.getUpdateOnlyMode()) {
