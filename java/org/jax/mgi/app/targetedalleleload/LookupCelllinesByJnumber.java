@@ -95,21 +95,7 @@ public class LookupCelllinesByJnumber
 		public Object interpret(RowReference row)
 		throws DBException
 		{
-            RowData rd = new RowData(row);
-            return rd;
-		}
-	}
-
-	/**
-	 * Simple data object representing a row of data from the query
-	 */
-	class RowData {
-		protected String cellline;
-
-		public RowData(RowReference row) 
-		throws DBException 
-		{
-			cellline = row.getString("cellline");
+            return row.getString("cellline");
 		}
 	}
 }
