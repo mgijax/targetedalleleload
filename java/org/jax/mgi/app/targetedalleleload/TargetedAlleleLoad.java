@@ -265,7 +265,7 @@ public class TargetedAlleleLoad extends DLALoader {
 		
 		while (lookupCelllinesByJnumber.hasNext()) {
 			String cellline = lookupCelllinesByJnumber.next();
-			databaseCellLines.add(cellline);
+			databaseCellLines.add(cellline.toLowerCase());
 		}
 	}
 
