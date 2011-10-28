@@ -121,7 +121,7 @@ extends FullCachedLookup
 		String provider = null;
 		try {
 			TargetedAlleleLoadCfg cfg = new TargetedAlleleLoadCfg();
-			provider = cfg.getProvider();
+			provider = cfg.getProviderLabcode();
 		} catch (MGIException e) {
 			logger.logdInfo("Config Exception retrieving JNUMBER", false);
 			return null;

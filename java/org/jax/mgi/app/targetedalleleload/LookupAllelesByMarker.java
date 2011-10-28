@@ -124,7 +124,7 @@ extends FullCachedLookup
 	{
 		String provider = null;
 		try {
-			provider = cfg.getProvider();
+			provider = cfg.getProviderLabcode();
 		} catch (ConfigException e) {
 			logger.logdInfo("Config Exception retrieving PROVIDER", false);
 		}

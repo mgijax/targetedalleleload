@@ -172,7 +172,7 @@ public class TargetedAlleleLoadCfg extends InputDataCfg {
 	 * @throws ConfigException
 	 *             if the value is not found
 	 */
-	public String getProvider() throws ConfigException {
+	public String getProviderLabcode() throws ConfigException {
 		return getConfigString("PROVIDER");
 	}
 

@@ -12,7 +12,7 @@ abstract class KnockoutAlleleFactory
 		// Get the configuration object
 		TargetedAlleleLoadCfg cfg = new TargetedAlleleLoadCfg();
 
-		String provider = cfg.getProvider();
+		String provider = cfg.getProviderLabcode();
 
 		// The providers require different factories
 		if (provider.equals("Wtsi") || 

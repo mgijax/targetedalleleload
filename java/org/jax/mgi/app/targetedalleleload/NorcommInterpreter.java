@@ -134,11 +134,11 @@ public class NorcommInterpreter extends KnockoutAlleleInterpreter {
 			if (regexMatcher.find()) {
 				center = regexMatcher.group(1);
 				try {
-					if (center.equals("T") && !cfg.getProvider().equals("Cmhd")) {
+					if (center.equals("T") && !cfg.getProviderLabcode().equals("Cmhd")) {
 						// This input record is not valid for this provider 
 						return false;
 					}
-					if (center.equals("W") && !cfg.getProvider().equals("Mfgc")) {
+					if (center.equals("W") && !cfg.getProviderLabcode().equals("Mfgc")) {
 						// This input record is not valid for this provider 
 						return false;
 					}

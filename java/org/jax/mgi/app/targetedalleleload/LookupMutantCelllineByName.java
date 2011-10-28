@@ -1,10 +1,8 @@
 package org.jax.mgi.app.targetedalleleload;
 
 import org.jax.mgi.dbs.SchemaConstants;
-import org.jax.mgi.dbs.mgd.loads.Alo.MutantCellLine;
 import org.jax.mgi.shr.cache.CacheException;
 import org.jax.mgi.shr.cache.FullCachedLookup;
-import org.jax.mgi.shr.cache.KeyNotFoundException;
 import org.jax.mgi.shr.cache.KeyValue;
 import org.jax.mgi.shr.config.ConfigException;
 import org.jax.mgi.shr.dbutils.DBException;
@@ -40,7 +38,7 @@ extends FullCachedLookup
 	 * @throws ConfigException
 	 *             thrown if there is an error accessing the configuration file
 	 */
-	public LookupMutantCelllineByName(Integer cellLineLogicalDB)
+	public LookupMutantCelllineByName()
 	throws CacheException, DBException, ConfigException 
 	{
 		super(SQLDataManagerFactory.getShared(SchemaConstants.MGD));
@@ -53,17 +51,10 @@ extends FullCachedLookup
 	 * @param cellLineID
 	 *            mclID
 	 * @return MutantCellLine object for cellLineID
-	 * @throws CacheException
+	 * @throws MGIException
 	 *             thrown if there is an error accessing the cache
-	 * @throws ConfigException
 	 *             thrown if there is an error accessing the cfg
-	 * @throws CacheException
-	 *             thrown if there is an error accessing the cache
-	 * @throws DBException
 	 *             thrown if there is an error accessing the database
-	 * @throws ConfigException
-	 *             thrown if there is an error accessing the cfg file
-	 * @throws KeyNotFoundException
 	 *             thrown if the key is not found
 	 */
 	public MutantCellLine lookup(String cellLineID) 

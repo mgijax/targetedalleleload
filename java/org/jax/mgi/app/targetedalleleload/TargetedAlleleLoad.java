@@ -21,7 +21,6 @@ import org.jax.mgi.dbs.mgd.AccessionLib;
 import org.jax.mgi.dbs.mgd.dao.ALL_Allele_CellLineDAO;
 import org.jax.mgi.dbs.mgd.dao.ALL_Allele_CellLineState;
 import org.jax.mgi.dbs.mgd.dao.ALL_CellLineDAO;
-import org.jax.mgi.dbs.mgd.loads.Alo.MutantCellLine;
 import org.jax.mgi.dbs.mgd.lookup.CellLineNameLookupByKey;
 import org.jax.mgi.dbs.mgd.lookup.ParentStrainLookupByParentKey;
 import org.jax.mgi.dbs.mgd.lookup.StrainKeyLookup;
@@ -137,7 +136,7 @@ public class TargetedAlleleLoad extends DLALoader {
 	private Timestamp currentTime;
 
 	// Cached DB Lookups
-	private LookupMutantCelllineByName koMutantCellLineLookup;
+	private LookupMutantCelllineByName lookupMutantCelllineByName;
 	private LookupAlleleByKey lookupAlleleByKey;
 	private LookupAllelesByProjectId lookupAllelesByProjectId;
 	private LookupAllelesByMarker lookupAllelesByMarker;
@@ -171,8 +170,7 @@ public class TargetedAlleleLoad extends DLALoader {
 		cfg = new TargetedAlleleLoadCfg();
 		sqlDBMgr = SQLDataManagerFactory.getShared(SchemaConstants.MGD);
 
-		Integer escLogicalDB = cfg.getEsCellLogicalDb();
-		koMutantCellLineLookup = new LookupMutantCelllineByName(escLogicalDB);
+		lookupMutantCelllineByName = new LookupMutantCelllineByName();
 
 		// These lookups implement a Singleton pattern because
 		// they're shared across objects so updates in one object
@@ -180,14 +178,16 @@ public class TargetedAlleleLoad extends DLALoader {
 		lookupAlleleByKey = LookupAlleleByKey.getInstance();
 		lookupAllelesByProjectId = LookupAllelesByProjectId.getInstance();
 		lookupAllelesByMarker = LookupAllelesByMarker.getInstance();
-		lookupCellLineCountByAlleleSymbol = LookupCellLineCountByAlleleSymbol.getInstance();
-		derivationLookup = LookupDerivationByVectorCreatorParentType
-				.getInstance();
+		lookupCellLineCountByAlleleSymbol = 
+			LookupCellLineCountByAlleleSymbol.getInstance();
+		derivationLookup = 
+			LookupDerivationByVectorCreatorParentType.getInstance();
 
 		lookupAlleleByCellLine = new LookupAlleleByCellLine();
 		lookupAlleleByCellLine.initCache();
 
-		parentStrainLookupByParentKey = new ParentStrainLookupByParentKey();
+		parentStrainLookupByParentKey = 
+			new ParentStrainLookupByParentKey();
 		strainKeyLookup = new StrainKeyLookup();
 		lookupVectorKeyByTerm = new LookupVectorKeyByTerm();
 		lookupMarkerByMGIID = new LookupMarkerByMGIID();
@@ -198,11 +198,8 @@ public class TargetedAlleleLoad extends DLALoader {
 
 		alleleFactory = KnockoutAlleleFactory.getFactory();
 
-		// This contains the combination of pipeline and provider
-		// that this load is currently loading.
-		String loadProvider = "(" + cfg.getPipeline() + ")" + cfg.getProvider();
 
-		filterProjectIds(databaseProjectIds, loadProvider);
+		filterProjectIds(databaseProjectIds);
 		filterCellLines(databaseCellLines);
 
 	}
@@ -220,8 +217,12 @@ public class TargetedAlleleLoad extends DLALoader {
 	 * @throws CacheException
 	 *             if the lookup fails
 	 */
-	private void filterProjectIds(Set databaseProjectIds, String loadProvider)
-	throws DBException, CacheException {
+	private void filterProjectIds(Set databaseProjectIds)
+	throws MGIException {
+
+		String loadProvider = 
+			"(" + cfg.getPipeline() + ")" + cfg.getProviderLabcode();
+
 		Iterator it = lookupAllelesByProjectId.getKeySet().iterator();
 		while (it.hasNext()) {
 			String label = (String) it.next();
@@ -329,6 +330,9 @@ public class TargetedAlleleLoad extends DLALoader {
 		// Keep track of which alleles we've updated the notes for
 		// so we only update it once
 		Set alreadyProcessed = new HashSet();
+		
+		int numberOfCelllinesToCheck = databaseCellLines.size();
+		int numberChecked = 0;
 
 		// For each input record
 		while (iter.hasNext()) {
@@ -426,11 +430,12 @@ public class TargetedAlleleLoad extends DLALoader {
 
 			// Does the Mutant Cell Line record exist in the
 			// cache (database or recently created)?
-			MutantCellLine esCell = koMutantCellLineLookup.lookup(in
+			MutantCellLine esCell = lookupMutantCelllineByName.lookup(in
 					.getMutantCellLine());
 
 			System.out.println("\n-- Cellline --------------------\n");
-			System.out.println("EXAMINING CELLLINE: " + esCell);
+			System.out.println("EXAMINING CELLLINE (" + numberChecked + " of " + numberOfCelllinesToCheck+ "): " + esCell);
+			numberChecked++;
 
 			// Update mode or create mode
 			if (cfg.getUpdateOnlyMode()) {
@@ -1267,7 +1272,7 @@ public class TargetedAlleleLoad extends DLALoader {
 		// cell line if it is not an orphan MCL
 		if (!orphan) {
 			// Add the recently created cell line to the cache
-			koMutantCellLineLookup.addToCache(in.getMutantCellLine(), mcl);
+			lookupMutantCelllineByName.addToCache(in.getMutantCellLine(), mcl);
 
 			// Create the MutantCellLine Accession object
 			// note the missing AccID parameter which indicates this is
