@@ -79,6 +79,7 @@ public class TargetedAlleleLoad extends DLALoader {
 	private static final String NUM_CELLLINES_CHANGED_CREATOR = "Number of cell lines that changed creator";
 	private static final String NUM_CELLLINES_CHANGED_ALLELE = "Number of cell lines that changed allele associations";
 	private static final String NUM_ORPHANED_ALLELES = "Number of orphaned alleles created";
+	private static final String NUM_CELLLINES_PASSED_QC = "Number of cell lines that passed QC check";
 
 	// String constants for Log messages
 	private static final String LOG_ALLELE_NOT_FOUND = "Cell line ~~INPUT_MCL~~ found in database, but cannot find associated allele\n";
@@ -202,7 +203,7 @@ public class TargetedAlleleLoad extends DLALoader {
 		String loadProvider = "(" + cfg.getPipeline() + ")" + cfg.getProvider();
 
 		filterProjectIds(databaseProjectIds, loadProvider);
-		filterCellLines(databaseCellLines, loadProvider);
+		filterCellLines(databaseCellLines);
 
 	}
 
@@ -220,7 +221,7 @@ public class TargetedAlleleLoad extends DLALoader {
 	 *             if the lookup fails
 	 */
 	private void filterProjectIds(Set databaseProjectIds, String loadProvider)
-			throws DBException, CacheException {
+	throws DBException, CacheException {
 		Iterator it = lookupAllelesByProjectId.getKeySet().iterator();
 		while (it.hasNext()) {
 			String label = (String) it.next();
@@ -251,27 +252,27 @@ public class TargetedAlleleLoad extends DLALoader {
 	 * @throws CacheException
 	 *             if the lookup fails
 	 */
-	private void filterCellLines(Set databaseCellLines, String loadProvider)
-			throws DBException, CacheException {
+	private void filterCellLines(Set databaseCellLines)
+	throws MGIException 
+	{
 		// Add only cell lines appropriate for this pipeline and provider
 		// to the QC pool (cell lines for other pipeline don't need QC
 		// during this run)
-		Iterator it = lookupAlleleByCellLine.getKeySet().iterator();
-		while (it.hasNext()) {
-			String label = (String) it.next();
-			KnockoutAllele a = lookupAlleleByCellLine.lookup(label);
-			if (a.getSymbol().indexOf(loadProvider) >= 0) {
-				databaseCellLines.add(label);
-			}
+		String [] jnumbers = cfg.getJNumbers();
+		LookupCelllinesByJnumber lookupCelllinesByJnumber = 
+			new LookupCelllinesByJnumber(sqlDBMgr, jnumbers[0]);
+		
+		while (lookupCelllinesByJnumber.hasNext()) {
+			String cellline = lookupCelllinesByJnumber.next();
+			databaseCellLines.add(cellline);
 		}
-
 	}
 
 	/**
 	 * initialize the internal structures used by this class
 	 * 
 	 * @assumes nothing
-	 * @effects internal structures including database caching is initialized
+	 * @effects internal structures are initialized
 	 */
 	protected void initialize() throws MGIException {
 		sqlDBMgr.setLogger(logger);
@@ -596,6 +597,8 @@ public class TargetedAlleleLoad extends DLALoader {
 					// END QC CHECKS
 					// ********************************************************
 					// done with QC checks. skip on to the next record
+					qcStats.record("SUMMARY", NUM_CELLLINES_PASSED_QC);
+
 					continue;
 				}
 			} else { // end of if (cfg.getUpdateOnlyMode())
