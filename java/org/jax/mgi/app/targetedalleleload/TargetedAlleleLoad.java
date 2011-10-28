@@ -167,18 +167,28 @@ public class TargetedAlleleLoad extends DLALoader {
 	 */
 	public TargetedAlleleLoad() throws MGIException {
 
-		sqlDBMgr.setLogger(logger);
+		// Instance the configuration object
+		sqlDBMgr = SQLDataManagerFactory.getShared(SchemaConstants.MGD);
 
+	}
+
+	/**
+	 * initialize the internal structures used by this class
+	 * 
+	 * @assumes nothing
+	 * @effects internal structures are initialized
+	 */
+	protected void initialize() throws MGIException {
+
+		logger.logdInfo("Initializing Targeted allele load\n", true);
+
+		cfg = new TargetedAlleleLoadCfg();
+
+		sqlDBMgr.setLogger(logger);
 		logger.logdDebug("TargetedAlleleLoader sqlDBMgr.server "
 				+ sqlDBMgr.getServer());
 		logger.logdDebug("TargetedAlleleLoader sqlDBMgr.database "
 				+ sqlDBMgr.getDatabase());
-
-		logger.logdInfo("Constructing Targeted allele load\n", true);
-
-		// Instance the configuration object
-		cfg = new TargetedAlleleLoadCfg();
-		sqlDBMgr = SQLDataManagerFactory.getShared(SchemaConstants.MGD);
 
 		lookupMutantCelllineByName = new LookupMutantCelllineByName();
 
@@ -208,14 +218,26 @@ public class TargetedAlleleLoad extends DLALoader {
 
 		alleleFactory = KnockoutAlleleFactory.getFactory();
 
-
 		filterProjectIds(databaseProjectIds);
 		filterCellLines(databaseCellLines);
 
-		logger.logdInfo("Finished constructing targeted allele load\n", 
-				true);
+		logger.logInfo("Reading input files");
+		logger.logpInfo("Processing " + cfg.getPipeline(), false);
 
+		InputDataFile inputFile = new InputDataFile(cfg);
+
+		// Get an appropriate Interpreter for the file
+		interp = alleleFactory.getInterpreter();
+
+		// Get an Iterator for going through the input file
+		iter = inputFile.getIterator(interp);
+
+		// Get an appropriate Processor for the records in the file
+		processor = alleleFactory.getProcessor();
+
+		logger.logdInfo("Finished initializing Targeted allele load\n", true);
 	}
+
 
 	/**
 	 * Filter out inappropriate project IDs based on pipeline and provider.
@@ -291,33 +313,6 @@ public class TargetedAlleleLoad extends DLALoader {
 
 		logger.logdInfo("Finished building celllines filter\n", true);
 	
-	}
-
-	/**
-	 * initialize the internal structures used by this class
-	 * 
-	 * @assumes nothing
-	 * @effects internal structures are initialized
-	 */
-	protected void initialize() throws MGIException {
-
-		logger.logdInfo("Initializing Targeted allele load\n", true);
-
-		logger.logInfo("Reading input files");
-		logger.logpInfo("Processing " + cfg.getPipeline(), false);
-
-		InputDataFile inputFile = new InputDataFile(cfg);
-
-		// Get an appropriate Interpreter for the file
-		interp = alleleFactory.getInterpreter();
-
-		// Get an Iterator for going through the input file
-		iter = inputFile.getIterator(interp);
-
-		// Get an appropriate Processor for the records in the file
-		processor = alleleFactory.getProcessor();
-
-		logger.logdInfo("Finished initializing Targeted allele load\n", true);
 	}
 
 	/**
