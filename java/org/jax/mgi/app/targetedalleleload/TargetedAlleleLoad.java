@@ -429,6 +429,9 @@ public class TargetedAlleleLoad extends DLALoader {
 			MutantCellLine esCell = koMutantCellLineLookup.lookup(in
 					.getMutantCellLine());
 
+			System.out.println("\n-- Cellline --------------------\n");
+			System.out.println("EXAMINING CELLLINE: " + esCell);
+
 			// Update mode or create mode
 			if (cfg.getUpdateOnlyMode()) {
 				if (esCell != null) {
