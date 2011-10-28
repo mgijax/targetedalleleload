@@ -167,6 +167,13 @@ public class TargetedAlleleLoad extends DLALoader {
 	 */
 	public TargetedAlleleLoad() throws MGIException {
 
+		sqlDBMgr.setLogger(logger);
+
+		logger.logdDebug("TargetedAlleleLoader sqlDBMgr.server "
+				+ sqlDBMgr.getServer());
+		logger.logdDebug("TargetedAlleleLoader sqlDBMgr.database "
+				+ sqlDBMgr.getDatabase());
+
 		logger.logdInfo("Constructing Targeted allele load\n", true);
 
 		// Instance the configuration object
@@ -295,12 +302,6 @@ public class TargetedAlleleLoad extends DLALoader {
 	protected void initialize() throws MGIException {
 
 		logger.logdInfo("Initializing Targeted allele load\n", true);
-
-		sqlDBMgr.setLogger(logger);
-		logger.logdDebug("TargetedAlleleLoader sqlDBMgr.server "
-				+ sqlDBMgr.getServer());
-		logger.logdDebug("TargetedAlleleLoader sqlDBMgr.database "
-				+ sqlDBMgr.getDatabase());
 
 		logger.logInfo("Reading input files");
 		logger.logpInfo("Processing " + cfg.getPipeline(), false);
