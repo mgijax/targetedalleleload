@@ -166,6 +166,9 @@ public class TargetedAlleleLoad extends DLALoader {
 	 *             thrown if the super class cannot be instantiated
 	 */
 	public TargetedAlleleLoad() throws MGIException {
+
+		logger.logdInfo("Constructing Targeted allele load\n", true);
+
 		// Instance the configuration object
 		cfg = new TargetedAlleleLoadCfg();
 		sqlDBMgr = SQLDataManagerFactory.getShared(SchemaConstants.MGD);
@@ -202,6 +205,9 @@ public class TargetedAlleleLoad extends DLALoader {
 		filterProjectIds(databaseProjectIds);
 		filterCellLines(databaseCellLines);
 
+		logger.logdInfo("Finished constructing targeted allele load\n", 
+				true);
+
 	}
 
 	/**
@@ -219,6 +225,8 @@ public class TargetedAlleleLoad extends DLALoader {
 	 */
 	private void filterProjectIds(Set databaseProjectIds)
 	throws MGIException {
+
+		logger.logdInfo("Building project ID filter\n", true);
 
 		String loadProvider = 
 			"(" + cfg.getPipeline() + ")" + cfg.getProviderLabcode();
@@ -238,6 +246,9 @@ public class TargetedAlleleLoad extends DLALoader {
 				databaseProjectIds.add(label);
 			}
 		}
+
+		logger.logdInfo("Finished building project ID filter\n", true);
+
 	}
 
 	/**
@@ -256,6 +267,9 @@ public class TargetedAlleleLoad extends DLALoader {
 	private void filterCellLines(Set databaseCellLines)
 	throws MGIException 
 	{
+
+		logger.logdInfo("Building celllines filter\n", true);
+
 		// Add only cell lines appropriate for this pipeline and provider
 		// to the QC pool (cell lines for other pipeline don't need QC
 		// during this run)
@@ -267,6 +281,9 @@ public class TargetedAlleleLoad extends DLALoader {
 			String cellline = lookupCelllinesByJnumber.next();
 			databaseCellLines.add(cellline.toLowerCase());
 		}
+
+		logger.logdInfo("Finished building celllines filter\n", true);
+	
 	}
 
 	/**
@@ -276,6 +293,9 @@ public class TargetedAlleleLoad extends DLALoader {
 	 * @effects internal structures are initialized
 	 */
 	protected void initialize() throws MGIException {
+
+		logger.logdInfo("Initializing Targeted allele load\n", true);
+
 		sqlDBMgr.setLogger(logger);
 		logger.logdDebug("TargetedAlleleLoader sqlDBMgr.server "
 				+ sqlDBMgr.getServer());
@@ -296,6 +316,7 @@ public class TargetedAlleleLoad extends DLALoader {
 		// Get an appropriate Processor for the records in the file
 		processor = alleleFactory.getProcessor();
 
+		logger.logdInfo("Finished initializing Targeted allele load\n", true);
 	}
 
 	/**
@@ -308,10 +329,16 @@ public class TargetedAlleleLoad extends DLALoader {
 	 * @throws nothing
 	 */
 	protected void preprocess() throws MGIException {
+
+		logger.logdInfo("Preprocessing Targeted allele load\n", true);
+
 		// Initialize the statistics for alleles and cell lines created
 		// by the load so far
 		qcStats.record("SUMMARY", NUM_ALLELES_CREATED, 0);
 		qcStats.record("SUMMARY", NUM_CELLLINES_CREATED, 0);
+
+		logger.logdInfo("Finished preprocessing Targeted allele load\n", true);
+
 	}
 
 	/**
@@ -326,6 +353,8 @@ public class TargetedAlleleLoad extends DLALoader {
 	 *             writing output data
 	 */
 	protected void run() throws MGIException {
+
+		logger.logdInfo("Running Targeted allele load\n", true);
 
 		// Keep track of which alleles we've updated the notes for
 		// so we only update it once
@@ -433,10 +462,12 @@ public class TargetedAlleleLoad extends DLALoader {
 			MutantCellLine esCell = lookupMutantCelllineByName.lookup(in
 					.getMutantCellLine());
 
-			System.out.println("\n-- Cellline --------------------\n");
-			System.out.println("EXAMINING CELLLINE (" + numberChecked + " of " + numberOfCelllinesToCheck+ "): " + esCell);
+			if (numberChecked % 1000 == 0) {
+				String m = "Processed " + numberChecked + " " +
+					"celllines (of " + numberOfCelllinesToCheck + ")\n";
+				logger.logdInfo(m, true);
+			}
 			numberChecked++;
-			if (numberChecked > 1000) break;
 
 			// Update mode or create mode
 			if (cfg.getUpdateOnlyMode()) {
@@ -685,6 +716,9 @@ public class TargetedAlleleLoad extends DLALoader {
 				}
 			} // end if (cfg.getUpdateOnlyMode())
 		} // end while (iter.hasNext())
+
+		logger.logdInfo("Finished running Targeted allele load\n", true);
+
 	} // end protected void run()
 
 	// Logging helper functions
@@ -1362,6 +1396,9 @@ public class TargetedAlleleLoad extends DLALoader {
 	 */
 	protected void postprocess() throws MGIException {
 
+		logger.logdInfo("Postprocessing Targeted allele load\n", true);
+
+
 		// After processing ALL the input records, there is now enough
 		// data to determine if the allele level attributes can be changed.
 		if (alleleProjects.size() > 0) {
@@ -1604,6 +1641,10 @@ public class TargetedAlleleLoad extends DLALoader {
 		// ACC_AccessionMax table needs to be updated with the new maximum
 		// value.
 		AccessionLib.commitAccessionMax();
+
+
+		logger.logdInfo("Finished postprocessing Targeted allele load\n", true);
+
 
 		logger.logInfo("Process Finishing");
 		return;
