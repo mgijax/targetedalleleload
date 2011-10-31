@@ -134,4 +134,4 @@ export PROJECT_LOGICAL_DB
 # The derivation for these types of alleles is determined by the unique
 # combination of Creator, Vector, and Parental Strain.  
 #
-DERIVATION_CREATOR_KEY='5372202'
+DERIVATION_CREATOR_KEY='7622839'
