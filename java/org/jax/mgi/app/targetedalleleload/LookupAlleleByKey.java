@@ -135,7 +135,7 @@ extends FullCachedLookup
 			"alleleNoteSeq=nc.sequenceNum, alleleNoteKey=nc._note_key, " +
 			"alleleNoteModifiedBy=n._ModifiedBy_key, " +
 			"alleleNoteCreatedBy=n._CreatedBy_key, " +
-			"projectId=acc2.accId  " +
+			"projectId=acc2.accId, alleleStatus=a._Allele_Status_key " +
 			"FROM ALL_Allele a, MRK_Marker mrk, " +
 			"MGI_Note n, MGI_NoteChunk nc, ACC_Accession acc, " +
 			"ACC_Accession acc2 " +
@@ -207,6 +207,8 @@ extends FullCachedLookup
 				koAllele.setName(rd.alleleName);
 				koAllele.setSymbol(rd.alleleSymbol);
 				koAllele.setKey(rd.alleleKey);
+				koAllele.setTypeKey(rd.alleleType);
+				koAllele.setStatus(rd.alleleStatus);
 				koAllele.setProjectId(rd.projectId);
 				koAllele.setNote(rd.alleleNote);
 				koAllele.setNoteKey(rd.alleleNoteKey);
@@ -260,6 +262,7 @@ extends FullCachedLookup
 		protected Integer alleleKey;
 		protected String projectId;
 		protected Integer alleleType;
+		protected Integer alleleStatus;
 		protected String alleleName;
 		protected String alleleSymbol;
 		protected String alleleNote;
@@ -273,6 +276,7 @@ extends FullCachedLookup
 			return "alleleKey:" + alleleKey + 
 				"\nprojectId:" + projectId + 
 				"\nalleleType:" + alleleType + 
+				"\nalleleStatus:" + alleleStatus + 
 				"\ngenemgi:" + geneMgiid + 
 				"\nalleleName:" + alleleName + 
 				"\nalleleSymbol:" + alleleSymbol + 
@@ -288,6 +292,7 @@ extends FullCachedLookup
 			alleleKey = row.getInt("alleleKey");
 			projectId = row.getString("projectId");
 			alleleType = row.getInt("alleleType");
+			alleleStatus = row.getInt("alleleStatus");
 			alleleName = row.getString("alleleName");
 			alleleSymbol = row.getString("alleleSymbol");
 			alleleNote = row.getString("alleleNote");

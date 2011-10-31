@@ -55,7 +55,7 @@ public class KnockoutAllele implements Comparable {
 	private Vector mutationTypes = new Vector();
 
 	private Integer modeKey = new Integer(Constants.ALLELE_MODE);
-	private Integer typeKey = new Integer(Constants.ALLELE_TYPE);
+	private Integer typeKey = null;
 	private Integer statusKey = new Integer(Constants.ALLELE_STATUS_APPROVED);
 	private Integer transmissionKey = new Integer(Constants.ALLELE_TRANSMISSION_CELLLINE);
 	private Boolean isWildType = new Boolean(false);

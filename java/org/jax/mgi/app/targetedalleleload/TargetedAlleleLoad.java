@@ -592,8 +592,7 @@ public class TargetedAlleleLoad extends DLALoader {
 						} else {
 	
 							// Compress the note fields to discount any extra spaces
-							// that
-							// might have snuck in
+							// that might have snuck in
 							String existingNote = existing.getNote()
 									.replaceAll("\\n", "").replaceAll(" ", "");
 							String constructedNote = constructed.getNote()
@@ -1144,6 +1143,8 @@ public class TargetedAlleleLoad extends DLALoader {
 			// we just created a "placeholder" MCL to keep the allele
 			// associated to the correct derivation even though the last
 			// "real" MCL migrated elsewhere. increment the MCL counter
+			// There will only ever be either zero or one orphaned MCL
+			// associated to an allele
 			lookupCellLineCountByAlleleSymbol.increment(oldAllele.getSymbol());
 		}
 

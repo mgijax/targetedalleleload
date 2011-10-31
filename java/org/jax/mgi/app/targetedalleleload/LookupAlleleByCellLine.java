@@ -126,6 +126,7 @@ extends LazyCachedLookup
 				koAllele.setSymbol(rd.alleleSymbol);
 				koAllele.setKey(rd.alleleKey);
 				koAllele.setTypeKey(rd.alleleType);
+				koAllele.setStatus(rd.alleleStatus);
 				koAllele.setTransmissionKey(rd.alleleTrans);
 				koAllele.setProjectId(rd.projectId);
 				koAllele.setNote(rd.alleleNote);
@@ -176,6 +177,7 @@ extends LazyCachedLookup
 		protected Integer alleleKey;
 		protected String projectId;
 		protected Integer alleleType;
+		protected Integer alleleStatus;
 		protected Integer alleleTrans;
 		protected String alleleName;
 		protected String alleleSymbol;
@@ -193,6 +195,7 @@ extends LazyCachedLookup
 			alleleKey = row.getInt("alleleKey");
 			projectId = row.getString("projectId");
 			alleleType = row.getInt("alleleType");
+			alleleStatus = row.getInt("alleleStatus");
 			alleleTrans = row.getInt("alleleTrans");
 			alleleName = row.getString("alleleName");
 			alleleSymbol = row.getString("alleleSymbol");
@@ -227,7 +230,7 @@ extends LazyCachedLookup
 	    "alleleNoteSeq=nc.sequenceNum, alleleNoteKey=nc._note_key, " +
 	    "alleleNoteModifiedBy=n._ModifiedBy_key, " +
 	    "alleleNoteCreatedBy=n._CreatedBy_key, " +
-	    "projectId=acc2.accId, " +
+	    "projectId=acc2.accId, alleleStatus=a._Allele_Status_key " +
 	    "aac._MutantCellLine_key, ac.cellLine " +
 	    "FROM ALL_Allele a, " +
 	    "MRK_Marker mrk,  ALL_Allele_CellLine aac, " +
