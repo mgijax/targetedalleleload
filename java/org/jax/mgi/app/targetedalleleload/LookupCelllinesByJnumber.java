@@ -1,5 +1,6 @@
 package org.jax.mgi.app.targetedalleleload;
 
+import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
 import org.jax.mgi.shr.dbutils.DBException;
 import org.jax.mgi.shr.dbutils.ResultsNavigator;
 import org.jax.mgi.shr.dbutils.RowDataInterpreter;
@@ -41,6 +42,7 @@ public class LookupCelllinesByJnumber
 	public LookupCelllinesByJnumber(SQLDataManager sqlMgr, String jnum) 
 	throws MGIException 
 	{
+		TargetedAlleleLoadCfg cfg = new TargetedAlleleLoadCfg();
         // Create a ResultsNavigator to get the records that were just loaded
         // into the WRK_CloneAssociation table.
         //
@@ -51,7 +53,7 @@ public class LookupCelllinesByJnumber
         	"AND mra._mgitype_key = 11 " +
         	"AND mra._object_key = aac._allele_key " +
     		"AND aac._mutantcellline_key = ac._cellline_key " +
-    		"AND bcc.jnumid = 'J:157064' " ;
+    		"AND bcc.jnumid = '" + cfg.getPrimaryJNumber() + "'" ;
 
         rn = sqlMgr.executeQuery(sql);
 
@@ -66,7 +68,6 @@ public class LookupCelllinesByJnumber
      * Checks to see if there is another RADARClone to be processed.
      * @assumes Nothing
      * @effects Nothing
-     * @param None
      * @return True if there is another RADARClone, otherwise false.
      * @throws Nothing
      */

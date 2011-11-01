@@ -377,7 +377,7 @@ public class TargetedAlleleLoadCfg extends InputDataCfg {
 	}
 
 	/**
-	 * Get the Reference JNUMBER, convert the jnumbers to an array
+	 * Get the Reference JNUMBERs, convert the jnumbers to an array
 	 * of strings, one jnumber per string
 	 * 
 	 * @assumes The "JNUMBER" constant is defined in the config file
@@ -389,6 +389,22 @@ public class TargetedAlleleLoadCfg extends InputDataCfg {
 	public String[] getJNumbers() throws ConfigException {
 		String jnumbers =  getConfigString("JNUMBER").replaceAll(" ", "");
 		return jnumbers.split(",");
+	}
+
+	/**
+	 * Get the Reference JNUMBERs, convert the jnumbers to an array
+	 * of strings, one jnumber per string
+	 * 
+	 * @assumes The "JNUMBER" constant is defined in the config file
+	 * @effects Nothing
+	 * @return The configuration value
+	 * @throws ConfigException
+	 *             if the value is not found
+	 */
+	public String getPrimaryJNumber() throws ConfigException {
+		String jnumbers =  getConfigString("JNUMBER").replaceAll(" ", "");
+		String [] jnums = jnumbers.split(",");
+		return jnums[0];
 	}
 
 	/**
