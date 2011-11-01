@@ -51,7 +51,7 @@ extends LazyCachedLookup
 	private static DLALogger logger;
 
 	/**
-	 * constructor
+	 * constructor implements the singleton pattern
 	 * 
 	 * @throws ConfigException
 	 *             thrown if there is an error accessing the configuration
@@ -65,7 +65,7 @@ extends LazyCachedLookup
 	{
 		super(SQLDataManagerFactory.getShared(SchemaConstants.MGD));
 
-		lookupMarkerByMGIID = new LookupMarkerByMGIID();
+		lookupMarkerByMGIID = LookupMarkerByMGIID.getInstance();
 		lookupJNumbersByAlleleKey = new LookupJNumbersByAlleleKey();
 
 		logger = DLALogger.getInstance();
@@ -230,7 +230,7 @@ extends LazyCachedLookup
 	    "alleleNoteSeq=nc.sequenceNum, alleleNoteKey=nc._note_key, " +
 	    "alleleNoteModifiedBy=n._ModifiedBy_key, " +
 	    "alleleNoteCreatedBy=n._CreatedBy_key, " +
-	    "projectId=acc2.accId, alleleStatus=a._Allele_Status_key " +
+	    "projectId=acc2.accId, alleleStatus=a._Allele_Status_key, " +
 	    "aac._MutantCellLine_key, ac.cellLine " +
 	    "FROM ALL_Allele a, " +
 	    "MRK_Marker mrk,  ALL_Allele_CellLine aac, " +

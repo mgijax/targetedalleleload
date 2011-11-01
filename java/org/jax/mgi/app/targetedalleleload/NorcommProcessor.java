@@ -60,7 +60,7 @@ extends KnockoutAlleleProcessor
 		parentStrainLookupByParentKey = new ParentStrainLookupByParentKey();
 		lookupAllelesByMarker = LookupAllelesByMarker.getInstance();
 		lookupAllelesByProjectId = LookupAllelesByProjectId.getInstance();
-		lookupMarkerByMGIID = new LookupMarkerByMGIID();
+		lookupMarkerByMGIID = LookupMarkerByMGIID.getInstance();
 		vocabLookup = new VocabKeyLookup(Constants.ALLELE_VOCABULARY);
 		strainKeyLookup = new StrainKeyLookup();
 	}

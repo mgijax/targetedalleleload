@@ -67,7 +67,7 @@ extends FullCachedLookup
 	{
 		super(SQLDataManagerFactory.getShared(SchemaConstants.MGD));
 
-		lookupMarkerByMGIID = new LookupMarkerByMGIID();
+		lookupMarkerByMGIID = LookupMarkerByMGIID.getInstance();
 		lookupJNumbersByAlleleKey = new LookupJNumbersByAlleleKey();
 	}
 

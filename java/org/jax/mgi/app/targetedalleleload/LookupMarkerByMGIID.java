@@ -2,14 +2,15 @@ package org.jax.mgi.app.targetedalleleload;
 
 import org.jax.mgi.dbs.SchemaConstants;
 import org.jax.mgi.shr.cache.CacheException;
-import org.jax.mgi.shr.cache.FullCachedLookup;
 import org.jax.mgi.shr.cache.KeyNotFoundException;
 import org.jax.mgi.shr.cache.KeyValue;
+import org.jax.mgi.shr.cache.LazyCachedLookup;
 import org.jax.mgi.shr.config.ConfigException;
 import org.jax.mgi.shr.dbutils.DBException;
 import org.jax.mgi.shr.dbutils.RowDataInterpreter;
 import org.jax.mgi.shr.dbutils.RowReference;
 import org.jax.mgi.shr.dbutils.SQLDataManagerFactory;
+import org.jax.mgi.shr.exception.MGIException;
 
 /**
  * 
@@ -22,10 +23,23 @@ import org.jax.mgi.shr.dbutils.SQLDataManagerFactory;
  * 
  */
 
-public class LookupMarkerByMGIID extends FullCachedLookup {
+public class LookupMarkerByMGIID
+extends LazyCachedLookup
+{
+
+	private static LookupMarkerByMGIID _instance;
+
+	public static LookupMarkerByMGIID getInstance() 
+	throws MGIException 
+	{
+		if (_instance == null) {
+			_instance = new LookupMarkerByMGIID();
+		}
+		return _instance;
+	}
 
 	/**
-	 * constructor
+	 * constructor uses the singleton pattern
 	 * 
 	 * @throws ConfigException
 	 *             thrown if there is an error accessing the configuration
@@ -34,8 +48,9 @@ public class LookupMarkerByMGIID extends FullCachedLookup {
 	 * @throws CacheException
 	 *             thrown if there is an error accessing the cache
 	 */
-	public LookupMarkerByMGIID() throws ConfigException, DBException,
-			CacheException {
+	private LookupMarkerByMGIID() 
+	throws MGIException 
+	{
 		super(SQLDataManagerFactory.getShared(SchemaConstants.MGD));
 	}
 
@@ -63,16 +78,35 @@ public class LookupMarkerByMGIID extends FullCachedLookup {
 	 * 
 	 * @return the initialization query
 	 */
-	public String getFullInitQuery() {
-		return "select mgiid = a2.accID, markerKey = a2._Object_key, "
-				+ "symbol = m.symbol, chromosome = m.chromosome "
-				+ "from ACC_Accession a2, MRK_Marker m "
-				+ "where a2._MGIType_key = 2 " + "and a2._LogicalDB_key = 1 "
-				+ "and a2.preferred = 1 " + "and a2.prefixPart = 'MGI:' "
-				+ "and a2._Object_key = m._Marker_key "
-				+ "and m._Organism_key = 1 ";
+//	public String getFullInitQuery() {
+	public String getPartialInitQuery() {
+		return null;
 	}
 
+    /**
+     * get the query to use when adding new entries to the cache
+     * 
+     * @param addObject the lookup identifier which triggers the cache add
+     * 
+     * @return the query string to add an allele to the cache based
+     * 			on the given cellline
+     */
+    public String getAddQuery(Object addObject)
+    {
+    	String MGIID = (String)addObject;
+
+    	return "SELECT  mgiid = a2.accID, markerKey = a2._Object_key, " +
+		"symbol = m.symbol, chromosome = m.chromosome " +
+		"FROM ACC_Accession a2, MRK_Marker m " +
+		"WHERE a2._MGIType_key = 2 " + 
+		"AND a2.accId = '" + MGIID + "' " +
+		"AND a2._LogicalDB_key = 1 " +
+		"AND a2.preferred = 1 " +
+		"AND a2.prefixPart = 'MGI:' " +
+		"AND a2._Object_key = m._Marker_key " +
+		"AND m._Organism_key = 1 ";
+    }
+	
 	/**
 	 * get the RowDataInterpreter for interpreting initialization query
 	 * 

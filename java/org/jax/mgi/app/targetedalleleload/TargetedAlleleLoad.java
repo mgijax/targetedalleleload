@@ -138,6 +138,7 @@ public class TargetedAlleleLoad extends DLALoader {
 	// Cached DB Lookups
 	private LookupMutantCelllineByName lookupMutantCelllineByName;
 	private LookupAlleleByKey lookupAlleleByKey;
+	private LookupAlleleByCellLine lookupAlleleByCellLine;
 	private LookupAllelesByProjectId lookupAllelesByProjectId;
 	private LookupAllelesByMarker lookupAllelesByMarker;
 	private LookupDerivationByVectorCreatorParentType derivationLookup;
@@ -145,7 +146,6 @@ public class TargetedAlleleLoad extends DLALoader {
 	private LookupMarkerByMGIID lookupMarkerByMGIID;
 	private ParentStrainLookupByParentKey parentStrainLookupByParentKey;
 	private StrainKeyLookup strainKeyLookup;
-	private LookupAlleleByCellLine lookupAlleleByCellLine;
 	private VocabTermLookup vocTermLookup;
 	private CellLineNameLookupByKey cellLineNameLookupByKey;
 	private LookupStrainKeyByCellLineKey lookupStrainKeyByCellLineKey;
@@ -210,7 +210,7 @@ public class TargetedAlleleLoad extends DLALoader {
 			new ParentStrainLookupByParentKey();
 		strainKeyLookup = new StrainKeyLookup();
 		lookupVectorKeyByTerm = new LookupVectorKeyByTerm();
-		lookupMarkerByMGIID = new LookupMarkerByMGIID();
+		lookupMarkerByMGIID = LookupMarkerByMGIID.getInstance();
 		vocTermLookup = new VocabTermLookup();
 		cellLineNameLookupByKey = new CellLineNameLookupByKey();
 		lookupStrainKeyByCellLineKey = new LookupStrainKeyByCellLineKey();
