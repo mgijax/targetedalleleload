@@ -6,10 +6,9 @@ import java.lang.StringBuffer;
 
 import org.jax.mgi.dbs.SchemaConstants;
 import org.jax.mgi.shr.cache.CacheException;
-import org.jax.mgi.shr.cache.FullCachedLookup;
 import org.jax.mgi.shr.cache.KeyValue;
+import org.jax.mgi.shr.cache.LazyCachedLookup;
 import org.jax.mgi.shr.config.ConfigException;
-import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
 import org.jax.mgi.shr.dbutils.DBException;
 import org.jax.mgi.shr.dbutils.MultiRowInterpreter;
 import org.jax.mgi.shr.dbutils.RowDataInterpreter;
@@ -32,11 +31,10 @@ import org.jax.mgi.shr.exception.MGIException;
  */
 
 public class LookupAlleleByKey 
-extends FullCachedLookup 
+extends LazyCachedLookup 
 {
 
 	private static LookupAlleleByKey _instance;
-	private static DLALogger logger;
 	private static LookupJNumbersByAlleleKey lookupJNumbersByAlleleKey;
 	private static LookupMarkerByMGIID lookupMarkerByMGIID;
 
@@ -44,7 +42,6 @@ extends FullCachedLookup
 	public static LookupAlleleByKey getInstance() 
 	throws MGIException 
 	{
-		logger = DLALogger.getInstance();
 		if (_instance == null) {
 			_instance = new LookupAlleleByKey();
 		}
@@ -111,21 +108,27 @@ extends FullCachedLookup
 	}
 
 	/**
-	 * get the query for fully initializing the cache mouse KnockoutAlleles by
+	 * get the query for partial initializing the cache mouse KnockoutAlleles by
 	 * name
 	 * 
 	 * @return the initialization query
 	 */
-	public String getFullInitQuery() 
+	public String getPartialInitQuery() 
 	{
-		String provider = null;
-		try {
-			TargetedAlleleLoadCfg cfg = new TargetedAlleleLoadCfg();
-			provider = cfg.getProviderLabcode();
-		} catch (MGIException e) {
-			logger.logdInfo("Config Exception retrieving JNUMBER", false);
 			return null;
-		}
+	}
+
+	/**
+     * get the query to use when adding new entries to the cache
+     * 
+     * @param addObject the lookup identifier which triggers the cache add
+     * 
+     * @return the query string to add an allele to the cache based
+     * 			on the given cellline
+     */
+    public String getAddQuery(Object addObject)
+    {
+    	String key = (String)addObject;
 
 		return "SELECT DISTINCT alleleKey=a._Allele_key, " +
 			"alleleName=a.name, alleleSymbol=a.symbol, " +
@@ -139,7 +142,7 @@ extends FullCachedLookup
 			"FROM ALL_Allele a, MRK_Marker mrk, " +
 			"MGI_Note n, MGI_NoteChunk nc, ACC_Accession acc, " +
 			"ACC_Accession acc2 " +
-			"WHERE a.symbol LIKE '%<tm%" + provider	+ ">' " +
+			"WHERE a._allele_key = " + key + " " +
 			"AND a._Marker_key = mrk._Marker_key " +
 			"AND acc.preferred=1 " +
 			"AND acc._Object_key = mrk._Marker_key " +
