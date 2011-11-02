@@ -128,7 +128,7 @@ extends LazyCachedLookup
      */
     public String getAddQuery(Object addObject)
     {
-    	String key = (String)addObject;
+    	Integer key = (Integer)addObject;
 
 		return "SELECT DISTINCT alleleKey=a._Allele_key, " +
 			"alleleName=a.name, alleleSymbol=a.symbol, " +
@@ -142,7 +142,7 @@ extends LazyCachedLookup
 			"FROM ALL_Allele a, MRK_Marker mrk, " +
 			"MGI_Note n, MGI_NoteChunk nc, ACC_Accession acc, " +
 			"ACC_Accession acc2 " +
-			"WHERE a._allele_key = " + key + " " +
+			"WHERE a._allele_key = " + key.toString() + " " +
 			"AND a._Marker_key = mrk._Marker_key " +
 			"AND acc.preferred=1 " +
 			"AND acc._Object_key = mrk._Marker_key " +
