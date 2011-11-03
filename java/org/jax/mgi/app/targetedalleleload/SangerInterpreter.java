@@ -145,7 +145,7 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 		// Combine the coordinate pairs
 		String c1 = fields[9] + "-" + fields[10];
         String c2 = "-";
-        if (fields.length > 10) {
+        if (fields.length == 13) {
             c2 = fields[11] + "-" + fields[12];
         }
                               
