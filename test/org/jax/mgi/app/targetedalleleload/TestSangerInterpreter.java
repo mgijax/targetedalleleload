@@ -40,7 +40,6 @@ public class TestSangerInterpreter extends TestCase {
 
 	public void testInterpret() throws MGIException{
 		
-		KnockoutAlleleInterpreter kai =  null;
 		List allowedCelllines = new ArrayList();
 		allowedCelllines.add("E");
 		List knownCelllines = new ArrayList();
@@ -48,7 +47,7 @@ public class TestSangerInterpreter extends TestCase {
 		knownCelllines.add("H");
 		knownCelllines.add("D");
 
-		kai = new SangerInterpreter(allowedCelllines, 
+		KnockoutAlleleInterpreter kai = new SangerInterpreter(allowedCelllines, 
 				knownCelllines, 
 				"EUCOMM");
 
@@ -65,7 +64,9 @@ public class TestSangerInterpreter extends TestCase {
 		good.setBuild("37");
 		good.setCassette("L1L2_gt2");
 		good.setInputPipeline("EUCOMM");
-
+		System.out.print(good);
+		System.out.print("\n");
+		System.out.print(check);
 		assertTrue(check.equals(good));
 	}
 

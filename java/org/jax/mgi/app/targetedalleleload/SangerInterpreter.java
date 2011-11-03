@@ -142,11 +142,10 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 			inputData.setMutationType("Deletion");
 		}
 		
-		// Check if this is a negative strand gene by comparing the
-		// orientation of the coordinates
+		// Combine the coordinate pairs
 		String c1 = fields[9] + "-" + fields[10];
         String c2 = "-";
-        if (fields.length < 10) {
+        if (fields.length > 10) {
             c2 = fields[11] + "-" + fields[12];
         }
                               
