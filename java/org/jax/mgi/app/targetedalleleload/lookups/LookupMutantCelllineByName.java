@@ -3,8 +3,8 @@ package org.jax.mgi.app.targetedalleleload.lookups;
 import org.jax.mgi.app.targetedalleleload.MutantCellLine;
 import org.jax.mgi.dbs.SchemaConstants;
 import org.jax.mgi.shr.cache.CacheException;
-import org.jax.mgi.shr.cache.FullCachedLookup;
 import org.jax.mgi.shr.cache.KeyValue;
+import org.jax.mgi.shr.cache.LazyCachedLookup;
 import org.jax.mgi.shr.config.ConfigException;
 import org.jax.mgi.shr.dbutils.DBException;
 import org.jax.mgi.shr.dbutils.InterpretException;
@@ -26,7 +26,7 @@ import org.jax.mgi.shr.exception.MGIException;
  */
 
 public class LookupMutantCelllineByName 
-extends FullCachedLookup 
+extends LazyCachedLookup 
 {
 
 	/**
@@ -43,7 +43,6 @@ extends FullCachedLookup
 	throws CacheException, DBException, ConfigException 
 	{
 		super(SQLDataManagerFactory.getShared(SchemaConstants.MGD));
-		initCache(cache);
 	}
 
 	/**
@@ -64,16 +63,30 @@ extends FullCachedLookup
 		return (MutantCellLine) super.lookupNullsOk(cellLineID);
 	}
 
+
 	/**
-	 * get the full initialization query which is called by the 
-	 * CacheStrategy class when performing cache initialization. 
-	 * This query restricts cell lines to the logical databases 
-	 * for KOMP-Regeneron, KOMP-CSD, EUCOMM, and NorCOMM 
-	 * (108,109,137,142)
+	 * get the query for partial initializing the cache mouse KnockoutAlleles by
+	 * name
 	 * 
-	 * @return the full initialization query
+	 * @return the initialization query
 	 */
-	public String getFullInitQuery() {
+	public String getPartialInitQuery() 
+	{
+			return null;
+	}
+
+	/**
+     * get the query to use when adding new entries to the cache
+     * 
+     * @param addObject the lookup identifier which triggers the cache add
+     * 
+     * @return the query string to add an allele to the cache based
+     * 			on the given cellline
+     */
+    public String getAddQuery(Object addObject)
+    {
+    	String cellline = (String)addObject;
+
 		return "SELECT a.accID, a._logicalDB_key, ldb.name as ldbName, " +
 				"c._CellLine_key, c.cellLine, c._CellLine_Type_key, " +
 				"v.term as cellLineType, c._Strain_key, s.strain, " +
@@ -84,6 +97,7 @@ extends FullCachedLookup
 				"VOC_Term v, PRB_Strain s, ACC_LogicalDB ldb " +
 				"WHERE a._MGIType_key = 28 " +
 				"AND a._LogicalDB_key = ldb._LogicalDB_key " +
+				"AND c.cellline = '" + cellline + "' " +
 				"AND a._Object_key = c._CellLine_key " +
 				"AND c.isMutant = 1 " +
 				"AND c._CellLine_Type_key = v._Term_key " +
