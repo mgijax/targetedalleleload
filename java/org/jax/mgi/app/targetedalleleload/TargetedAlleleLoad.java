@@ -203,20 +203,21 @@ public class TargetedAlleleLoad extends DLALoader {
 
 		lookupMutantCelllineByName = new LookupMutantCelllineByName();
 
-		// These lookups implement a Singleton pattern because
-		// they're shared across objects so updates in one object
-		// should be reflected in the other objects
-		lookupAlleleByKey = LookupAlleleByKey.getInstance();
 		lookupAllelesByProjectId = LookupAllelesByProjectId.getInstance();
+
 		lookupAllelesByMarker = LookupAllelesByMarker.getInstance();
+		
 		lookupCellLineCountByAlleleSymbol = 
 			LookupCellLineCountByAlleleSymbol.getInstance();
+
 		derivationLookup = 
 			LookupDerivationByVectorCreatorParentType.getInstance();
 
-		lookupAlleleByCellLine = new LookupAlleleByCellLine();
-		lookupAlleleByCellLine.initCache();
+		lookupAlleleByCellLine = LookupAlleleByCellLine.getInstance();
 
+		lookupAlleleByKey = LookupAlleleByKey.getInstance(lookupAlleleByCellLine);
+
+		
 		parentStrainLookupByParentKey = 
 			new ParentStrainLookupByParentKey();
 		strainKeyLookup = new StrainKeyLookup();

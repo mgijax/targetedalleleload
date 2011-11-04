@@ -47,7 +47,7 @@ public class KnockoutAllele implements Comparable {
 	private Integer noteKey = null;
 	private Integer noteModifiedByKey = null;
 	private String projectId = null;
-	private Integer cellLineKey = null;
+//	private Integer cellLineKey = null;
 
 	// From cfg file
 	private String[] jNumbers = null;
@@ -118,13 +118,13 @@ public class KnockoutAllele implements Comparable {
 		return this.typeKey;
 	}
 
-	public Integer getCellLineKey() {
-		return cellLineKey;
-	}
+//	public Integer getCellLineKey() {
+//		return cellLineKey;
+//	}
 
-	public void setCellLineKey(Integer key) {
-		this.cellLineKey = key;
-	}
+//	public void setCellLineKey(Integer key) {
+//		this.cellLineKey = key;
+//	}
 
 	public Integer getMarkerKey() {
 		return markerKey;
