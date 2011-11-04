@@ -70,13 +70,15 @@ public class LookupAlleleByKey
 
     		Set celllines = lookupAlleleByCellline.getKeySet();
         	Iterator it = celllines.iterator();
-    		KnockoutAllele k = null;
+        	String cellline = null;
+    		KnockoutAllele ka = null;
 
     		while (it.hasNext())
         	{
-        		k = (KnockoutAllele)it.next();
-        		Integer alleleKey = k.getKey();
-        		cache.put(alleleKey, k);
+        		cellline = (String)it.next();
+        		ka = lookupAlleleByCellline.lookup(cellline);
+        		Integer alleleKey = ka.getKey();
+        		cache.put(alleleKey, ka);
         		numAlleles++;
         	}
     		String m = "Size of alleleByKey cache: ";
