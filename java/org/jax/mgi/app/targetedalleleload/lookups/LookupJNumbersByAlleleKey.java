@@ -11,6 +11,7 @@ import org.jax.mgi.dbs.SchemaConstants;
 import org.jax.mgi.shr.cache.CacheException;
 import org.jax.mgi.shr.cache.FullCachedLookup;
 import org.jax.mgi.shr.cache.KeyValue;
+import org.jax.mgi.shr.cache.LazyCachedLookup;
 import org.jax.mgi.shr.config.ConfigException;
 import org.jax.mgi.shr.dbutils.DBException;
 import org.jax.mgi.shr.dbutils.MultiRowInterpreter;
@@ -31,7 +32,7 @@ import org.jax.mgi.shr.dbutils.SQLDataManagerFactory;
  * @version 1.0
  */
 public class LookupJNumbersByAlleleKey 
-extends FullCachedLookup 
+extends LazyCachedLookup 
 {
 
 	// provide a static cache so that all instances share one cache
@@ -105,18 +106,36 @@ extends FullCachedLookup
 		cache.put(alleleKey, jnumbers);
 	}
 
+
 	/**
-	 * get the query for fully initializing the cache
-	 *  
+	 * get the query for partial initializing the cache mouse KnockoutAlleles by
+	 * name
+	 * 
 	 * @return the initialization query
 	 */
-	public String getFullInitQuery() 
+	public String getPartialInitQuery() 
 	{
-		return "SELECT jnumid, mra._object_key '_allele_key' "+
-			"FROM MGI_Reference_Assoc mra, BIB_citation_cache bcc "+
-			"WHERE mra._refs_key = bcc._refs_key "+
-			"AND mra._mgitype_key = 11 "+
-			"ORDER BY mra._object_key ";
+			return null;
+	}
+
+	/**
+     * get the query to use when adding new entries to the cache
+     * 
+     * @param addObject the lookup identifier which triggers the cache add
+     * 
+     * @return the query string to add an allele to the cache based
+     * 			on the given cellline
+     */
+    public String getAddQuery(Object addObject)
+    {
+    	Integer key = (Integer)addObject;
+
+		return "SELECT jnumid, mra._object_key '_allele_key' " +
+			"FROM MGI_Reference_Assoc mra, BIB_citation_cache bcc " +
+			"WHERE mra._refs_key = bcc._refs_key " +
+			"AND mra._mgitype_key = 11 " +
+			"AND mra._object_key = " + key + " " +
+			"ORDER BY mra._object_key " ;
 	}
 
 	/**
