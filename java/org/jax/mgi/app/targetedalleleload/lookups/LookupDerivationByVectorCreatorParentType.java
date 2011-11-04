@@ -1,5 +1,6 @@
-package org.jax.mgi.app.targetedalleleload;
+package org.jax.mgi.app.targetedalleleload.lookups;
 
+import org.jax.mgi.app.targetedalleleload.Derivation;
 import org.jax.mgi.dbs.SchemaConstants;
 import org.jax.mgi.shr.cache.CacheException;
 import org.jax.mgi.shr.cache.FullCachedLookup;
@@ -102,7 +103,7 @@ extends FullCachedLookup
 	 * @throws CacheException
 	 *             thrown if there is an error with the cache
 	 */
-	protected void addToCache(Derivation d) 
+	public void addToCache(Derivation d) 
 	throws MGIException 
 	{
 		// Replace the current value if it exists

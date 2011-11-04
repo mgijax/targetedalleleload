@@ -1,4 +1,4 @@
-package org.jax.mgi.app.targetedalleleload;
+package org.jax.mgi.app.targetedalleleload.lookups;
 
 import java.util.ArrayList;
 import java.util.HashMap;

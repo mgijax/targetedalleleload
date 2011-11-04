@@ -1,5 +1,6 @@
-package org.jax.mgi.app.targetedalleleload;
+package org.jax.mgi.app.targetedalleleload.lookups;
 
+import org.jax.mgi.app.targetedalleleload.MutantCellLine;
 import org.jax.mgi.dbs.SchemaConstants;
 import org.jax.mgi.shr.cache.CacheException;
 import org.jax.mgi.shr.cache.FullCachedLookup;
@@ -106,7 +107,7 @@ extends FullCachedLookup
 	 * @throws CacheException
 	 *             thrown if there is an error with the cache
 	 */
-	protected void addToCache(String accId, MutantCellLine mcl)
+	public void addToCache(String accId, MutantCellLine mcl)
 	throws DBException, CacheException 
 	{
 		// Replace the current value if it exists

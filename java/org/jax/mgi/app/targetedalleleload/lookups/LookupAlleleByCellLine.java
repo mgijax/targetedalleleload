@@ -1,8 +1,9 @@
-package org.jax.mgi.app.targetedalleleload;
+package org.jax.mgi.app.targetedalleleload.lookups;
 
 import java.util.Iterator;
 import java.util.Vector;
 
+import org.jax.mgi.app.targetedalleleload.KnockoutAllele;
 import org.jax.mgi.dbs.SchemaConstants;
 import org.jax.mgi.shr.cache.CacheException;
 import org.jax.mgi.shr.cache.KeyValue;

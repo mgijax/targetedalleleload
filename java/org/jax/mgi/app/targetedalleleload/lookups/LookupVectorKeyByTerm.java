@@ -1,4 +1,4 @@
-package org.jax.mgi.app.targetedalleleload;
+package org.jax.mgi.app.targetedalleleload.lookups;
 
 import org.jax.mgi.dbs.SchemaConstants;
 import org.jax.mgi.shr.cache.CacheException;

@@ -1,4 +1,4 @@
-package org.jax.mgi.app.targetedalleleload;
+package org.jax.mgi.app.targetedalleleload.lookups;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -138,7 +138,7 @@ public class LookupAllelesByProjectId extends FullCachedLookup {
 	 * @throws CacheException
 	 *             thrown if there is an error with the cache
 	 */
-	protected void addToCache(String projectId, Map alleleMap)
+	public void addToCache(String projectId, Map alleleMap)
 			throws DBException, CacheException {
 		// Replace the current value if it exists
 		cache.put(projectId.toLowerCase(), alleleMap);

@@ -1,11 +1,9 @@
-package org.jax.mgi.app.targetedalleleload;
-
-import java.util.Set;
+package org.jax.mgi.app.targetedalleleload.lookups;
 
 import org.jax.mgi.dbs.SchemaConstants;
 import org.jax.mgi.shr.cache.CacheException;
-import org.jax.mgi.shr.cache.FullCachedLookup;
 import org.jax.mgi.shr.cache.KeyValue;
+import org.jax.mgi.shr.cache.LazyCachedLookup;
 import org.jax.mgi.shr.config.ConfigException;
 import org.jax.mgi.shr.exception.MGIException;
 import org.jax.mgi.shr.dbutils.DBException;
@@ -23,7 +21,9 @@ import org.jax.mgi.shr.dbutils.SQLDataManagerFactory;
  * 
  */
 
-public class LookupCellLineCountByAlleleSymbol extends FullCachedLookup {
+public class LookupCellLineCountByAlleleSymbol 
+extends LazyCachedLookup 
+{
 
 	// Singleton pattern implementation
 	private static LookupCellLineCountByAlleleSymbol _instance;
@@ -72,34 +72,34 @@ public class LookupCellLineCountByAlleleSymbol extends FullCachedLookup {
 		return (Integer) lookupNullsOk(symbol);
 	}
 
+
 	/**
-	 * get the query for fully initializing the cache ES cell lines by
-	 * production center project ID
-	 * 
+	 * get the query for partial initializing the cache 
+	 *  
 	 * @return the initialization query
 	 */
-	public String getFullInitQuery() 
+	public String getPartialInitQuery() 
 	{
-		return "SELECT a.symbol, COUNT(ac._mutantcellline_key) as cnt " +
-				"FROM All_allele a, All_allele_cellline ac " +
-				"WHERE a._allele_key *= ac._allele_key " +
-				// This query cannot be pipeline specific because 
-				// alleles change between pipelines and creators, so we
-				// need the ability to lookup ALL allele cell line counts 
-				// + "AND a.symbol LIKE '%(" + pipeline + ")%' "
-				"GROUP BY a.symbol " +
-				"ORDER BY COUNT(ac._mutantcellline_key)" ;
+			return null;
 	}
 
 	/**
-	 * returns the set of keys from the cache
-	 * 
-	 * @assumes nothing
-	 * @effects nothing
-	 */
-	public Set getKeySet() 
-	{
-		return cache.keySet();
+     * get the query to use when adding new entries to the cache
+     * 
+     * @param addObject the lookup identifier which triggers the cache add
+     * 
+     * @return the query string to add an allele to the cache based
+     * 			on the given cellline
+     */
+    public String getAddQuery(Object addObject)
+    {
+    	String symbol = (String)addObject;
+		return "SELECT a.symbol, COUNT(ac._mutantcellline_key) as cnt " +
+				"FROM All_allele a, All_allele_cellline ac " +
+				"WHERE a._allele_key *= ac._allele_key " +
+				"AND a.symbol = '" + symbol + "' " +
+				"GROUP BY a.symbol " +
+				"ORDER BY COUNT(ac._mutantcellline_key)" ;
 	}
 
 	/**
@@ -115,7 +115,7 @@ public class LookupCellLineCountByAlleleSymbol extends FullCachedLookup {
 	 * @throws CacheException
 	 *             thrown if there is an error with the cache
 	 */
-	protected void decrement(String symbol) 
+	public void decrement(String symbol) 
 	throws MGIException 
 	{
 		// Increment the count, or if the symbol didn't exist
@@ -153,7 +153,7 @@ public class LookupCellLineCountByAlleleSymbol extends FullCachedLookup {
 	 * @throws CacheException
 	 *             thrown if there is an error with the cache
 	 */
-	protected void increment(String symbol) 
+	public void increment(String symbol) 
 	throws MGIException 
 	{
 		// Increment the count, or if the symbol didn't exist

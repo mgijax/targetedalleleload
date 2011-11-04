@@ -8,6 +8,9 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jax.mgi.app.targetedalleleload.lookups.LookupAllelesByMarker;
+import org.jax.mgi.app.targetedalleleload.lookups.LookupAllelesByProjectId;
+import org.jax.mgi.app.targetedalleleload.lookups.LookupMarkerByMGIID;
 import org.jax.mgi.dbs.mgd.lookup.ParentStrainLookupByParentKey;
 import org.jax.mgi.dbs.mgd.lookup.StrainKeyLookup;
 import org.jax.mgi.dbs.mgd.lookup.TranslationException;

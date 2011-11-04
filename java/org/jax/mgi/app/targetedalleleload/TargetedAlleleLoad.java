@@ -16,6 +16,17 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jax.mgi.app.targetedalleleload.lookups.LookupAlleleByCellLine;
+import org.jax.mgi.app.targetedalleleload.lookups.LookupAlleleByKey;
+import org.jax.mgi.app.targetedalleleload.lookups.LookupAllelesByMarker;
+import org.jax.mgi.app.targetedalleleload.lookups.LookupAllelesByProjectId;
+import org.jax.mgi.app.targetedalleleload.lookups.LookupCellLineCountByAlleleSymbol;
+import org.jax.mgi.app.targetedalleleload.lookups.LookupCelllinesByJnumber;
+import org.jax.mgi.app.targetedalleleload.lookups.LookupDerivationByVectorCreatorParentType;
+import org.jax.mgi.app.targetedalleleload.lookups.LookupMarkerByMGIID;
+import org.jax.mgi.app.targetedalleleload.lookups.LookupMutantCelllineByName;
+import org.jax.mgi.app.targetedalleleload.lookups.LookupStrainKeyByCellLineKey;
+import org.jax.mgi.app.targetedalleleload.lookups.LookupVectorKeyByTerm;
 import org.jax.mgi.dbs.SchemaConstants;
 import org.jax.mgi.dbs.mgd.AccessionLib;
 import org.jax.mgi.dbs.mgd.dao.ALL_Allele_CellLineDAO;
@@ -1128,6 +1139,12 @@ public class TargetedAlleleLoad extends DLALoader {
 			qcStats.record("SUMMARY", NUM_ALLELES_CHANGED_TRANS);
 			return;
 		}
+
+		// lookupCellLineCountByAlleleSymbol is a lazy cache, so make 
+		// sure the Alleles are in the cache before 
+		// incrementing/decrementing
+		lookupCellLineCountByAlleleSymbol.lookup(oldAllele.getSymbol());
+		lookupCellLineCountByAlleleSymbol.lookup(newAllele.getSymbol());
 
 		// Update the count of MCL associated to this allele and create an
 		// orphan MCL record if the count drops to 0

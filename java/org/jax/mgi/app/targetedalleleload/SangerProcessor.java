@@ -9,6 +9,10 @@ import java.util.Map;
 import java.util.regex.*;
 
 import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
+import org.jax.mgi.app.targetedalleleload.lookups.LookupAlleleByKey;
+import org.jax.mgi.app.targetedalleleload.lookups.LookupAllelesByMarker;
+import org.jax.mgi.app.targetedalleleload.lookups.LookupAllelesByProjectId;
+import org.jax.mgi.app.targetedalleleload.lookups.LookupMarkerByMGIID;
 import org.jax.mgi.dbs.mgd.lookup.VocabKeyLookup;
 import org.jax.mgi.dbs.mgd.lookup.StrainKeyLookup;
 import org.jax.mgi.dbs.mgd.lookup.ParentStrainLookupByParentKey;

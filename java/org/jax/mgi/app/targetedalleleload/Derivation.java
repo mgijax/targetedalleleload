@@ -1,5 +1,6 @@
 package org.jax.mgi.app.targetedalleleload;
 
+import org.jax.mgi.app.targetedalleleload.lookups.LookupDerivationByVectorCreatorParentType;
 import org.jax.mgi.dbs.mgd.dao.ALL_CellLine_DerivationDAO;
 import org.jax.mgi.dbs.mgd.dao.ALL_CellLine_DerivationState;
 import org.jax.mgi.shr.dbutils.dao.SQLStream;
