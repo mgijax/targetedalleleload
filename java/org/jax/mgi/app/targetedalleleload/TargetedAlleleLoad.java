@@ -215,7 +215,7 @@ public class TargetedAlleleLoad extends DLALoader {
 
 		lookupAlleleByCellLine = LookupAlleleByCellLine.getInstance();
 
-		lookupAlleleByKey = LookupAlleleByKey.getInstance(lookupAlleleByCellLine);
+		lookupAlleleByKey = LookupAlleleByKey.getInstance();
 
 		
 		parentStrainLookupByParentKey = 

@@ -69,6 +69,7 @@ extends FullCachedLookup
 		lookupJNumbersByAlleleKey = new LookupJNumbersByAlleleKey();
 
 		logger = DLALogger.getInstance();
+		this.initCache();
 	}
 
 	/**

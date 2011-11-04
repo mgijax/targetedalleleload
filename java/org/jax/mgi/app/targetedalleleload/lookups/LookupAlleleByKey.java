@@ -51,18 +51,6 @@ public class LookupAlleleByKey
         	return _instance;
         }
 
-        public static LookupAlleleByKey getInstance(
-        	LookupAlleleByCellLine lookupAlleleByCellline) 
-        throws MGIException 
-        {
-                logger = DLALogger.getInstance();
-                if (_instance == null) {
-                        _instance = 
-                        	new LookupAlleleByKey(lookupAlleleByCellline);
-                }
-                return _instance;
-        }
-
 
         /**
          * constructor
