@@ -157,7 +157,7 @@ extends FullCachedLookup
 				"MRK_Marker mrk, ALL_Allele_CellLine aac, " +
 				"ALL_Cellline ac, MGI_Note n, MGI_NoteChunk nc, " +
 				"ACC_Accession acc, ACC_Accession acc2 " +
-				"WHERE a.symbol like '%tm%" + provider + ">' " + 
+				"WHERE a.symbol like '%tm%" + provider + ">' " +
 				"AND aac._Allele_key = a._Allele_key " +
 				"AND aac._MutantCellLine_key = ac._cellline_key " +
 				"and a._Marker_key = mrk._Marker_key " +
