@@ -1,22 +1,21 @@
 package org.jax.mgi.app.targetedalleleload.lookups;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Vector;
 
 import org.jax.mgi.dbs.SchemaConstants;
 import org.jax.mgi.shr.cache.CacheException;
+import org.jax.mgi.shr.cache.FullCachedLookup;
 import org.jax.mgi.shr.cache.KeyValue;
-import org.jax.mgi.shr.cache.LazyCachedLookup;
 import org.jax.mgi.shr.config.ConfigException;
 import org.jax.mgi.shr.dbutils.DBException;
 import org.jax.mgi.shr.dbutils.MultiRowInterpreter;
 import org.jax.mgi.shr.dbutils.RowDataInterpreter;
 import org.jax.mgi.shr.dbutils.RowReference;
 import org.jax.mgi.shr.dbutils.SQLDataManagerFactory;
+import org.jax.mgi.shr.exception.MGIException;
 
 
 
@@ -31,36 +30,37 @@ import org.jax.mgi.shr.dbutils.SQLDataManagerFactory;
  * @version 1.0
  */
 public class LookupJNumbersByAlleleKey 
-extends LazyCachedLookup 
+extends FullCachedLookup 
 {
 
-	// provide a static cache so that all instances share one cache
-	private static Map cache = new HashMap();
+	// Singleton pattern implementation
+	private static LookupJNumbersByAlleleKey _instance;
 
-	// indicate if the cache has been initialized
-	private static boolean hasBeenInitialized = false;
+	public static LookupJNumbersByAlleleKey getInstance() 
+	throws MGIException 
+	{
+		if (_instance == null) {
+			_instance = new LookupJNumbersByAlleleKey();
+		}
+		return _instance;
+	}
 
 	/**
-	 * constructor
+	 * constructor (singleton guarantees that this is only called 
+	 * the first time an instance of AlleleCellLineCount is created)
 	 * 
-	 * @throws CacheException
-	 *             thrown if there is an error with the cache
-	 * @throws DBException
-	 *             thrown if there is an error accessing the db
 	 * @throws ConfigException
-	 *             thrown if there is an error accessing the 
-	 *             configuration file
+	 *             thrown if there is an error accessing the configuration
+	 * @throws DBException
+	 *             thrown if there is an error accessing the database
+	 * @throws CacheException
+	 *             thrown if there is an error accessing the cache
 	 */
-	public LookupJNumbersByAlleleKey()
-	throws CacheException, DBException, ConfigException 
+	private LookupJNumbersByAlleleKey() 
+	throws MGIException 
 	{
 		super(SQLDataManagerFactory.getShared(SchemaConstants.MGD));
-
-		// since cache is static make sure it is not reinitialized
-		if (!hasBeenInitialized) {
-			initCache(cache);
-		}
-		hasBeenInitialized = true;
+		initCache(cache);
 	}
 
 	/**
@@ -112,30 +112,22 @@ extends LazyCachedLookup
 	 * 
 	 * @return the initialization query
 	 */
-	public String getPartialInitQuery() 
+	public String getFullInitQuery() 
 	{
-			return null;
+			return "SELECT distinct jnumid, " +
+				"mra._object_key '_allele_key' " + 
+				"FROM MGI_Reference_Assoc mra, BIB_citation_cache bcc, " + 
+				"ACC_Accession acc2 " +
+				"WHERE mra._refs_key = bcc._refs_key " +
+				"AND mra._mgitype_key = 11 " +
+				"AND acc2.preferred = 1 " +
+				"AND acc2.private = 1 " +
+				"AND acc2._Object_key = mra._Object_key " + 
+				"AND acc2._LogicalDB_key in (125,126,138,143) " +
+				"AND acc2._MGIType_key=11 " +
+				"ORDER BY mra._object_key " ;
 	}
 
-	/**
-     * get the query to use when adding new entries to the cache
-     * 
-     * @param addObject the lookup identifier which triggers the cache add
-     * 
-     * @return the query string to add an allele to the cache based
-     * 			on the given cellline
-     */
-    public String getAddQuery(Object addObject)
-    {
-    	Integer key = (Integer)addObject;
-
-		return "SELECT jnumid, mra._object_key '_allele_key' " +
-			"FROM MGI_Reference_Assoc mra, BIB_citation_cache bcc " +
-			"WHERE mra._refs_key = bcc._refs_key " +
-			"AND mra._mgitype_key = 11 " +
-			"AND mra._object_key = " + key + " " +
-			"ORDER BY mra._object_key " ;
-	}
 
 	/**
 	 * return the RowDataInterpreter for creating KeyValue objects from 

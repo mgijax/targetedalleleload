@@ -33,7 +33,9 @@ import org.jax.mgi.shr.exception.MGIException;
  * 
  */
 
-public class LookupAllelesByProjectId extends FullCachedLookup {
+public class LookupAllelesByProjectId 
+extends FullCachedLookup 
+{
 
 	private TargetedAlleleLoadCfg cfg;
 	private Integer logicalDb;
@@ -48,7 +50,9 @@ public class LookupAllelesByProjectId extends FullCachedLookup {
 	 * @return an instance of AlleleLookupByProjectId
 	 * @throws MGIException
 	 */
-	public static LookupAllelesByProjectId getInstance() throws MGIException {
+	public static LookupAllelesByProjectId getInstance() 
+	throws MGIException 
+	{
 		logger = DLALogger.getInstance();
 		if (_instance == null) {
 			_instance = new LookupAllelesByProjectId();
@@ -63,7 +67,9 @@ public class LookupAllelesByProjectId extends FullCachedLookup {
 	 * 
 	 * @throws MGIException
 	 */
-	private LookupAllelesByProjectId() throws MGIException {
+	private LookupAllelesByProjectId() 
+	throws MGIException 
+	{
 		super(SQLDataManagerFactory.getShared(SchemaConstants.MGD));
 
 		try {
@@ -88,7 +94,9 @@ public class LookupAllelesByProjectId extends FullCachedLookup {
 	 * @throws CacheException
 	 *             thrown if there is an error accessing the configuration
 	 */
-	public Map lookup(String projectID) throws DBException, CacheException {
+	public Map lookup(String projectID) 
+	throws DBException, CacheException 
+	{
 		return (Map) lookupNullsOk(projectID);
 	}
 
@@ -98,7 +106,8 @@ public class LookupAllelesByProjectId extends FullCachedLookup {
 	 * 
 	 * @return the initialization query
 	 */
-	public String getFullInitQuery() {
+	public String getFullInitQuery() 
+	{
 		return "SELECT acc.accID 'projectid', a._Allele_key 'allelekey', "
 				+ "c.cellLine 'mutantCellLine', aa.symbol 'symbol', "
 				+ "p._CellLine_key 'parentCellLine_key', "
@@ -120,7 +129,8 @@ public class LookupAllelesByProjectId extends FullCachedLookup {
 	 * @assumes nothing
 	 * @effects nothing
 	 */
-	public Set getKeySet() {
+	public Set getKeySet() 
+	{
 		return cache.keySet();
 	}
 
@@ -139,7 +149,8 @@ public class LookupAllelesByProjectId extends FullCachedLookup {
 	 *             thrown if there is an error with the cache
 	 */
 	public void addToCache(String projectId, Map alleleMap)
-			throws DBException, CacheException {
+	throws DBException, CacheException 
+	{
 		// Replace the current value if it exists
 		cache.put(projectId.toLowerCase(), alleleMap);
 	}
@@ -150,20 +161,28 @@ public class LookupAllelesByProjectId extends FullCachedLookup {
 	 * 
 	 * @return the RowDataInterpreter for this query
 	 */
-	public RowDataInterpreter getRowDataInterpreter() {
-		class Interpreter implements MultiRowInterpreter {
-			public Object interpret(RowReference ref) throws DBException {
+	public RowDataInterpreter getRowDataInterpreter() 
+	{
+		class Interpreter 
+		implements MultiRowInterpreter 
+		{
+			public Object interpret(RowReference ref) 
+			throws DBException 
+			{
 				return new RowData(ref);
 			}
 
-			public Object interpretKey(RowReference row) throws DBException {
+			public Object interpretKey(RowReference row) 
+			throws DBException 
+			{
 				String key = row.getString("projectid") + ","
 						+ row.getString("symbol") + ","
 						+ row.getString("parentCellLine");
 				return key;
 			}
 
-			public Object interpretRows(Vector v) {
+			public Object interpretRows(Vector v) 
+			{
 				RowData rd = (RowData) v.get(0);
 				String projectId = rd.projectId;
 				String symbol = rd.symbol;
@@ -210,7 +229,8 @@ public class LookupAllelesByProjectId extends FullCachedLookup {
 	/**
 	 * Simple data object representing a row of data from the query
 	 */
-	class RowData {
+	class RowData 
+	{
 		protected String projectId;
 		protected Integer key;
 		protected String symbol;
@@ -218,7 +238,9 @@ public class LookupAllelesByProjectId extends FullCachedLookup {
 		protected String parentCellLine;
 		protected Integer parentCellLineKey;
 
-		public RowData(RowReference row) throws DBException {
+		public RowData(RowReference row) 
+		throws DBException 
+		{
 			projectId = row.getString("projectid");
 			symbol = row.getString("symbol");
 			key = row.getInt("allelekey");

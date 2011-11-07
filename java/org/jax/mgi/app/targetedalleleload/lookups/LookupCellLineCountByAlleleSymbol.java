@@ -2,8 +2,8 @@ package org.jax.mgi.app.targetedalleleload.lookups;
 
 import org.jax.mgi.dbs.SchemaConstants;
 import org.jax.mgi.shr.cache.CacheException;
+import org.jax.mgi.shr.cache.FullCachedLookup;
 import org.jax.mgi.shr.cache.KeyValue;
-import org.jax.mgi.shr.cache.LazyCachedLookup;
 import org.jax.mgi.shr.config.ConfigException;
 import org.jax.mgi.shr.exception.MGIException;
 import org.jax.mgi.shr.dbutils.DBException;
@@ -22,7 +22,7 @@ import org.jax.mgi.shr.dbutils.SQLDataManagerFactory;
  */
 
 public class LookupCellLineCountByAlleleSymbol 
-extends LazyCachedLookup 
+extends FullCachedLookup 
 {
 
 	// Singleton pattern implementation
@@ -78,9 +78,20 @@ extends LazyCachedLookup
 	 *  
 	 * @return the initialization query
 	 */
-	public String getPartialInitQuery() 
+	public String getFullInitQuery() 
 	{
-			return null;
+		return "SELECT DISTINCT a.symbol, " +
+			"COUNT(ac._mutantcellline_key) as cnt " +
+			"FROM All_allele a, All_allele_cellline ac, " +
+			"ACC_Accession acc2 " +
+			"WHERE a._allele_key *= ac._allele_key " +
+			"AND acc2.preferred = 1 " +
+			"AND acc2.private = 1 " +
+			"AND acc2._Object_key = a._Object_key " +
+			"AND acc2._LogicalDB_key in (125,126,138,143) " +
+			"AND acc2._MGIType_key=11 " +
+			"GROUP BY a.symbol " +
+			"ORDER BY COUNT(ac._mutantcellline_key)" ;
 	}
 
 	/**

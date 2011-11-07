@@ -43,8 +43,7 @@ public class LookupCelllinesByJnumber
 	throws MGIException 
 	{
 		TargetedAlleleLoadCfg cfg = new TargetedAlleleLoadCfg();
-        // Create a ResultsNavigator to get the records that were just loaded
-        // into the WRK_CloneAssociation table.
+        // Create a ResultsNavigator to get the records
         //
         String sql = "SELECT cellline " +
         	"FROM ALL_Allele_Cellline aac, All_Cellline ac, " +

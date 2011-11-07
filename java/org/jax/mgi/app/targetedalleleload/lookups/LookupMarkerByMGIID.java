@@ -68,8 +68,9 @@ extends LazyCachedLookup
 	 * @throws CacheException
 	 *             thrown if there is an error accessing the cache
 	 */
-	public Marker lookup(String mgiid) throws DBException, CacheException,
-			KeyNotFoundException {
+	public Marker lookup(String mgiid) 
+	throws DBException, CacheException, KeyNotFoundException 
+	{
 		return (Marker) super.lookup(mgiid);
 	}
 
@@ -80,7 +81,8 @@ extends LazyCachedLookup
 	 * @return the initialization query
 	 */
 //	public String getFullInitQuery() {
-	public String getPartialInitQuery() {
+	public String getPartialInitQuery() 
+	{
 		return null;
 	}
 
@@ -113,12 +115,17 @@ extends LazyCachedLookup
 	 * 
 	 * @return the RowDataInterpreter
 	 */
-	public RowDataInterpreter getRowDataInterpreter() {
+	public RowDataInterpreter getRowDataInterpreter() 
+	{
 		return new Interpreter();
 	}
 
-	private class Interpreter implements RowDataInterpreter {
-		public Object interpret(RowReference row) throws DBException {
+	private class Interpreter 
+	implements RowDataInterpreter 
+	{
+		public Object interpret(RowReference row) 
+		throws DBException 
+		{
 			Marker marker = new Marker(row.getString("mgiid"),
 					row.getString("symbol"), row.getString("chromosome"),
 					row.getInt("markerKey"));

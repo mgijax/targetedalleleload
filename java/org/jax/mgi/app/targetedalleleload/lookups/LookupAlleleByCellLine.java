@@ -10,6 +10,7 @@ import org.jax.mgi.shr.cache.CacheException;
 import org.jax.mgi.shr.cache.FullCachedLookup;
 import org.jax.mgi.shr.cache.KeyValue;
 import org.jax.mgi.shr.config.ConfigException;
+import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
 import org.jax.mgi.shr.dbutils.DBException;
 import org.jax.mgi.shr.dbutils.MultiRowInterpreter;
 import org.jax.mgi.shr.dbutils.RowDataInterpreter;
@@ -66,7 +67,7 @@ extends FullCachedLookup
 		super(SQLDataManagerFactory.getShared(SchemaConstants.MGD));
 
 		lookupMarkerByMGIID = LookupMarkerByMGIID.getInstance();
-		lookupJNumbersByAlleleKey = new LookupJNumbersByAlleleKey();
+		lookupJNumbersByAlleleKey = LookupJNumbersByAlleleKey.getInstance();
 
 		logger = DLALogger.getInstance();
 		this.initCache();
@@ -129,7 +130,17 @@ extends FullCachedLookup
 	 * 
 	 * @return the initialization query
 	 */
-	public String getFullInitQuery() {
+	public String getFullInitQuery() 
+	{
+		TargetedAlleleLoadCfg cfg;
+		String provider;
+		try {
+			cfg = new TargetedAlleleLoadCfg();
+			provider = cfg.getProviderLabcode();
+		} catch (MGIException e) {
+			// Cannot get load provider lab code.  Bail!
+			return "";
+		}
 
 		return "SELECT alleleKey=a._Allele_key, alleleName=a.name, " +
 				"alleleSymbol=a.symbol, alleleType=a._Allele_Type_key, " +
@@ -146,7 +157,8 @@ extends FullCachedLookup
 				"MRK_Marker mrk, ALL_Allele_CellLine aac, " +
 				"ALL_Cellline ac, MGI_Note n, MGI_NoteChunk nc, " +
 				"ACC_Accession acc, ACC_Accession acc2 " +
-				"WHERE aac._Allele_key = a._Allele_key " +
+				"WHERE a.symbol like '%tm%" + provider + ">' " + 
+				"AND aac._Allele_key = a._Allele_key " +
 				"AND aac._MutantCellLine_key = ac._cellline_key " +
 				"and a._Marker_key = mrk._Marker_key " +
 				"and acc.preferred=1 " +
