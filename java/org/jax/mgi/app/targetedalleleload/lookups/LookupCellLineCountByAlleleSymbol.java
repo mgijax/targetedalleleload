@@ -87,7 +87,7 @@ extends FullCachedLookup
 			"WHERE a._allele_key *= ac._allele_key " +
 			"AND acc2.preferred = 1 " +
 			"AND acc2.private = 1 " +
-			"AND acc2._Object_key = a._Object_key " +
+			"AND acc2._Object_key = a._Allele_key " +
 			"AND acc2._LogicalDB_key in (125,126,138,143) " +
 			"AND acc2._MGIType_key=11 " +
 			"GROUP BY a.symbol " +
