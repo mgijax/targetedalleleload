@@ -25,6 +25,7 @@ public class TestSangerInterpreter extends TestCase {
 	public String validInput2 = "MGI:1349766	NCBIM37	L1L2_gt2	EUCOMM	72416	EPD0001_3_E04	SI2.3	tm2a(EUCOMM)Wtsi	conditional_ready	90879083	90879213	90878244	90878296";
 	public String validInput3 = "MGI:1349766	NCBIM37	L1L2_gt2	EUCOMM	72416	EPD0001_3_E04	SI2.3	tm2a(EUCOMM)Wtsi	deletion	90879213	90879083		";
 	public String validInput4 = "MGI:1349766	NCBIM37	L1L2_gt2	EUCOMM	72416	EPD0001_3_E04	SI2.3	tm2a(EUCOMM)Wtsi	targeted_non_conditional	90879213	90879083	90878296	90878244";
+	public String validInput5 = "MGI:1921138	NCBIM37	L1L2_Bact_P	KOMP-CSD	27522	DEPD00538_1_H08	JM8A3.N1	tm1e(KOMP)Ucd	targeted_non_conditional	9990688	9990619";
 
 	public String inValidInput1 = "MGI:1349766	NCBIM37	L1L2_gt2	EUCOMM	72416		SI2.3	tm2a(EUCOMM)Wtsi	targeted_non_conditional	90879213	90879083	90878296	90878244";
 	public String inValidInput2 = "	NCBIM37	L1L2_gt2	EUCOMM	72416	EPD0001_3_E04	SI2.3	tm2a(EUCOMM)Wtsi	targeted_non_conditional	90879213	90879083	90878296	90878244";
@@ -38,7 +39,7 @@ public class TestSangerInterpreter extends TestCase {
 	public String inValidInput10 = "MGI:1349766	NCBIM37	L1L2_gt2	EUCOMM	72416	EPD0001_3_E04	SI2.3	tm2a(EUCOMM)Wtsi	targeted_non_conditional	90879213	90879083		90878244";
 	public String inValidInput11 = "MGI:1349766	NCBIM37	L1L2_gt2	EUCOMM	72416	EPD0001_3_E04	SI2.3	tm2a(EUCOMM)Wtsi	targeted_non_conditional	90879213	90879083	90878296	";
 
-	public void testInterpret() throws MGIException{
+	public void testInterpret1() throws MGIException{
 		
 		List allowedCelllines = new ArrayList();
 		allowedCelllines.add("E");
@@ -67,10 +68,45 @@ public class TestSangerInterpreter extends TestCase {
 		System.out.print(good);
 		System.out.print("\n");
 		System.out.print(check);
+		System.out.print("\n");
 		assertTrue(check.equals(good));
 	}
 
-	public void testIsValid() {
+	public void testInterpret5() throws MGIException{
+		
+		List allowedCelllines = new ArrayList();
+		allowedCelllines.add("D");
+		List knownCelllines = new ArrayList();
+		knownCelllines.add("E");
+		knownCelllines.add("H");
+		knownCelllines.add("D");
+
+		KnockoutAlleleInterpreter kai = new SangerInterpreter(allowedCelllines, 
+				knownCelllines, 
+				"KOMP-CSD");
+
+		SangerAlleleInput check = (SangerAlleleInput) kai.interpret(validInput5);
+
+		SangerAlleleInput good = new SangerAlleleInput();
+		good.setESCellName("DEPD00538_1_H08");
+		good.setMutationType("Targeted non-conditional");
+		good.setParentESCellName("JM8A3N1");
+		good.setProjectId("27522");
+		good.setGeneId("MGI:1921138");
+		good.setLocus1("9990688");
+		good.setLocus2("9990619");
+		good.setBuild("37");
+		good.setCassette("L1L2_Bact_P");
+		good.setInputPipeline("KOMP-CSD");
+		System.out.print(good);
+		System.out.print("\n");
+		System.out.print(check);
+		System.out.print("\n");
+		assertTrue(check.equals(good));
+	}
+
+	
+	public void testIsValidEUCOMM() {
 
 		KnockoutAlleleInterpreter kai =  null;
 		List allowedCelllines = new ArrayList();
@@ -101,6 +137,7 @@ public class TestSangerInterpreter extends TestCase {
 
 		for (int i = 0; i<validInputs.size(); i++) {
 			String input = (String)validInputs.get(i);
+			System.out.println((i+1) + " is vaid: " + kai.isValid(input));
 			assertTrue(kai.isValid(input));			
 		}
 		
@@ -120,6 +157,38 @@ public class TestSangerInterpreter extends TestCase {
 		for (int i = 0; i<inValidInputs.size(); i++) {
 			String input = (String)inValidInputs.get(i);
 			assertFalse(kai.isValid(input));
+		}
+	}
+	public void testIsValidKOMPCSD() {
+
+		KnockoutAlleleInterpreter kai =  null;
+		List allowedCelllines = new ArrayList();
+		allowedCelllines.add("D");
+		List knownCelllines = new ArrayList();
+		knownCelllines.add("E");
+		knownCelllines.add("H");
+		knownCelllines.add("D");
+
+		try {
+			kai = new SangerInterpreter(allowedCelllines, 
+					knownCelllines, 
+					"KOMP-CSD");
+		} catch (MGIException e) {
+			e.printStackTrace();
+			fail("Instantiation error");
+		}
+		
+		if (kai == null) {
+			fail("Could not create new instance of SangerInterpreter");
+		}
+		
+		List validInputs = new ArrayList();
+		validInputs.add(validInput5);
+
+		for (int i = 0; i<validInputs.size(); i++) {
+			String input = (String)validInputs.get(i);
+			System.out.println((i+1) + " is vaid: " + kai.isValid(input));
+			assertTrue(kai.isValid(input));			
 		}
 	}
 }

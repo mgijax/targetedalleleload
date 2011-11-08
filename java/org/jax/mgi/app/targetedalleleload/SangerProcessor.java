@@ -216,9 +216,14 @@ extends KnockoutAlleleProcessor
 				Integer nextKey = (Integer) alleleSetIt.next();
 				KnockoutAllele existingKoAllele = lookupAlleleByKey
 						.lookup(nextKey);
-				if (existingKoAllele == null) {
-					throw new MGIException("Unable to create allele for "
-							+ in.getMutantCellLine());
+				if (existingKoAllele == null) 
+				{
+					String m = "Unable to find allele for key ";
+					m += nextKey;
+					m += " (for cellline ";
+					m += in.getMutantCellLine();
+					m += ")";
+					throw new MGIException(m);
 				}
 				String allSymbol = existingKoAllele.getSymbol();
 
