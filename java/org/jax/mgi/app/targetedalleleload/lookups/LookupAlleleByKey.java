@@ -70,8 +70,8 @@ public class LookupAlleleByKey
 
     		Set celllines = lookupAlleleByCellline.getKeySet();
         	Iterator it = celllines.iterator();
-        	String cellline = null;
-    		KnockoutAllele ka = null;
+        	String cellline;
+    		KnockoutAllele ka;
 
     		while (it.hasNext())
         	{
@@ -81,7 +81,25 @@ public class LookupAlleleByKey
         		cache.put(alleleKey, ka);
         		numAlleles++;
         	}
-    		String m = "Size of alleleByKey cache: ";
+    		
+    		// Guess what.... the orphaned alleles are missing
+    		// from that set!
+    		LookupOrphanedAlleleByKey lookupOrphanedAlleleByKey = 
+    			LookupOrphanedAlleleByKey.getInstance();
+
+    		Set keys = lookupOrphanedAlleleByKey.getKeySet();
+    		it = keys.iterator();
+    		Integer key;
+
+     		while (it.hasNext())
+        	{
+     			key = (Integer)it.next();
+        		ka = lookupOrphanedAlleleByKey.lookup(key);
+        		cache.put(key, ka);
+        		numAlleles++;
+        	}
+
+     		String m = "Size of alleleByKey cache: ";
     		m += new Integer(numAlleles);
     		logger.logdInfo(m , true);
 
