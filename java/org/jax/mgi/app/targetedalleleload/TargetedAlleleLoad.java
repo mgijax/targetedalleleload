@@ -501,6 +501,12 @@ public class TargetedAlleleLoad extends DLALoader {
 					}
 
 					// ********************************************************
+					// Ensure that all cfg references are associated to
+					// this allele
+					// ********************************************************
+					existing.normalizeReferences(loadStream);
+
+					// ********************************************************
 					// BEGIN QC CHECKS
 					// ********************************************************
 

@@ -1,8 +1,11 @@
 package org.jax.mgi.app.targetedalleleload;
 
 import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.Vector;
 
 import org.jax.mgi.dbs.mgd.dao.ALL_AlleleDAO;
@@ -21,8 +24,11 @@ import org.jax.mgi.dbs.mgd.lookup.JNumberLookup;
 import org.jax.mgi.shr.cache.CacheException;
 import org.jax.mgi.shr.config.ConfigException;
 import org.jax.mgi.shr.config.RecordStampCfg;
+import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
 import org.jax.mgi.shr.dbutils.DBException;
 import org.jax.mgi.shr.dbutils.dao.SQLStream;
+import org.jax.mgi.shr.dla.log.DLALoggingException;
+import org.jax.mgi.shr.exception.MGIException;
 
 /**
  * A plain old java object for representing an allele record in MGD
@@ -228,13 +234,53 @@ public class KnockoutAllele implements Comparable {
 	}
 
 	// @Override
-	public int compareTo(Object that) throws ClassCastException {
+	public int compareTo(Object that) 
+	throws ClassCastException 
+	{
 		if (!(that instanceof KnockoutAllele)) {
 			throw new ClassCastException("A KnockoutAllele object expected.");
 		}
 
 		String thatSymbol = ((KnockoutAllele) that).getSymbol();
 		return this.getSymbol().compareTo(thatSymbol);
+	}
+
+	/**
+	 * This method returns the difference between jnumbers indicated
+	 * in the configuration that should be associated to this allele
+	 * and actual jnumber associations
+	 * 
+	 * to this allele already, and  
+	 * @return set of strings indicating which jnumbers
+	 * 			need to be associated to this allele but aren't 
+	 * @throws ClassCastException
+	 * @throws MGIException
+	 */
+	public Set getJNumSetDifference() 
+	throws MGIException 
+	{
+		TargetedAlleleLoadCfg cfg = new TargetedAlleleLoadCfg();
+		
+		Set difference = new HashSet(Arrays.asList(cfg.getJNumbers()));
+		Set theseJNums = new HashSet(Arrays.asList(this.getJNumbers()));
+		difference.removeAll(theseJNums);
+		return difference;
+	}
+	
+	/**
+	 * This method enforce that all the references indicated
+	 * in the CFG are associated to this allele
+	 * @param stream SQL stream to use to create the missing associations
+	 * @throws MGIException
+	 */
+	public void normalizeReferences(SQLStream stream) 
+	throws MGIException
+	{
+		Set jnumbers = getJNumSetDifference();
+		for (Iterator it = jnumbers.iterator(); it.hasNext();) {
+			String jNumber = (String) it.next();
+			createReference(stream, Constants.MOLECULAR_REFERENCE, jNumber);
+		}
 	}
 
 	/**
@@ -379,17 +425,7 @@ public class KnockoutAllele implements Comparable {
 			createReference(stream, Constants.MOLECULAR_REFERENCE, jNumber);
 			
 		}
-//		int[] REFERENCE_ASSOC = { 1011, 1012 };
-//		for (int i = 0; i < REFERENCE_ASSOC.length; i++) {
-//			MGI_Reference_AssocState raState = new MGI_Reference_AssocState();
-//			raState.setRefsKey(jnumLookup.lookup(jNumber));
-//			raState.setObjectKey(key);
-//			raState.setMGITypeKey(new Integer(Constants.ALLELE_MGI_TYPE));
-//			raState.setRefAssocTypeKey(new Integer(Constants.REFERENCE_ASSOC[i]));
-//
-//			MGI_Reference_AssocDAO raDAO = new MGI_Reference_AssocDAO(raState);
-//			stream.insert(raDAO);
-//		}
+
 
 		// Save the note to the stream
 		this.updateNote(stream, note);
