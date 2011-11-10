@@ -274,22 +274,25 @@ implements Comparable
 	throws MGIException
 	{
 		Set jnumbers = getJNumSetDifference();
-		for (Iterator it = jnumbers.iterator(); it.hasNext();) {
-			String jNumber = (String) it.next();
-			createReference(stream, Constants.MOLECULAR_REFERENCE, jNumber);
-			
-			// Add the new reference association to the lookup 
-			// to make sure the it's only recorded the first time 
-			List update = new ArrayList(Arrays.asList(this.jNumbers));
-			update.add(jNumber);
-			this.setJNumbers((String [])update.toArray(new String [0]));
+		if (jnumbers.size() != 0)
+		{
+			for (Iterator it = jnumbers.iterator(); it.hasNext();) {
+				String jNumber = (String) it.next();
+				createReference(stream, Constants.MOLECULAR_REFERENCE, jNumber);
+				
+				// Add the new reference association to the lookup 
+				// to make sure the it's only recorded the first time 
+				List update = new ArrayList(Arrays.asList(this.jNumbers));
+				update.add(jNumber);
+				this.setJNumbers((String [])update.toArray(new String [0]));
 
-			lookupJNumbersByAlleleKey.addToCache(
-				key, 
-				this.getJNumbers()
-				);
+				lookupJNumbersByAlleleKey.addToCache(
+					key, 
+					this.getJNumbers()
+					);
+			}
+			lookupAlleleByKey.addToCache(key, this);			
 		}
-		lookupAlleleByKey.addToCache(key, this);
 	}
 
 	/**
