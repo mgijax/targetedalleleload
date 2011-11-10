@@ -98,7 +98,7 @@ extends FullCachedLookup
 	 * @throws CacheException
 	 *             thrown if there is an error with the cache
 	 */
-	protected void addToCache(Integer alleleKey, String[] jnumbers)
+	public void addToCache(Integer alleleKey, String[] jnumbers)
 	throws DBException, CacheException 
 	{
 		// Replace the current value if it exists

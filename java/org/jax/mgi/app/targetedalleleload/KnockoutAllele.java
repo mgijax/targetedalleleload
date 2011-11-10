@@ -1,13 +1,16 @@
 package org.jax.mgi.app.targetedalleleload;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
+import org.jax.mgi.app.targetedalleleload.lookups.LookupJNumbersByAlleleKey;
 import org.jax.mgi.dbs.mgd.dao.ALL_AlleleDAO;
 import org.jax.mgi.dbs.mgd.dao.ALL_AlleleState;
 import org.jax.mgi.dbs.mgd.dao.ALL_Allele_MutationDAO;
@@ -27,7 +30,6 @@ import org.jax.mgi.shr.config.RecordStampCfg;
 import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
 import org.jax.mgi.shr.dbutils.DBException;
 import org.jax.mgi.shr.dbutils.dao.SQLStream;
-import org.jax.mgi.shr.dla.log.DLALoggingException;
 import org.jax.mgi.shr.exception.MGIException;
 
 /**
@@ -36,10 +38,13 @@ import org.jax.mgi.shr.exception.MGIException;
  * allele load).
  */
 
-public class KnockoutAllele implements Comparable {
+public class KnockoutAllele 
+implements Comparable 
+{
 	private final int NOTECHUNKSIZE = 255;
-	private RecordStampCfg rdCfg = null;
-	private JNumberLookup jnumLookup = null;
+	private RecordStampCfg rdCfg;
+	private JNumberLookup jnumLookup;
+	private LookupJNumbersByAlleleKey lookupJNumbersByAlleleKey;
 	private Timestamp currentTime = new Timestamp(new Date().getTime());
 
 	// We will need to compare and save these types of objects to the
@@ -47,21 +52,20 @@ public class KnockoutAllele implements Comparable {
 	private Integer key = new Integer(0);
 	private Integer markerKey = new Integer(0);
 	private Integer strainKey = new Integer(0);
-	private String symbol = null;
-	private String name = null;
-	private String note = null;
-	private Integer noteKey = null;
-	private Integer noteModifiedByKey = null;
-	private String projectId = null;
-//	private Integer cellLineKey = null;
+	private String symbol;
+	private String name;
+	private String note;
+	private Integer noteKey;
+	private Integer noteModifiedByKey;
+	private String projectId;
 
 	// From cfg file
-	private String[] jNumbers = null;
-	private Integer projectLogicalDb = null;
+	private String[] jNumbers;
+	private Integer projectLogicalDb;
 	private Vector mutationTypes = new Vector();
 
 	private Integer modeKey = new Integer(Constants.ALLELE_MODE);
-	private Integer typeKey = null;
+	private Integer typeKey;
 	private Integer statusKey = new Integer(Constants.ALLELE_STATUS_APPROVED);
 	private Integer transmissionKey = new Integer(Constants.ALLELE_TRANSMISSION_CELLLINE);
 	private Boolean isWildType = new Boolean(false);
@@ -74,19 +78,17 @@ public class KnockoutAllele implements Comparable {
 
 	/**
 	 * Constructs a Knockout Allele object
+	 * @throws MGIException 
 	 * 
 	 * @assumes Nothing
 	 * @effects Set the class variables.
-	 * @throws ConfigException
-	 *             thrown if there is an error accessing the configuration
-	 * @throws DBException
-	 *             thrown if there is an error accessing the database
-	 * @throws CacheException
-	 *             thrown if there is an error accessing the cache
 	 */
-	public KnockoutAllele() throws ConfigException, DBException, CacheException {
+	public KnockoutAllele() 
+	throws MGIException 
+	{
 		// To lookup the JNumber Key from the database
 		jnumLookup = new JNumberLookup();
+		lookupJNumbersByAlleleKey = LookupJNumbersByAlleleKey.getInstance();
 
 		// To get the approvedBy user key from the database
 		rdCfg = new RecordStampCfg();
@@ -123,14 +125,6 @@ public class KnockoutAllele implements Comparable {
 	public Integer getTypeKey() {
 		return this.typeKey;
 	}
-
-//	public Integer getCellLineKey() {
-//		return cellLineKey;
-//	}
-
-//	public void setCellLineKey(Integer key) {
-//		this.cellLineKey = key;
-//	}
 
 	public Integer getMarkerKey() {
 		return markerKey;
@@ -280,6 +274,14 @@ public class KnockoutAllele implements Comparable {
 		for (Iterator it = jnumbers.iterator(); it.hasNext();) {
 			String jNumber = (String) it.next();
 			createReference(stream, Constants.MOLECULAR_REFERENCE, jNumber);
+			
+			// Add the new reference association to the lookup 
+			// to make sure the it's only recorded the first time 
+			List update = new ArrayList(Arrays.asList(this.jNumbers));
+			lookupJNumbersByAlleleKey.addToCache(
+				key, 
+				(String [])update.toArray(new String [0])
+				);
 		}
 	}
 

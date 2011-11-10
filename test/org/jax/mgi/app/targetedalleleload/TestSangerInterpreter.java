@@ -9,7 +9,9 @@ import org.jax.mgi.shr.exception.MGIException;
 
 import junit.framework.TestCase;
 
-public class TestSangerInterpreter extends TestCase {
+public class TestSangerInterpreter
+extends TestCase 
+{
 
 	public String [] multiInput = {
 			"MGI:1349766	NCBIM37	L1L2_gt2	EUCOMM	72416	EPD0001_3_E04	SI2.3	tm2a(EUCOMM)Wtsi	conditional_ready	90879213	90879083	90878296	90878244",
