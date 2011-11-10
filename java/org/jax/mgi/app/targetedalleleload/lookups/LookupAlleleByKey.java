@@ -24,11 +24,6 @@ import org.jax.mgi.shr.exception.MGIException;
  * 
  */
 
-
-
-
-
-
 public class LookupAlleleByKey 
 {
 
