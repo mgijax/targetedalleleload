@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
+import org.jax.mgi.app.targetedalleleload.lookups.LookupAlleleByKey;
 import org.jax.mgi.app.targetedalleleload.lookups.LookupJNumbersByAlleleKey;
 import org.jax.mgi.dbs.mgd.dao.ALL_AlleleDAO;
 import org.jax.mgi.dbs.mgd.dao.ALL_AlleleState;
@@ -45,6 +46,7 @@ implements Comparable
 	private RecordStampCfg rdCfg;
 	private JNumberLookup jnumLookup;
 	private LookupJNumbersByAlleleKey lookupJNumbersByAlleleKey;
+	private LookupAlleleByKey lookupAlleleByKey;
 	private Timestamp currentTime = new Timestamp(new Date().getTime());
 
 	// We will need to compare and save these types of objects to the
@@ -89,6 +91,7 @@ implements Comparable
 		// To lookup the JNumber Key from the database
 		jnumLookup = new JNumberLookup();
 		lookupJNumbersByAlleleKey = LookupJNumbersByAlleleKey.getInstance();
+		lookupAlleleByKey = LookupAlleleByKey.getInstance();
 
 		// To get the approvedBy user key from the database
 		rdCfg = new RecordStampCfg();
@@ -278,11 +281,15 @@ implements Comparable
 			// Add the new reference association to the lookup 
 			// to make sure the it's only recorded the first time 
 			List update = new ArrayList(Arrays.asList(this.jNumbers));
+			update.add(jNumber);
+			this.setJNumbers((String [])update.toArray(new String [0]));
+
 			lookupJNumbersByAlleleKey.addToCache(
 				key, 
-				(String [])update.toArray(new String [0])
+				this.getJNumbers()
 				);
 		}
+		lookupAlleleByKey.addToCache(key, this);
 	}
 
 	/**

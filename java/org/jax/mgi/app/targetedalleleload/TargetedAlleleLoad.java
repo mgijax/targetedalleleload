@@ -214,7 +214,6 @@ public class TargetedAlleleLoad extends DLALoader {
 			LookupDerivationByVectorCreatorParentType.getInstance();
 
 		lookupAlleleByCellLine = LookupAlleleByCellLine.getInstance();
-
 		lookupAlleleByKey = LookupAlleleByKey.getInstance();
 
 		
@@ -485,6 +484,12 @@ public class TargetedAlleleLoad extends DLALoader {
 					// Find the existing associated allele
 					KnockoutAllele existing = lookupAlleleByCellLine.lookup(in
 							.getMutantCellLine());
+					
+					// Replace it with the object by Key lookup
+					// because the allele might include jnumber 
+					// association updates, but this cell line
+					// doesn't know about those
+					existing = lookupAlleleByKey.lookup(existing.getKey());
 
 					// If the associated allele can't be found, there's a major
 					// problem. The caches are out of synch, or the cell line to
