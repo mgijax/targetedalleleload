@@ -60,7 +60,7 @@ PROVIDER='Wtsi'
 #
 # JNumber reference for CSD Alleles
 #
-JNUMBER='J:148605'
+JNUMBER='J:148605, J:173534'
 
 #
 # Should the load be allowed to overwrite curator entered notes?

@@ -60,7 +60,7 @@ PROVIDER='Wtsi'
 #
 # JNumber reference for EUCOMM Alleles
 #
-JNUMBER='J:155845'
+JNUMBER='J:155845, J:173534'
 
 #
 # Should the load be allowed to overwrite curator entered notes?
