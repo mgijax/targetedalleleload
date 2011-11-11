@@ -35,7 +35,7 @@ public class LookupAlleleByCellLine
 extends FullCachedLookup 
 {
 
-	private static LookupAlleleByCellLine _instance;
+	private static LookupAlleleByCellLine _instance = null;
 
 	private static LookupJNumbersByAlleleKey lookupJNumbersByAlleleKey;
 	private static LookupMarkerByMGIID lookupMarkerByMGIID;
