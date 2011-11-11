@@ -198,18 +198,27 @@ extends FullCachedLookup
 			public Object interpret(RowReference ref) 
 			throws DBException 
 			{
+				logger.logdDebug(
+						"LookupAlleleByCellLine, RowDataInterpreter.interpret\n", 
+						true);
 				return new RowData(ref);
 			}
 
 			public Object interpretKey(RowReference row) 
 			throws DBException 
 			{
+				logger.logdDebug(
+						"LookupAlleleByCellLine, RowDataInterpreter.interpretKey\n", 
+						true);
 				return row.getString("cellLine");
 			}
 
 			public Object interpretRows(Vector v) {
 				// All rows return the same values for every columns EXCEPT
 				// for the alleleNote column (one row per note chunk)
+				logger.logdDebug(
+						"LookupAlleleByCellLine, RowDataInterpreter.interpretRows\n", 
+						true);
 				RowData rd = (RowData) v.get(0);
 
 				String completeNote = "";
@@ -294,6 +303,10 @@ extends FullCachedLookup
 		public RowData(RowReference row) 
 		throws DBException 
 		{
+			logger.logdDebug(
+					"LookupAlleleByCellLine, RowData.constructor\n", 
+					true);
+
 			alleleKey = row.getInt("alleleKey");
 			projectId = row.getString("projectId");
 			alleleType = row.getInt("alleleType");
