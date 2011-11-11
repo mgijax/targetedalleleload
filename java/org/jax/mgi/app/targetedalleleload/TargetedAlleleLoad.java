@@ -201,35 +201,61 @@ public class TargetedAlleleLoad extends DLALoader {
 		logger.logdDebug("TargetedAlleleLoader sqlDBMgr.database "
 				+ sqlDBMgr.getDatabase());
 
+		logger.logdDebug("Initializing lookupMutantCelllineByName", true);
 		lookupMutantCelllineByName = new LookupMutantCelllineByName();
 
+		logger.logdDebug("Initializing lookupAllelesByProjectId", true);
 		lookupAllelesByProjectId = LookupAllelesByProjectId.getInstance();
 
+		logger.logdDebug("Initializing lookupAllelesByMarker", true);
 		lookupAllelesByMarker = LookupAllelesByMarker.getInstance();
 		
+		logger.logdDebug("Initializing lookupCellLineCountByAlleleSymbol", true);
 		lookupCellLineCountByAlleleSymbol = 
 			LookupCellLineCountByAlleleSymbol.getInstance();
 
+		logger.logdDebug("Initializing derivationLookup", true);
 		derivationLookup = 
 			LookupDerivationByVectorCreatorParentType.getInstance();
 
+		logger.logdDebug("Initializing lookupAlleleByCellLine", true);
 		lookupAlleleByCellLine = LookupAlleleByCellLine.getInstance();
+
+		logger.logdDebug("Initializing lookupAlleleByKey", true);
 		lookupAlleleByKey = LookupAlleleByKey.getInstance();
 
 		
+		logger.logdDebug("Initializing parentStrainLookupByParentKey", true);
 		parentStrainLookupByParentKey = 
 			new ParentStrainLookupByParentKey();
+
+		logger.logdDebug("Initializing strainKeyLookup", true);
 		strainKeyLookup = new StrainKeyLookup();
+
+		logger.logdDebug("Initializing lookupVectorKeyByTerm", true);
 		lookupVectorKeyByTerm = new LookupVectorKeyByTerm();
+
+		logger.logdDebug("Initializing lookupMarkerByMGIID", true);
 		lookupMarkerByMGIID = LookupMarkerByMGIID.getInstance();
+
+		logger.logdDebug("Initializing vocTermLookup", true);
 		vocTermLookup = new VocabTermLookup();
+
+		logger.logdDebug("Initializing cellLineNameLookupByKey", true);
 		cellLineNameLookupByKey = new CellLineNameLookupByKey();
+
+		logger.logdDebug("Initializing lookupStrainKeyByCellLineKey", true);
 		lookupStrainKeyByCellLineKey = new LookupStrainKeyByCellLineKey();
+
+		logger.logdDebug("Initializing strainNameLookup", true);
 		strainNameLookup = new StrainNameLookup();
 
 		alleleFactory = KnockoutAlleleFactory.getFactory();
 
+		logger.logdDebug("Filtering project IDs", true);
 		filterProjectIds(databaseProjectIds);
+
+		logger.logdDebug("Filtering cell lines", true);
 		filterCellLines(databaseCellLines);
 
 		logger.logInfo("Reading input files");
