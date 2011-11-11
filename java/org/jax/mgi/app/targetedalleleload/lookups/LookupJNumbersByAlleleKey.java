@@ -15,6 +15,7 @@ import org.jax.mgi.shr.dbutils.MultiRowInterpreter;
 import org.jax.mgi.shr.dbutils.RowDataInterpreter;
 import org.jax.mgi.shr.dbutils.RowReference;
 import org.jax.mgi.shr.dbutils.SQLDataManagerFactory;
+import org.jax.mgi.shr.dla.log.DLALogger;
 import org.jax.mgi.shr.exception.MGIException;
 
 
@@ -35,11 +36,14 @@ extends FullCachedLookup
 
 	// Singleton pattern implementation
 	private static LookupJNumbersByAlleleKey _instance;
+    private static DLALogger logger;
 
 	public static LookupJNumbersByAlleleKey getInstance() 
 	throws MGIException 
 	{
+    	logger = DLALogger.getInstance();
 		if (_instance == null) {
+    		logger.logdDebug("First time getting instance of LookupAlleleByCellLine, initializing ", true);
 			_instance = new LookupJNumbersByAlleleKey();
 		}
 		return _instance;

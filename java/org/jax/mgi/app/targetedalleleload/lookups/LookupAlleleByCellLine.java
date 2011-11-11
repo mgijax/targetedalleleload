@@ -46,6 +46,9 @@ extends FullCachedLookup
     {
             logger = DLALogger.getInstance();
             if (_instance == null) {
+        		logger.logdDebug(
+        				"First time getting instance of LookupAlleleByCellLine, initializing ", 
+        				true);
                     _instance = new LookupAlleleByCellLine();
             }
             return _instance;
@@ -141,6 +144,9 @@ extends FullCachedLookup
 			// Cannot get load provider lab code.  Bail!
 			return "";
 		}
+		logger.logdDebug(
+				"LookupAlleleByCellLine, getting init query ", 
+				true);
 
 		return "SELECT alleleKey=a._Allele_key, alleleName=a.name, " +
 				"alleleSymbol=a.symbol, alleleType=a._Allele_Type_key, " +
@@ -184,13 +190,20 @@ extends FullCachedLookup
 	 * 
 	 * @return the RowDataInterpreter for this query
 	 */
-	public RowDataInterpreter getRowDataInterpreter() {
-		class Interpreter implements MultiRowInterpreter {
-			public Object interpret(RowReference ref) throws DBException {
+	public RowDataInterpreter getRowDataInterpreter() 
+	{
+		class Interpreter 
+		implements MultiRowInterpreter 
+		{
+			public Object interpret(RowReference ref) 
+			throws DBException 
+			{
 				return new RowData(ref);
 			}
 
-			public Object interpretKey(RowReference row) throws DBException {
+			public Object interpretKey(RowReference row) 
+			throws DBException 
+			{
 				return row.getString("cellLine");
 			}
 
@@ -221,8 +234,8 @@ extends FullCachedLookup
 				koAllele.setNoteModifiedByKey(rd.alleleNoteModifiedBy);
 //				koAllele.setCellLineKey(rd.mutantCellLineKey);
 
-				// Lookup the jnumber in the database, if we can't find
-				// any there, this allele is BAD, report the exception
+				// Lookup the jnumbers, if we can't find any
+				// then this allele is BAD, report the exception
 				// and skip
 				try {
 					koAllele.setJNumbers(lookupJNumbersByAlleleKey
@@ -248,6 +261,9 @@ extends FullCachedLookup
 					logger.logdInfo(e.getMessage(), true);
 					return null;
 				}
+				logger.logdDebug(
+						"LookupAlleleByCellLine, new entry: \n"+koAllele, 
+						true);
 
 				return new KeyValue(rd.cellLine, koAllele);
 			}
@@ -259,7 +275,8 @@ extends FullCachedLookup
 	/**
 	 * Simple data object representing a row of data from the query
 	 */
-	class RowData {
+	class RowData 
+	{
 		protected Integer alleleKey;
 		protected String projectId;
 		protected Integer alleleType;
@@ -274,7 +291,9 @@ extends FullCachedLookup
 		protected Integer mutantCellLineKey;
 		private String cellLine;
 
-		public RowData(RowReference row) throws DBException {
+		public RowData(RowReference row) 
+		throws DBException 
+		{
 			alleleKey = row.getInt("alleleKey");
 			projectId = row.getString("projectId");
 			alleleType = row.getInt("alleleType");
