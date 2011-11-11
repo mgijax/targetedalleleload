@@ -91,8 +91,7 @@ implements Comparable
 		// To lookup the JNumber Key from the database
 		jnumLookup = new JNumberLookup();
 		lookupJNumbersByAlleleKey = LookupJNumbersByAlleleKey.getInstance();
-		lookupAlleleByKey = LookupAlleleByKey.getInstance();
-
+		
 		// To get the approvedBy user key from the database
 		rdCfg = new RecordStampCfg();
 	}
@@ -290,6 +289,13 @@ implements Comparable
 					key, 
 					this.getJNumbers()
 					);
+			}
+			
+			// Do NOT initialize this in the constructor or it leads to
+			// a circular initialization death spiral.
+			if (lookupAlleleByKey == null)
+			{
+				lookupAlleleByKey = LookupAlleleByKey.getInstance();				
 			}
 			lookupAlleleByKey.addToCache(key, this);			
 		}
