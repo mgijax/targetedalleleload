@@ -47,9 +47,12 @@ extends FullCachedLookup
             logger = DLALogger.getInstance();
             if (_instance == null) {
         		logger.logdDebug(
-        				"First time getting instance of LookupAlleleByCellLine, initializing ", 
-        				true);
-                    _instance = new LookupAlleleByCellLine();
+        			"First time getting instance of LookupAlleleByCellLine, initializing ", 
+        			true);
+        		_instance = new LookupAlleleByCellLine();
+        		logger.logdDebug(
+        			"Done first time getting instance of LookupAlleleByCellLine, initializing ", 
+        			true);
             }
             return _instance;
     }
