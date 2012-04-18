@@ -6,7 +6,7 @@ import org.jax.mgi.shr.exception.*;
 public class TestTargetedAlleleLoad
     extends TestCase
 {
-    private TargetedAlleleLoad taLoad;
+    //private TargetedAlleleLoad taLoad;
 
     public static void main(String[] args)
     throws Exception
@@ -31,7 +31,7 @@ public class TestTargetedAlleleLoad
     protected void tearDown()
         throws Exception
     {
-        taLoad = null;
+        //taLoad = null;
         super.tearDown();
     }
 
