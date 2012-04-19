@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 import org.jax.mgi.app.targetedalleleload.lookups.LookupAllelesByMarker;
 import org.jax.mgi.app.targetedalleleload.lookups.LookupAllelesByProjectId;
 import org.jax.mgi.app.targetedalleleload.lookups.LookupMarkerByMGIID;
+import org.jax.mgi.dbs.mgd.lookup.ParentStrainLookupByParentKey;
 import org.jax.mgi.dbs.mgd.lookup.StrainKeyLookup;
 import org.jax.mgi.dbs.mgd.lookup.TranslationException;
 import org.jax.mgi.dbs.mgd.lookup.VocabKeyLookup;
@@ -23,21 +24,15 @@ import org.jax.mgi.shr.dla.log.DLALoggingException;
 import org.jax.mgi.shr.exception.MGIException;
 import org.jax.mgi.shr.ioutils.RecordFormatException;
 
-/**
- * An object that knows how to create a KnockoutAllele object from 
- * a RegeneronAlleleInput
- */
+public class MirkoProcessor extends KnockoutAlleleProcessor {
 
-public class RegeneronProcessor 
-extends KnockoutAlleleProcessor 
-{
-	
 	private TargetedAlleleLoadCfg cfg;
 	private LookupMarkerByMGIID lookupMarkerByMGIID;
 	private StrainKeyLookup strainKeyLookup;
 	private VocabKeyLookup vocabLookup;
 	private LookupAllelesByProjectId lookupAllelesByProjectId;
 	private LookupAllelesByMarker lookupAllelesByMarker;
+	private ParentStrainLookupByParentKey parentStrainLookupByParentKey;
 
 	private Matcher regexMatcher;
 	private Pattern sequencePattern = Pattern.compile(".*tm(\\d{1,2}).*");
@@ -55,7 +50,7 @@ extends KnockoutAlleleProcessor
 	 * @throws CacheException
 	 * @throws TranslationException
 	 */
-	public RegeneronProcessor() 
+	public MirkoProcessor() 
 	throws MGIException 
 	{
 		cfg = new TargetedAlleleLoadCfg();
@@ -65,16 +60,17 @@ extends KnockoutAlleleProcessor
 		lookupMarkerByMGIID = LookupMarkerByMGIID.getInstance();
 		vocabLookup = new VocabKeyLookup(Constants.ALLELE_VOCABULARY);
 		strainKeyLookup = new StrainKeyLookup();
+		parentStrainLookupByParentKey = new ParentStrainLookupByParentKey();
 	}
 
 	/**
 	 * Set all the attributes of the clone object by parsing the given 
-	 * input record and providing Regeneron Specific constant values.
+	 * input record and providing MirKO Specific constant values.
 	 * 
 	 * @assumes Nothing
 	 * @effects Loads the clone object.
 	 * @param inputData
-	 *            A record from the Regeneron allele input file
+	 *            A record from the MirKO allele input file
 	 * @return An KnockoutAllele object
 	 * @throws RecordFormatException
 	 * @throws ConfigException
@@ -85,25 +81,26 @@ extends KnockoutAlleleProcessor
 	public KnockoutAllele process(KnockoutAlleleInput inputData)
 	throws MGIException 
 	{
-		// Cast the input to a Regeneron specific allele input type
-		RegeneronAlleleInput in = (RegeneronAlleleInput) inputData;
+		// Cast the input to a sanger specific allele input type
+		// Since we're reading in data from the same source as Sanger
+		// Alleles
+		SangerAlleleInput in = (SangerAlleleInput) inputData;
 
 		KnockoutAllele koAllele = new KnockoutAllele();
 
-		// Get the external dependencies referenced in this row
 		Marker marker = lookupMarkerByMGIID.lookup(in.getGeneId());
-		Integer strainKey = strainKeyLookup.lookup(in.getStrainName());
+		Integer strainKey = strainKeyLookup
+				.lookup(parentStrainLookupByParentKey.lookup(cfg
+						.getParentalKey(in.getParentCellLine())));
 
 		koAllele.setMarkerKey(marker.getKey());
 		koAllele.setProjectId(in.getProjectId());
 		koAllele.setProjectLogicalDb(cfg.getProjectLogicalDb());
 		koAllele.setStrainKey(strainKey);
 
-		// Regeneron alleles are all DELETION type alleles 
-		// (Targeted Knockout)
+		// MirKO alleles are all DELETION type alleles (Targeted Knockout)
 		koAllele.setTypeKey(cfg.getAlleleType("DELETION"));
 
-		// Regeneron Specific Mutation types
 		List mutationTypeKeys = new ArrayList();
 		String[] types = cfg.getMutationTypes().split(",");
 		for (int i = 0; i < types.length; i++) {
@@ -178,24 +175,36 @@ extends KnockoutAlleleProcessor
 
 		String note = cfg.getNoteTemplate();
 
-		// If coordinates are missing, use the incomplete note template
-		if (in.getDelSize().toString().equals("0") ||
-			in.getDelStart().toString().equals("0") ||
-			in.getDelEnd().toString().equals("0")
-			) {
-			note = cfg.getNoteTemplateMissingCoords();
-		}
-
-		// Build the molecular note
 		note = note.replaceAll("~~CASSETTE~~", in.getCassette());
-		note = note.replaceAll("~~SIZE~~", in.getDelSize().toString());
-		note = note.replaceAll("~~START~~", in.getDelStart().toString());
-		note = note.replaceAll("~~END~~", in.getDelEnd().toString());
+		note = note.replaceAll("~~LOCUS1~~", in.getLocus1());
+		note = note.replaceAll("~~LOCUS2~~", in.getLocus2());
 		note = note.replaceAll("~~CHROMOSOME~~", marker.getChromosome());
+		note = note.replaceAll("~~DELSIZE~~", Integer.toString(getDeletionSize(in)));
 		note = note.replaceAll("~~BUILD~~", in.getBuild());
 		koAllele.setNote(note);
 
+
 		return koAllele;
+	}
+
+	protected int getDeletionSize(SangerAlleleInput in) 
+	throws MGIException 
+	{
+		int delSize = 0;
+
+		// Calculate the deletion size
+		if (in.getLocus1().compareTo("0") != 0
+				&& in.getLocus2().compareTo("0") != 0) {
+			int delStart = Integer.parseInt(in.getLocus1());
+			int delEnd = Integer.parseInt(in.getLocus2());
+			delSize = Math.abs(delEnd - delStart);
+		} else {
+			qcStatistics.record("ERROR",
+					"Number of records missing coordinates");
+			throw new MGIException("Missing coordinates: "
+					+ in.getMutantCellLine());
+		}
+		return delSize;
 	}
 
 }

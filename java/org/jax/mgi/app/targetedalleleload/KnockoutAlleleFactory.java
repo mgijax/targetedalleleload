@@ -19,6 +19,12 @@ abstract class KnockoutAlleleFactory
 			provider.equals("Hmgu") || 
 			provider.equals("Mbp")
 			) {
+
+			// mirKO uses a different processor than other sanger
+			// ESC
+			if (cfg.getPrimaryJNumber().equals("J:174268")) {
+				return new MirkoFactory();
+			}
 			return new SangerFactory();
 		}
 		else if (provider.equals("Vlcg")) {

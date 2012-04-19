@@ -64,7 +64,7 @@ implements Comparable
 	// From cfg file
 	private String[] jNumbers;
 	private Integer projectLogicalDb;
-	private Vector mutationTypes = new Vector();
+	private List mutationTypes = new ArrayList();
 
 	private Integer modeKey = new Integer(Constants.ALLELE_MODE);
 	private Integer typeKey;
@@ -176,11 +176,11 @@ implements Comparable
 		this.jNumbers = jNumbers;
 	}
 
-	public Vector getMutationTypes() {
+	public List getMutationTypes() {
 		return mutationTypes;
 	}
 
-	public void setMutationTypes(Vector mutationTypes) {
+	public void setMutationTypes(List mutationTypes) {
 		this.mutationTypes = mutationTypes;
 	}
 
@@ -411,7 +411,8 @@ implements Comparable
 
 		ALL_Marker_AssocDAO amaDAO = new ALL_Marker_AssocDAO(amaState);
 		stream.insert(amaDAO);
-		// Create the mutation type references in the database
+
+		// Create the mutation type references
 		for (Iterator i = mutationTypes.iterator(); i.hasNext();) {
 			Integer typeKey = (Integer) i.next();
 

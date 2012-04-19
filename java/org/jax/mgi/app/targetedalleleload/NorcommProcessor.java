@@ -1,7 +1,9 @@
 package org.jax.mgi.app.targetedalleleload;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
@@ -95,7 +97,7 @@ extends KnockoutAlleleProcessor
 		allele.setTypeKey(cfg.getAlleleType("DELETION"));
 
 		// NorCOMM Specific Mutation types
-		Vector mutationTypeKeys = new Vector();
+		List mutationTypeKeys = new ArrayList();
 		String[] types = cfg.getMutationTypes().split(",");
 		for (int i = 0; i < types.length; i++) {
 			Integer key = vocabLookup.lookup(types[i].trim());

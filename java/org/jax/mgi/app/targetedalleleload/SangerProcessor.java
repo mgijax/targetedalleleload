@@ -1,7 +1,8 @@
 package org.jax.mgi.app.targetedalleleload;
 
 import java.lang.Integer;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Iterator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -143,7 +144,7 @@ extends KnockoutAlleleProcessor
 		koAllele.setStrainKey(strainKey);
 
 		// CSD Specific Mutation types
-		Vector mutationTypeKeys = new Vector();
+		List mutationTypeKeys = new ArrayList();
 		String[] types = cfg.getMutationTypes(in.getMutationType()).split(",");
 		for (int i = 0; i < types.length; i++) {
 			Integer key = vocabLookup.lookup(types[i].trim());
