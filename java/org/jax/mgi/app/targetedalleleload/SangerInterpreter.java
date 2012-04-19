@@ -23,9 +23,9 @@ import org.jax.mgi.shr.ioutils.RecordFormatException;
 public class SangerInterpreter extends KnockoutAlleleInterpreter {
 
 	// QC string constants
-	private static final String NUM_UNKNOWN_MUTATION = "Input record(s) with unknown mutation type skipped";
-	private static final String NUM_UNKNOWN_PARENT = "Input record(s) with unknown parental cell line skipped";
-	private static final Set alleleTypes = new HashSet();
+	protected static final String NUM_UNKNOWN_MUTATION = "Input record(s) with unknown mutation type skipped";
+	protected static final String NUM_UNKNOWN_PARENT = "Input record(s) with unknown parental cell line skipped";
+	protected static final Set alleleTypes = new HashSet();
 	static {
 		alleleTypes.add("conditional_ready");
 		alleleTypes.add("targeted_non_conditional");
@@ -33,11 +33,11 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 	}
 
 	// The minimum length of a valid input record (including NL character).
-	private static final int MIN_REC_LENGTH = 50;
-	private TargetedAlleleLoadCfg cfg = null;
-	private List allowedCelllines = null;
-	private List knownCelllines = null;
-	private String pipeline = null;
+	protected static final int MIN_REC_LENGTH = 50;
+	protected TargetedAlleleLoadCfg cfg = null;
+	protected List allowedCelllines = null;
+	protected List knownCelllines = null;
+	protected String pipeline = null;
 	protected DLALogger logger = null;
 
 	/**

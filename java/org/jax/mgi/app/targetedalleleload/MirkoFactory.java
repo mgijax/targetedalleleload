@@ -5,7 +5,7 @@ import org.jax.mgi.shr.exception.MGIException;
 public class MirkoFactory extends KnockoutAlleleFactory {
 
 	public KnockoutAlleleInterpreter getInterpreter() throws MGIException {
-		return new SangerInterpreter();
+		return new MirkoInterpreter();
 	}
 
 	public KnockoutAlleleProcessor getProcessor() throws MGIException {
