@@ -3,6 +3,8 @@ package org.jax.mgi.app.targetedalleleload;
 import java.util.List;
 
 import org.jax.mgi.app.targetedalleleload.lookups.LookupMirkoClusterByCellLine;
+import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
+import org.jax.mgi.shr.dla.log.DLALogger;
 import org.jax.mgi.shr.exception.MGIException;
 import org.jax.mgi.shr.ioutils.RecordFormatException;
 
@@ -12,7 +14,9 @@ public class MirkoInterpreter extends SangerInterpreter {
 	LookupMirkoClusterByCellLine lookupMirkoClusterByCellLine;
 
 	public MirkoInterpreter() throws MGIException {
-		super();
+		cfg = new TargetedAlleleLoadCfg();
+		pipeline = cfg.getPipeline();
+		this.logger = DLALogger.getInstance();
 		LookupMirkoClusterByCellLine.getInstance();
 	}
 
