@@ -244,7 +244,6 @@ extends FullCachedLookup
 				koAllele.setNote(rd.alleleNote);
 				koAllele.setNoteKey(rd.alleleNoteKey);
 				koAllele.setNoteModifiedByKey(rd.alleleNoteModifiedBy);
-//				koAllele.setCellLineKey(rd.mutantCellLineKey);
 
 				// Lookup the jnumbers, if we can't find any
 				// then this allele is BAD, report the exception

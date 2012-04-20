@@ -63,25 +63,11 @@ public class LookupCelllinesByJnumber
 
 	}
 
-    /**
-     * Checks to see if there is another RADARClone to be processed.
-     * @assumes Nothing
-     * @effects Nothing
-     * @return True if there is another RADARClone, otherwise false.
-     * @throws Nothing
-     */
     public boolean hasNext ()
     {
         return it.hasNext();
     }
 
-    /**
-     * Gets the next RADARClone to be processed.
-     * @assumes Nothing
-     * @effects Nothing
-     * @return The next RADARClone object.
-     * @throws DBException
-     */
     public String next ()
         throws DBException
     {
