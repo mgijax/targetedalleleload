@@ -1616,8 +1616,12 @@ public class TargetedAlleleLoad extends DLALoader {
 			while (iterator.hasNext()) {
 				String label = (String) iterator.next();
 				KnockoutAllele a = lookupAlleleByCellLine.lookup(label);
-				s.add(a.getSymbol() + "\t" + a.getProjectId() + "\t"
-						+ label.toUpperCase());
+				if (a != null) {
+					s.add(a.getSymbol() + "\t" + a.getProjectId() + "\t"
+							+ label.toUpperCase());					
+				} else {
+					logger.logdInfo("\nCannot find allele for cellline "+label+" in MGD", false);
+				}
 			}
 
 			iterator = s.iterator();
