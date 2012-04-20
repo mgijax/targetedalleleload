@@ -76,7 +76,7 @@ extends FullCachedLookup
 	/**
 	 * look up an associated KnockoutAllele by a given name
 	 * 
-	 * @param name the KnockoutAllele name
+	 * @param key the KnockoutAllele key to lookup
 	 * @return the associated KnockoutAllele
 	 * @throws DBException thrown if there is an error accessing the database
 	 * @throws CacheException thrown if there is an error accessing the configuration
@@ -94,9 +94,8 @@ extends FullCachedLookup
 	 * @assumes nothing
 	 * @effects the value identified by 'cellLine' will be added 
 	 * 			or replaced
-	 * @param cellLine the cellLine name
-	 * @param koAllele
-	 *            the knockout allele
+	 * @param key the cellLine key to lookup
+	 * @param koAllele the knockout allele
 	 * @throws DBException
 	 *             thrown if there is an error with the database
 	 * @throws CacheException
