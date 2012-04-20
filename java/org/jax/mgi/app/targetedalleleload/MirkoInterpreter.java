@@ -1,6 +1,9 @@
 package org.jax.mgi.app.targetedalleleload;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.jax.mgi.app.targetedalleleload.lookups.LookupMirkoClusterByCellLine;
 import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
@@ -8,8 +11,23 @@ import org.jax.mgi.shr.dla.log.DLALogger;
 import org.jax.mgi.shr.exception.MGIException;
 import org.jax.mgi.shr.ioutils.RecordFormatException;
 
-public class MirkoInterpreter extends SangerInterpreter {
+public class MirkoInterpreter extends KnockoutAlleleInterpreter {
+	// QC string constants
+	protected static final String NUM_UNKNOWN_MUTATION = "Input record(s) with unknown mutation type skipped";
+	protected static final String NUM_UNKNOWN_PARENT = "Input record(s) with unknown parental cell line skipped";
 	protected static final String NUM_MISSING_ESC = "Input record(s) missing ES Cell name skipped";
+
+	protected static final Set alleleTypes = new HashSet();
+	static {
+		alleleTypes.add("deletion");
+	}
+
+	protected TargetedAlleleLoadCfg cfg = null;
+	protected String pipeline = null;
+	protected DLALogger logger = null;
+
+	// The minimum length of a valid input record (including NL character).
+	protected static final int MIN_REC_LENGTH = 10;
 
 	LookupMirkoClusterByCellLine lookupMirkoClusterByCellLine;
 
@@ -20,27 +38,35 @@ public class MirkoInterpreter extends SangerInterpreter {
 		LookupMirkoClusterByCellLine.getInstance();
 	}
 
+	/**
+	 * Parse one line. Split the line apart on tab character
+	 * 
+	 * @return array of Strings
+	 */
+	public String[] parse(String line) {
+		String prepared = line.replaceAll("\\r|\\n", "");
+		return prepared.split("\t");
+	}
+
 	public Object interpret(String rec) throws MGIException {
 		SangerAlleleInput inputData = new SangerAlleleInput();
 		qcStatistics.record("SUMMARY", "Number of input records");
 
-		// Throw an exception if the input record does not meet the minimum
-		// length required to extract the fields.
-		//
+		// Throw an exception if the input record does not meet the 
+		// minimum length required to extract the fields.
 		if (rec.length() < MIN_REC_LENGTH) {
 			RecordFormatException e = new RecordFormatException();
 			e.bindRecord(rec);
-			qcStatistics.record("WARNING", "Number of incorrectly formatted input records");
+			qcStatistics.record("WARNING",
+					"Number of incorrectly formatted input records");
 			throw e;
 		}
 
 		// Get fields from the input record
-		// The file is a CSV file
-		List list = parse(rec);
-		String[] fields = (String[]) list.toArray(new String[0]);
+		String[] fields = parse(rec);
 
-		// Set the attributes of the inputData object using the fields parsed
-		// from the input record.
+		// Set the attributes of the inputData object using the fields 
+		// parsed from the input record
 		// 0 - Gene ID
 		// 1 - Genome Build
 		// 2 - Cassette
@@ -64,15 +90,15 @@ public class MirkoInterpreter extends SangerInterpreter {
 		inputData.setProjectId(fields[4]);
 		inputData.setESCellName(fields[5]);
 		inputData.setParentESCellName(fields[6]);
-		
-		if(fields[8].equals("conditional_ready")) {
+
+		if (fields[8].equals("conditional_ready")) {
 			inputData.setMutationType("Conditional");
 		} else if (fields[8].equals("targeted_non_conditional")) {
 			inputData.setMutationType("Targeted non-conditional");
 		} else if (fields[8].equals("deletion")) {
 			inputData.setMutationType("Deletion");
 		}
-		
+
 		inputData.setLocus1(fields[9]);
 		inputData.setLocus2(fields[10]);
 
@@ -83,8 +109,7 @@ public class MirkoInterpreter extends SangerInterpreter {
 	public boolean isValid(String rec) {
 
 		try {
-			List list = parse(rec);
-			String[] parts = (String[]) list.toArray(new String[0]);
+			String[] parts = parse(rec);
 
 			if (parts[0].equals("")) {
 				// Skip any missing MGI IDs
@@ -100,13 +125,13 @@ public class MirkoInterpreter extends SangerInterpreter {
 				// Ignore any comment lines which start with a "#" character
 				return false;
 			}
-			
+
 			try {
 				// The project IDs look like mirKOxxxx where xxxx
 				// is an integer
 				Integer.parseInt(parts[4].replaceAll("mirKO", ""));
 			} catch (NumberFormatException e) {
-				// MirKO IKMC project IDs should be Integers, but this 
+				// MirKO IKMC project IDs should be Integers, but this
 				// record is not an integer
 				return false;
 			}
@@ -119,7 +144,7 @@ public class MirkoInterpreter extends SangerInterpreter {
 			if (parts[5].equals("")) {
 				// Missing ESC name
 				qcStatistics.record("WARNING", NUM_MISSING_ESC);
-				logger.logdInfo("Missing ESC name: "+rec, false);
+				logger.logdInfo("Missing ESC name: " + rec, false);
 				return false;
 			}
 
@@ -137,25 +162,27 @@ public class MirkoInterpreter extends SangerInterpreter {
 
 			// if the record is missing coordinates, fail it
 			try {
-				if(Integer.valueOf(parts[9]) == null) {return false;}
-				if(Integer.valueOf(parts[10]) == null) {return false;}
+				if (Integer.valueOf(parts[9]) == null) {
+					return false;
+				}
+				if (Integer.valueOf(parts[10]) == null) {
+					return false;
+				}
 			} catch (NumberFormatException e) {
 				return false;
 			}
-			
+
 			// Skip all cell lines that belong to a mirKO cluster
-			SangerAlleleInput in = (SangerAlleleInput) super.interpret(rec);
-			if(lookupMirkoClusterByCellLine.lookup(in.getMutantCellLine())) {
+			if (lookupMirkoClusterByCellLine.lookup(parts[5])) {
 				return false;
 			}
-
 
 			// Looks like this cell line is not already
 			// loaded as belonging to a mirKO cluster project
 			return true;
 
 		} catch (MGIException e) {
-			logger.logdInfo("Malformed record "+rec, false);
+			logger.logdInfo("Malformed record " + rec, false);
 			return false;
 		}
 	}
