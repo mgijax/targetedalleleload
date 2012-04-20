@@ -47,7 +47,7 @@ export MGD_BCP_PATH
 #
 # Pipeline this configuration file is for
 #
-PIPELINE='KOMP'
+PIPELINE='mirKO'
 
 #
 # Provider this configuration file is for
