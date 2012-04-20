@@ -1,4 +1,4 @@
-package org.jax.mgi.app.targetedalleleload.lookups;
+	package org.jax.mgi.app.targetedalleleload.lookups;
 
 import java.util.Iterator;
 import java.util.Set;
@@ -76,13 +76,10 @@ extends FullCachedLookup
 	/**
 	 * look up an associated KnockoutAllele by a given name
 	 * 
-	 * @param name
-	 *            the KnockoutAllele name
+	 * @param name the KnockoutAllele name
 	 * @return the associated KnockoutAllele
-	 * @throws DBException
-	 *             thrown if there is an error accessing the database
-	 * @throws CacheException
-	 *             thrown if there is an error accessing the configuration
+	 * @throws DBException thrown if there is an error accessing the database
+	 * @throws CacheException thrown if there is an error accessing the configuration
 	 */
 	public KnockoutAllele lookup(Integer key) 
 	throws DBException, CacheException 
@@ -97,8 +94,7 @@ extends FullCachedLookup
 	 * @assumes nothing
 	 * @effects the value identified by 'cellLine' will be added 
 	 * 			or replaced
-	 * @param cellLine
-	 *            the cellLine name
+	 * @param cellLine the cellLine name
 	 * @param koAllele
 	 *            the knockout allele
 	 * @throws DBException
@@ -117,7 +113,7 @@ extends FullCachedLookup
 	 * returns the set of keys from the cache
 	 * 
 	 * @assumes nothing
-	 * @returns a Set of keys for this cache
+	 * @return a Set of keys for this cache
 	 */
 	public Set getKeySet() 
 	{

@@ -79,7 +79,6 @@ public class LookupCelllinesByJnumber
      * Gets the next RADARClone to be processed.
      * @assumes Nothing
      * @effects Nothing
-     * @param None
      * @return The next RADARClone object.
      * @throws DBException
      */

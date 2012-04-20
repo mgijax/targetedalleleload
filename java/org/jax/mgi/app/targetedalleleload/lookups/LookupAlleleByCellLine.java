@@ -122,7 +122,7 @@ extends FullCachedLookup
 	 * returns the set of keys from the cache
 	 * 
 	 * @assumes nothing
-	 * @returns a Set of keys for this cache
+	 * @return a Set of keys for this cache
 	 */
 	public Set getKeySet() 
 	{
