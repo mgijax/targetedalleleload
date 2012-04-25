@@ -1,5 +1,6 @@
 package org.jax.mgi.app.targetedalleleload.lookups;
 
+import org.jax.mgi.app.targetedalleleload.MutantCellLine;
 import org.jax.mgi.dbs.SchemaConstants;
 import org.jax.mgi.shr.cache.CacheException;
 import org.jax.mgi.shr.cache.KeyValue;
@@ -46,14 +47,15 @@ extends LazyCachedLookup {
 	 * 
 	 * @param cellline
 	 *            the cellline of interest
-	 * @return true if 
+	 * @return the allele symbol associated to the cellline (or null if
+	 * 			not found) 
 	 * @throws MGIException
 	 *             if something goes wrong
 	 */
-	public boolean lookup(String cellline) 
+	public String lookup(String cellline) 
 	throws MGIException 
 	{
-		return super.lookup(cellline) == null ? false : true;
+		return (String) super.lookupNullsOk(cellline);
 	}
 
 	/**
