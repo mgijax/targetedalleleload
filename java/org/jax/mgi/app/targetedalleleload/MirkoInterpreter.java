@@ -35,7 +35,7 @@ public class MirkoInterpreter extends KnockoutAlleleInterpreter {
 		cfg = new TargetedAlleleLoadCfg();
 		pipeline = cfg.getPipeline();
 		this.logger = DLALogger.getInstance();
-		LookupMirkoClusterByCellLine.getInstance();
+		lookupMirkoClusterByCellLine = LookupMirkoClusterByCellLine.getInstance();
 	}
 
 	/**
@@ -173,7 +173,7 @@ public class MirkoInterpreter extends KnockoutAlleleInterpreter {
 			}
 
 			// Skip all cell lines that belong to a mirKO cluster
-			if (lookupMirkoClusterByCellLine.lookup(parts[5])) {
+			if (lookupMirkoClusterByCellLine.lookup(parts[5]) != null) {
 				return false;
 			}
 
@@ -183,6 +183,7 @@ public class MirkoInterpreter extends KnockoutAlleleInterpreter {
 
 		} catch (MGIException e) {
 			logger.logdInfo("Malformed record " + rec, false);
+			logger.logdInfo(e.toString(), false);
 			return false;
 		}
 	}
