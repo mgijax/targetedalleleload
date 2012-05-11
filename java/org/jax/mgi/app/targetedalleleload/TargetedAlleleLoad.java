@@ -768,7 +768,7 @@ public class TargetedAlleleLoad extends DLALoader {
 			    		m += " Check that the logicalDB ("+ cfg.getProjectLogicalDb() +
 			    				") is in the LookupAlleleByCellLine cache query";
 			    		logger.logdInfo(m, false);
-			            throw new MGIException("Invalid configuration");
+			            throw new MGIException("Invalid configuration. Can't find allele when one certainly exists.");
 			        }
 			        associateCellLineToAllele(alleleKey, mclKey);
 				}
