@@ -756,7 +756,21 @@ public class TargetedAlleleLoad extends DLALoader {
 						continue;
 					}
 
-					associateCellLineToAllele(alleleKey, mclKey);
+			        KnockoutAllele lookedUpAllele = lookupAlleleByKey.lookup(alleleKey);
+			        if (lookedUpAllele == null)
+			        {   
+			        	// This is fatal.  We should not continue because
+			        	// the caches do not contain the correct set of
+			        	// alleles
+			        	String m = "Cannot find allele for allele key: " + 
+			    				alleleKey + "\n";
+			    		logger.logcInfo(m, false);
+			    		m += " Check that the logicalDB ("+ cfg.getProjectLogicalDb() +
+			    				") is in the LookupAlleleByCellLine cache query";
+			    		logger.logdInfo(m, false);
+			            throw new MGIException("Invalid configuration");
+			        }
+			        associateCellLineToAllele(alleleKey, mclKey);
 				}
 			} // end if (cfg.getUpdateOnlyMode())
 		} // end while (iter.hasNext())
@@ -1389,7 +1403,18 @@ public class TargetedAlleleLoad extends DLALoader {
 		loadStream.insert(aclDAO);
 
 		// Update the allele status
-		setAlleleApproved(lookupAlleleByKey.lookup(alleleKey));
+        KnockoutAllele lookedUpAllele = lookupAlleleByKey.lookup(alleleKey);
+        if (lookedUpAllele == null)
+        {   
+        	String m = "Cannot find allele for allele key: " + 
+    				alleleKey + "\n";
+    		logger.logcInfo(m, false);
+    		m += " Check that the logicalDB ("+ cfg.getProjectLogicalDb() +
+    				") is in the LookupAlleleByCellLine cache query";
+    		logger.logdInfo(m, false);
+            return;
+        }
+		setAlleleApproved(lookedUpAllele);
 	}
 
 	private KnockoutAllele createAllele(KnockoutAllele constructed,
