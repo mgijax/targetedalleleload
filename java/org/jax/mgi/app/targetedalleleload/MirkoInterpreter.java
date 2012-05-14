@@ -1,8 +1,6 @@
 package org.jax.mgi.app.targetedalleleload;
 
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.jax.mgi.app.targetedalleleload.lookups.LookupMirkoClusterByCellLine;
@@ -13,6 +11,7 @@ import org.jax.mgi.shr.ioutils.RecordFormatException;
 
 public class MirkoInterpreter extends KnockoutAlleleInterpreter {
 	// QC string constants
+	protected static final String NUM_CLUSTER_ESC = "Input record(s) that belong to a cluster skipped";
 	protected static final String NUM_UNKNOWN_MUTATION = "Input record(s) with unknown mutation type skipped";
 	protected static final String NUM_UNKNOWN_PARENT = "Input record(s) with unknown parental cell line skipped";
 	protected static final String NUM_MISSING_ESC = "Input record(s) missing ES Cell name skipped";
@@ -174,6 +173,7 @@ public class MirkoInterpreter extends KnockoutAlleleInterpreter {
 
 			// Skip all cell lines that belong to a mirKO cluster
 			if (lookupMirkoClusterByCellLine.lookup(parts[5]) != null) {
+				qcStatistics.record("WARNING", NUM_CLUSTER_ESC);
 				return false;
 			}
 
