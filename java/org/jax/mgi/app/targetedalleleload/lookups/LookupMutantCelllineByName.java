@@ -89,7 +89,7 @@ extends FullCachedLookup
 				"AND c._CellLine_Type_key = v._Term_key " +
 				"AND c._Strain_key = s._Strain_key " +
 				"AND c._Derivation_key != null " +
-				"AND a._LogicalDB_Key in (108,109,137,142)" ;
+				"AND a._LogicalDB_Key in (108,109,137,142,165)" ;
 	}
 
 	/**
