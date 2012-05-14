@@ -97,12 +97,12 @@ MUTATION_TYPES='Insertion, Intragenic deletion'
 #
 # New ES Cells are created with in the following logical database
 #
-ESCELL_LOGICAL_DB='109'
+ESCELL_LOGICAL_DB='165'
 
 #
 # The projects for mirKO are stored using the following logical db
 #
-PROJECT_LOGICAL_DB='125'
+PROJECT_LOGICAL_DB='166'
 export PROJECT_LOGICAL_DB
 
 #
