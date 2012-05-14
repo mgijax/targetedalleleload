@@ -214,9 +214,13 @@ implements Comparable
 
 	// @Override
 	public String toString() {
+		String jnumString = "";
+		if (this.jNumbers != null) {
+			jnumString = this.jNumbers.toString();
+		}
 		return "Allele key: " + this.key + "\n" + "name: " + this.name + "\n"
 				+ "symbol: " + this.symbol + "\n" + "note: " + this.note + "\n"
-				+ "J Numbers: " + this.jNumbers.toString() + "\n";
+				+ "J Numbers: " + jnumString + "\n";
 	}
 
 	// @Override
