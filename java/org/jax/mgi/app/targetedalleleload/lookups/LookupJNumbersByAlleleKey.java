@@ -127,7 +127,7 @@ extends FullCachedLookup
 				"AND acc2.preferred = 1 " +
 				"AND acc2.private = 1 " +
 				"AND acc2._Object_key = mra._Object_key " + 
-				"AND acc2._LogicalDB_key in (125,126,138,143) " +
+				"AND acc2._LogicalDB_key in (125,126,138,143,166) " +
 				"AND acc2._MGIType_key=11 " +
 				"ORDER BY mra._object_key " ;
 	}
