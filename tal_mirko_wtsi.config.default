@@ -87,7 +87,7 @@ NAME_TEMPLATE='targeted mutation ~~SEQUENCE~~, Wellcome Trust Sanger Institute'
 # ~~CHROMOSOME~~ is replaced with the chromosome of the deletion
 # ~~BUILD~~ is replaced with the genome build specified in the file
 #
-NOTE_TEMPLATE='The insertion of the ~~CASSETTE~~ cassette created a deletion of size ~~DELSIZE~~ starting at position ~~LOCUS1~~ and ending at position ~~LOCUS2~~ of Chromosome ~~CHROMOSOME~~ (Genome Build ~~BUILD~~).  This deletion results in the removal of functionally critical exon(s).  The cassette is composed of a loxP site followed by an F3 site followed by a PGK-puromycin-delta-tk cassette, a loxP site and finally an FRT site.'
+NOTE_TEMPLATE='The insertion of the ~~CASSETTE~~ cassette created a deletion of size ~~DELSIZE~~ starting at position ~~LOCUS1~~ and ending at position ~~LOCUS2~~ of Chromosome ~~CHROMOSOME~~ (Genome Build ~~BUILD~~).  This deletion eliminates the DNA sequence for this microRNA.  The cassette is composed of a loxP site followed by an F3 site followed by a PGK-puromycin-delta-tk cassette, a loxP site and finally an FRT site.'
 
 #
 # New alleles are created with the following mutation types
