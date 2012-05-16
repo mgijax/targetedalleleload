@@ -20,6 +20,7 @@ import org.jax.mgi.shr.cache.CacheException;
 import org.jax.mgi.shr.config.ConfigException;
 import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
 import org.jax.mgi.shr.dbutils.DBException;
+import org.jax.mgi.shr.dla.log.DLALogger;
 import org.jax.mgi.shr.dla.log.DLALoggingException;
 import org.jax.mgi.shr.exception.MGIException;
 import org.jax.mgi.shr.ioutils.RecordFormatException;
@@ -33,6 +34,7 @@ public class MirkoProcessor extends KnockoutAlleleProcessor {
 	private LookupAllelesByProjectId lookupAllelesByProjectId;
 	private LookupAllelesByMarker lookupAllelesByMarker;
 	private ParentStrainLookupByParentKey parentStrainLookupByParentKey;
+	private static DLALogger logger;
 
 	private Matcher regexMatcher;
 	private Pattern sequencePattern = Pattern.compile(".*tm(\\d{1,2}).*");
@@ -54,6 +56,7 @@ public class MirkoProcessor extends KnockoutAlleleProcessor {
 	throws MGIException 
 	{
 		cfg = new TargetedAlleleLoadCfg();
+        logger = DLALogger.getInstance();
 
 		lookupAllelesByProjectId = LookupAllelesByProjectId.getInstance();
 		lookupAllelesByMarker = LookupAllelesByMarker.getInstance();
@@ -89,6 +92,15 @@ public class MirkoProcessor extends KnockoutAlleleProcessor {
 		KnockoutAllele koAllele = new KnockoutAllele();
 
 		Marker marker = lookupMarkerByMGIID.lookup(in.getGeneId());
+		if( marker == null ) {
+			qcStatistics.record(
+					"WARNING",
+					"Number of records matching a missing marker");
+			String m = "Cannot find marker for MGI ID " + 
+					in.getGeneId() + "\n";
+			logger.logdInfo(m, false);
+			return null;
+		}
 		Integer strainKey = strainKeyLookup
 				.lookup(parentStrainLookupByParentKey.lookup(cfg
 						.getParentalKey(in.getParentCellLine())));

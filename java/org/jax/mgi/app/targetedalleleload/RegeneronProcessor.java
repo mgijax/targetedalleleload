@@ -47,13 +47,7 @@ extends KnockoutAlleleProcessor
 	 * 
 	 * @assumes Nothing
 	 * @effects Nothing
-	 * @throws ConfigException
-	 * @throws DLALoggingException
-	 *             if a logger instance cannot be obtained
-	 * @throws DBException
-	 *             if a database access error occurs
-	 * @throws CacheException
-	 * @throws TranslationException
+	 * @throws MGIException if something goes wrong
 	 */
 	public RegeneronProcessor() 
 	throws MGIException 
