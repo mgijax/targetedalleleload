@@ -1507,44 +1507,44 @@ public class TargetedAlleleLoad extends DLALoader {
 					executeQuery(query);
 				}
 			}
+		}
 
-			// These alleles need to have their molecular note updated
-			if (alleleNotes.size() > 0) {
-				Iterator noteIt = alleleNotes.entrySet().iterator();
-				while (noteIt.hasNext()) {
-					Map.Entry entry = (Map.Entry) noteIt.next();
-					Integer key = (Integer) entry.getKey();
-					KnockoutAllele a = lookupAlleleByKey.lookup(key);
-					List notes = new ArrayList((Set) entry.getValue());
+		// These alleles need to have their molecular note updated
+		if (alleleNotes.size() > 0) {
+			Iterator noteIt = alleleNotes.entrySet().iterator();
+			while (noteIt.hasNext()) {
+				Map.Entry entry = (Map.Entry) noteIt.next();
+				Integer key = (Integer) entry.getKey();
+				KnockoutAllele a = lookupAlleleByKey.lookup(key);
+				List notes = new ArrayList((Set) entry.getValue());
 
-					if (notes.size() != 1) {
+				if (notes.size() != 1) {
 
-						// Multiple notes for this allele!
+					// Multiple notes for this allele!
 
-						logger.logdInfo("Molecular note for " + a.getSymbol()
-								+ " could NOT be updated to:\n" + notes, false);
-					} else if (!a.getNote().equals(notes.get(0))) {
+					logger.logdInfo("Molecular note for " + a.getSymbol()
+							+ " could NOT be updated to:\n" + notes, false);
+				} else if (!a.getNote().equals(notes.get(0))) {
 
-						// The MCLs all agree that there should be a new note
-						logger.logdInfo("Molecular note for " + a.getSymbol()
-								+ " updated to:\n" + notes, false);
+					// The MCLs all agree that there should be a new note
+					logger.logdInfo("Molecular note for " + a.getSymbol()
+							+ " updated to:\n" + notes, false);
 
-						// If a note exists
-						// Delete the existing note
-						if (a.getNoteKey() != null) {
-							String query = "DELETE FROM MGI_Note WHERE ";
-							query += "_Note_key = ";
-							query += a.getNoteKey();
+					// If a note exists
+					// Delete the existing note
+					if (a.getNoteKey() != null) {
+						String query = "DELETE FROM MGI_Note WHERE ";
+						query += "_Note_key = ";
+						query += a.getNoteKey();
 
-							executeQuery(query);
+						executeQuery(query);
 
-							// Attach the new note to the existing allele
-							a.updateNote(loadStream, (String) notes.get(0));
-							qcStats.record("SUMMARY", NUM_ALLELES_NOTE_CHANGE);
-						} else {
-							logger.logdInfo("Note key for " + a.getSymbol()
-									+ " could NOT be found", false);
-						}
+						// Attach the new note to the existing allele
+						a.updateNote(loadStream, (String) notes.get(0));
+						qcStats.record("SUMMARY", NUM_ALLELES_NOTE_CHANGE);
+					} else {
+						logger.logdInfo("Note key for " + a.getSymbol()
+								+ " could NOT be found", false);
 					}
 				}
 			}
