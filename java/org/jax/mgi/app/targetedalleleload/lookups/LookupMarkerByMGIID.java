@@ -100,7 +100,7 @@ extends LazyCachedLookup
 
     	return "SELECT  mgiid = a2.accID, markerKey = a2._Object_key, " +
 		"symbol = m.symbol, chromosome = m.chromosome, " +
-    	"stausKey = m._marker_status_key " +
+    	"statusKey = m._marker_status_key " +
 		"FROM ACC_Accession a2, MRK_Marker m " +
 		"WHERE a2._MGIType_key = 2 " + 
 		"AND a2.accId = '" + MGIID + "' " +
@@ -108,7 +108,6 @@ extends LazyCachedLookup
 		"AND a2.preferred = 1 " +
 		"AND a2.prefixPart = 'MGI:' " +
 		"AND a2._Object_key = m._Marker_key " +
-		"AND m._marker_status_key = 1 " +
 		"AND m._Organism_key = 1 ";
     }
 	
