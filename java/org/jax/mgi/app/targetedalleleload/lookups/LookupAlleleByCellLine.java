@@ -276,7 +276,7 @@ extends FullCachedLookup
 							"Marker was possibly withdrawn, but has celllines. Cannot find marker for MGIID: "+rd.geneMgiid+" for cellline "+rd.cellLine, 
 							true);
 					logger.logdInfo(e.getMessage(), true);
-					return null;
+					return new KeyValue(null, null);
 				}
 				koAllele.setMarkerKey(m);
 
