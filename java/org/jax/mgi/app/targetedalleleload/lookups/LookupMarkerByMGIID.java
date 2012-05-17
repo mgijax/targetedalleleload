@@ -99,7 +99,8 @@ extends LazyCachedLookup
     	String MGIID = (String)addObject;
 
     	return "SELECT  mgiid = a2.accID, markerKey = a2._Object_key, " +
-		"symbol = m.symbol, chromosome = m.chromosome " +
+		"symbol = m.symbol, chromosome = m.chromosome, " +
+    	"stausKey = m._marker_status_key " +
 		"FROM ACC_Accession a2, MRK_Marker m " +
 		"WHERE a2._MGIType_key = 2 " + 
 		"AND a2.accId = '" + MGIID + "' " +
@@ -128,7 +129,9 @@ extends LazyCachedLookup
 		throws DBException 
 		{
 			Marker marker = new Marker(row.getString("mgiid"),
-					row.getString("symbol"), row.getString("chromosome"),
+					row.getString("symbol"), 
+					row.getString("chromosome"),
+					row.getInt("statusKey"),
 					row.getInt("markerKey"));
 			return new KeyValue(row.getString("mgiid"), marker);
 		}

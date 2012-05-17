@@ -93,5 +93,8 @@ public class Constants {
 	}
 
 	public static final int VECTOR_TYPE_KEY = 3982979;
+	
+	public static final Integer MARKER_OFFICIAL = new Integer(1);
+	public static final Integer MARKER_WITHDRAWN = new Integer(2);
 
 }

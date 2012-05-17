@@ -5,7 +5,6 @@ import java.util.Set;
 import java.util.Vector;
 
 import org.jax.mgi.app.targetedalleleload.KnockoutAllele;
-import org.jax.mgi.app.targetedalleleload.Marker;
 import org.jax.mgi.dbs.SchemaConstants;
 import org.jax.mgi.shr.cache.CacheException;
 import org.jax.mgi.shr.cache.FullCachedLookup;
@@ -266,20 +265,13 @@ extends FullCachedLookup
 
 				koAllele.setNote(completeNote.trim());
 
-				// If the marker is missing, we cannot QC this cellline
-				// Report it and return null
-				Integer m = null;
 				try {
-					m = lookupMarkerByMGIID.lookup(rd.geneMgiid).getKey();
+					koAllele.setMarkerKey(lookupMarkerByMGIID.lookup(
+							rd.geneMgiid).getKey());
 				} catch (MGIException e) {
-					logger.logcInfo(
-							"Marker was possibly withdrawn, but has celllines. Cannot find marker for MGIID: "+rd.geneMgiid+" for cellline "+rd.cellLine, 
-							true);
 					logger.logdInfo(e.getMessage(), true);
-					return new KeyValue(null, null);
+					return null;
 				}
-				koAllele.setMarkerKey(m);
-
 				logger.logdDebug(
 						"LookupAlleleByCellLine, new entry: \n"+koAllele, 
 						true);

@@ -15,6 +15,7 @@ public class Marker {
 	private String chromosome = null;
 	private String symbol = null;
 	private Integer key = null;
+	private Integer statusKey = null;
 
 	/**
 	 * constructor
@@ -24,11 +25,12 @@ public class Marker {
 	 * @param key
 	 *            the database key of object
 	 */
-	public Marker(String accid, String symbol, String chromosome, Integer key) {
+	public Marker(String accid, String symbol, String chromosome, Integer statusKey, Integer key) {
 		this.accid = accid;
 		this.chromosome = chromosome;
 		this.symbol = symbol;
 		this.key = key;
+		this.statusKey = statusKey;
 	}
 
 	/**
@@ -68,6 +70,15 @@ public class Marker {
 	}
 
 	/**
+	 * get the database status key of the marker
+	 * 
+	 * @return the database key
+	 */
+	public Integer getStatusKey() {
+		return this.statusKey;
+	}
+
+	/**
 	 * override of equals method from Object class
 	 * 
 	 * @param o
@@ -99,8 +110,15 @@ public class Marker {
 	 * @return the string representation of this instance
 	 */
 	public String toString() {
-		return "<Marker: " + this.symbol + ", " + this.getAccid() + "(key: "
-				+ this.getKey() + ")>";
+		return "<Marker: " +
+				this.symbol + 
+				", " +
+				this.getAccid() + 
+				"(key: " +
+				this.getKey() +
+				", status: " +
+				getStatusKey() +
+				")>";
 	}
 
 }

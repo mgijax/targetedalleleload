@@ -90,6 +90,7 @@ public class TargetedAlleleLoad extends DLALoader {
 	private static final String NUM_CELLLINES_CHANGED_ALLELE = "Number of cell lines that changed allele associations";
 	private static final String NUM_ORPHANED_ALLELES = "Number of orphaned alleles created";
 	private static final String NUM_CELLLINES_PASSED_QC = "Number of cell lines that passed QC check";
+	private static final String NUM_WITHDRAWN_MARKER = "Number of cell lines that are associated to withdrawn markers";
 
 	// String constants for Log messages
 	private static final String LOG_ALLELE_NOT_FOUND = "Cell line ~~INPUT_MCL~~ found in database, but cannot find associated allele\n";
@@ -443,6 +444,20 @@ public class TargetedAlleleLoad extends DLALoader {
 				continue;
 			}
 
+			// Log if the marker has been withdrawn
+			if (((Marker)lookupMarkerByMGIID.lookup(in.getGeneId())).getStatusKey() == Constants.MARKER_WITHDRAWN) {
+				qcStats.record("ERROR", NUM_WITHDRAWN_MARKER);
+
+				String m = "Marker " +
+					in.getGeneId() +
+					" has been withdrawn, but cell line " +
+					in.getMutantCellLine() +
+					" is associated to it, skipping record\n";
+				logger.logcInfo(m, false);
+				continue;
+			}
+
+			
 			// Construct the allele from the input record
 			KnockoutAllele constructed = null;
 
