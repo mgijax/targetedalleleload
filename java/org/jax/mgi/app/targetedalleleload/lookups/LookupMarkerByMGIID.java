@@ -71,7 +71,7 @@ extends LazyCachedLookup
 	public Marker lookup(String mgiid) 
 	throws DBException, CacheException, KeyNotFoundException 
 	{
-		return (Marker) super.lookup(mgiid);
+		return (Marker) super.lookupNullsOk(mgiid);
 	}
 
 	/**
