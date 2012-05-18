@@ -449,7 +449,7 @@ public class TargetedAlleleLoad extends DLALoader {
 			Marker mrk = null;
 			try {
 				mrk = lookupMarkerByMGIID.lookup(in.getGeneId());
-			} catch (KeyNotFoundException e) {
+			} catch (Exception e) {
 				//pass
 			}
 
