@@ -446,7 +446,14 @@ public class TargetedAlleleLoad extends DLALoader {
 			}
 
 			// Log if the marker has been withdrawn
-			if (lookupMarkerByMGIID.lookup(in.getGeneId()) == null) {
+			Marker mrk = null;
+			try {
+				mrk = lookupMarkerByMGIID.lookup(in.getGeneId());
+			} catch (KeyNotFoundException e) {
+				//pass
+			}
+
+			if (mrk == null) {
 				qcStats.record("ERROR", BAD_MARKER_ID);
 
 				String m = "Marker " +
@@ -459,7 +466,7 @@ public class TargetedAlleleLoad extends DLALoader {
 				
 			}
 			
-			if (((Marker)lookupMarkerByMGIID.lookup(in.getGeneId())).getStatusKey() == Constants.MARKER_WITHDRAWN) {
+			if (mrk.getStatusKey() == Constants.MARKER_WITHDRAWN) {
 				qcStats.record("ERROR", NUM_WITHDRAWN_MARKER);
 
 				String m = "Marker " +
