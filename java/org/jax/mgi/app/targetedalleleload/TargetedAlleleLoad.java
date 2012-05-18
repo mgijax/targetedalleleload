@@ -91,6 +91,7 @@ public class TargetedAlleleLoad extends DLALoader {
 	private static final String NUM_ORPHANED_ALLELES = "Number of orphaned alleles created";
 	private static final String NUM_CELLLINES_PASSED_QC = "Number of cell lines that passed QC check";
 	private static final String NUM_WITHDRAWN_MARKER = "Number of cell lines that are associated to withdrawn markers";
+	private static final String BAD_MARKER_ID = "Number of cell lines that are associated to missing markers";
 
 	// String constants for Log messages
 	private static final String LOG_ALLELE_NOT_FOUND = "Cell line ~~INPUT_MCL~~ found in database, but cannot find associated allele\n";
@@ -445,6 +446,19 @@ public class TargetedAlleleLoad extends DLALoader {
 			}
 
 			// Log if the marker has been withdrawn
+			if (lookupMarkerByMGIID.lookup(in.getGeneId()) == null) {
+				qcStats.record("ERROR", BAD_MARKER_ID);
+
+				String m = "Marker " +
+					in.getGeneId() +
+					" can't be found, but cell line " +
+					in.getMutantCellLine() +
+					" is associated to it, skipping record\n";
+				logger.logcInfo(m, false);
+				continue;
+				
+			}
+			
 			if (((Marker)lookupMarkerByMGIID.lookup(in.getGeneId())).getStatusKey() == Constants.MARKER_WITHDRAWN) {
 				qcStats.record("ERROR", NUM_WITHDRAWN_MARKER);
 
