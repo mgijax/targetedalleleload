@@ -69,7 +69,7 @@ extends FullCachedLookup
 	 * CacheStrategy class when performing cache initialization. 
 	 * This query restricts cell lines to the logical databases 
 	 * for KOMP-Regeneron, KOMP-CSD, EUCOMM, and NorCOMM 
-	 * (108,109,137,142)
+	 * (108,109,137,142,165)
 	 * 
 	 * @return the full initialization query
 	 */
