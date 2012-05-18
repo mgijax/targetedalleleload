@@ -547,6 +547,12 @@ public class TargetedAlleleLoad extends DLALoader {
 					KnockoutAllele existing = lookupAlleleByCellLine.lookup(in
 							.getMutantCellLine());
 					
+					if (existing == null) {
+						String m = "Missing allele for cell line in lookup " + in.getMutantCellLine() + "\n";
+						logger.logdInfo(m, true);
+						continue;
+					}
+					
 					// Replace it with the object by Key lookup
 					// because the allele might include jnumber 
 					// association updates, but this cell line
