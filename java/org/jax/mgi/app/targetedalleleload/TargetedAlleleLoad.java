@@ -466,7 +466,7 @@ public class TargetedAlleleLoad extends DLALoader {
 				
 			}
 			
-			if (mrk.getStatusKey() == Constants.MARKER_WITHDRAWN) {
+			if (mrk.getStatusKey().equals(Constants.MARKER_WITHDRAWN)) {
 				qcStats.record("ERROR", NUM_WITHDRAWN_MARKER);
 
 				String m = "Marker " +
