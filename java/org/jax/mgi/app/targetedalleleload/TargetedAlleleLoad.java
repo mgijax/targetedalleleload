@@ -70,27 +70,49 @@ public class TargetedAlleleLoad extends DLALoader {
 	private QualityControlStatistics qcStats = new QualityControlStatistics();
 
 	// String constants for QC reporting
+	// ERROR
 	private static final String NUM_DERIVATIONS_NOT_FOUND = "Number of derivations not found";
+	// ERROR
 	private static final String NUM_BAD_CELLLINE_PROCESSING = "Number of cell lines that were not able to be constructed";
+	// SUMMARY
 	private static final String NUM_ALLELES_NOTE_CHANGE = "Number of alleles that had molecular notes updated";
+	// SUMMARY
 	private static final String NUM_CELLLINES_CHANGE_TYPE = "Number of cell lines that changed type";
+	// WARNING
 	private static final String NUM_CELLLINES_CHANGED_DERIVATION = "Number of cell lines that changed derivation";
+	// SUMMARY
 	private static final String NUM_CELLLINES_CHANGED_PIPELINE = "Number of cell lines that changed IKMC groups";
+	// SUMMARY
 	private static final String NUM_CELLLINES_CHANGED_NUMBER = "Number of cell lines that changed sequence number";
+	// ERROR
 	private static final String NUM_CELLINES_MISSING_ALLELE = "Number of cell lines that cannot find associated allele";
+	// SUMMARY
 	private static final String NUM_CELLINES_CHANGED_MARKER = "Number of cell lines that changed marker, skipped";
+	// SUMMARY
 	private static final String NUM_ALLELES_CHANGED_TRANS = "Number of alleles that changed transmission type, not processed";
+	// ERROR
 	private static final String NUM_BAD_ALLELE_PROCESSING = "Number of alleles that were not able to be constructed";
+	// ERROR
 	private static final String NUM_MISSING_PARENT = "Number of input records missing parental cell line";
+	// SUMMARY
 	private static final String NUM_CELLLINES_CREATED = "Number of cell lines created";
+	// SUMMARY
 	private static final String NUM_ALLELES_CREATED = "Number of alleles created";
+	// WARNING
 	private static final String NUM_DUPLICATE_INPUT_REC = "Number of duplicate cell line records in input file";
+	// WARNING
 	private static final String NUM_BAD_INPUT_REC = "Number of input records that were unable to be processed";
+	// SUMMARY
 	private static final String NUM_CELLLINES_CHANGED_CREATOR = "Number of cell lines that changed creator";
+	// SUMMARY
 	private static final String NUM_CELLLINES_CHANGED_ALLELE = "Number of cell lines that changed allele associations";
+	// WARNING
 	private static final String NUM_ORPHANED_ALLELES = "Number of orphaned alleles created";
+	// SUMMARY
 	private static final String NUM_CELLLINES_PASSED_QC = "Number of cell lines that passed QC check";
+	// ERROR
 	private static final String NUM_WITHDRAWN_MARKER = "Number of cell lines that are associated to withdrawn markers";
+	// ERROR
 	private static final String BAD_MARKER_ID = "Number of cell lines that are associated to missing markers";
 
 	// String constants for Log messages
@@ -284,8 +306,6 @@ public class TargetedAlleleLoad extends DLALoader {
 	 * 
 	 * @param databaseProjectIds
 	 *            set of all project IDs to be QCed
-	 * @param loadProvider
-	 *            string to identify the appropriate projects
 	 * @throws DBException
 	 *             if the lookup fails
 	 * @throws CacheException
@@ -325,8 +345,6 @@ public class TargetedAlleleLoad extends DLALoader {
 	 * 
 	 * @param databaseCellLines
 	 *            set of all cell lines to be QCed
-	 * @param loadProvider
-	 *            string to identify the appropriate projects
 	 * @throws DBException
 	 *             if the lookup fails
 	 * @throws CacheException
@@ -355,9 +373,9 @@ public class TargetedAlleleLoad extends DLALoader {
 	}
 
 	/**
-	 * The input files are in different formats, so read each of the files
-	 * according to their input format objects to provide a collection of
-	 * consistent Allele objects to the run process
+	 * 
+	 *  Initialize QC stats 
+	 * 
 	 * 
 	 * @assumes nothing
 	 * @effects nothing
@@ -419,6 +437,7 @@ public class TargetedAlleleLoad extends DLALoader {
 			// If this record is not appropriate to be handled by this
 			// processor, skip it. The only reason we included it in the
 			// first place was to assist in the QC of all cell lines
+			// sc - I think interpreter isValid method filters this out
 			if (!in.getInputPipeline().equals(cfg.getPipeline())) {
 				continue;
 			}
@@ -445,7 +464,7 @@ public class TargetedAlleleLoad extends DLALoader {
 				continue;
 			}
 
-			// Log if the marker has been withdrawn
+			// sc - Log and skip if the marker is secondary - this lookup only includes preferred IDs
 			Marker mrk = null;
 			try {
 				mrk = lookupMarkerByMGIID.lookup(in.getGeneId());
@@ -465,7 +484,7 @@ public class TargetedAlleleLoad extends DLALoader {
 				continue;
 				
 			}
-			
+			//  sc - log and skip if marker has been withdrawn
 			if (mrk.getStatusKey().equals(Constants.MARKER_WITHDRAWN)) {
 				qcStats.record("ERROR", NUM_WITHDRAWN_MARKER);
 
@@ -516,7 +535,7 @@ public class TargetedAlleleLoad extends DLALoader {
 				logger.logdInfo(m, false);
 				continue;
 			}
-
+			// not sure if this can happen because exception caught above and continue
 			if (constructed == null) {
 				qcStats.record("ERROR", NUM_BAD_ALLELE_PROCESSING);
 
@@ -528,6 +547,8 @@ public class TargetedAlleleLoad extends DLALoader {
 
 			// Does the Mutant Cell Line record exist in the
 			// cache (database or recently created)?
+			// sc - don't understand how it could be in the cache if dups are weeded out already ...
+			// sc - I think this simply lets us know if the MCL is in the database
 			MutantCellLine esCell = lookupMutantCelllineByName.lookup(in
 					.getMutantCellLine());
 
