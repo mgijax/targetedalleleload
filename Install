@@ -224,6 +224,7 @@ ${DLAINSTALL} ${DEV} ${DO_BUILD}
 #
 # run DLAInstall for the last time, this time build the software
 #
+echo 'building the software'
 DO_BUILD=""
 . ${COMMON_CONFIG}
 ${DLAINSTALL} ${DEV} ${DO_BUILD}

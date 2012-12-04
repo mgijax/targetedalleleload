@@ -1,3 +1,15 @@
+TAG: targetedalleleload-5-1-1-1
+DATE: 12/04/2012
+STAFF: sc
+CHANGES: TR11202
+1) LookupAllelesByProjectId.java - added AND acc._MGIType_key = 11
+2) LookupAllelesByMarker.java - AND a._Allele_Status_key != 847112
+3) SangerInterpreter.java - updated Sanger allele types (they call them
+   mutation types) which have changed in the input file 
+   e.g. "targeted_non_conditional" is now "Targeted Non Conditional"
+4) TargetedAlleleLoad.java - added comments
+5) config defaults - added new cassette for eucomm and csd
+ 
 TAG: targetedalleleload-5-1-0-1
 DATE: 10/19/2012
 STAFF: dbm
