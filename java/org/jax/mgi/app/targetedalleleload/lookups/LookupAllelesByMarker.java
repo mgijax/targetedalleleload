@@ -133,6 +133,7 @@ extends FullCachedLookup
 			"m.symbol 'markerSymbol' " +
 			"FROM ALL_Allele a, MRK_Marker m " +
 			"WHERE a.symbol like '%<tm%" + provider + ">' " +
+			"AND a._Allele_Status_key != 847112 " +
 			"AND a._Marker_key = m._Marker_key " +
 			"ORDER BY m.symbol" ;
 	}
