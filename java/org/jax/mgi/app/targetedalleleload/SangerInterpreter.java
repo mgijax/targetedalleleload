@@ -27,9 +27,9 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 	protected static final String NUM_UNKNOWN_PARENT = "Input record(s) with unknown parental cell line skipped";
 	protected static final Set alleleTypes = new HashSet();
 	static {
-		alleleTypes.add("conditional_ready");
-		alleleTypes.add("targeted_non_conditional");
-		alleleTypes.add("deletion");
+		alleleTypes.add("Conditional Ready");
+		alleleTypes.add("Targeted Non Conditional");
+		alleleTypes.add("Deletion");
 	}
 
 	// The minimum length of a valid input record (including NL character).
@@ -134,11 +134,11 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 		inputData.setESCellName(fields[5]);
 		inputData.setParentESCellName(fields[6]);
 		
-		if(fields[8].equals("conditional_ready")) {
+		if(fields[8].equals("Conditional Ready")) {
 			inputData.setMutationType("Conditional");
-		} else if (fields[8].equals("targeted_non_conditional")) {
+		} else if (fields[8].equals("Targeted Non Conditional")) {
 			inputData.setMutationType("Targeted non-conditional");
-		} else if (fields[8].equals("deletion")) {
+		} else if (fields[8].equals("Deletion")) {
 			inputData.setMutationType("Deletion");
 		}
 		
@@ -222,7 +222,7 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 			String[] parts = (String[]) list.toArray(new String[0]);
 
 			if (parts[0].equals("")) {
-				// Skip any missing ES Cell IDs
+				// Skip any missing ES Cell IDs 
 				return false;
 			}
 			if (parts[0].equals("MGI ACCESSION ID")) {
@@ -246,11 +246,13 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 			}
 			if (parts[6].indexOf(",") != -1) {
 				// strangely formatted ES Cell (parental)
+				logger.logdInfo("Unknown parental cell line: " + parts[6], false);
 				qcStatistics.record("WARNING", NUM_UNKNOWN_PARENT);
 				return false;
 			}
 			if (!alleleTypes.contains(parts[8])) {
 				// unknown mutation type
+				logger.logdInfo("Unknown mutation type: " + parts[8], false);
 				qcStatistics.record("WARNING", NUM_UNKNOWN_MUTATION);
 				return false;
 			}
