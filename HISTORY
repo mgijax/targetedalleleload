@@ -1,3 +1,26 @@
+TAG: targetedalleleload-tr6519-1
+DATE: 02/08/2013
+STAFF: sc
+CHANGES: 
+1) added mutationSubType SangerAlleleInput and SangerInterpreter
+2) removed dup testing for pipeline - TargetedAlleleLoad
+3) added special note template case for artificial intron - SangerProcessor
+4) added getmethods for two new note templates - TargetedAlleleLoadCfg
+5) tal_eucomm_hmgu.config.default and tal_eucomm_wtsi.config.default
+a) added  EUCCOMTools cassettes to PROMOTERDRIVEN_CASSETTES list
+b) added NOTE_TEMPLATE_CONDITIONAL_AI_PROMOTERDRIVEN
+c) added NOTE_TEMPLATE_NONCONDITIONAL_AI_PROMOTERDRIVEN
+d) added CASSETTE_L1L2_6XOSPNENH_BACT_P='This is a new promoter 1'
+Note: totally unclear why the following are needed - the value is not used. Path of least
+resistance to add them
+e) added CASSETTE_IFITM2_INTRON_L1L2_GT0_LF2A_LACZ_BETACTP_NEO='This is a new promoter 2'
+f) added CASSETTE_IFITM2_INTRON_L1L2_GT1_LF2A_LACZ_BETACTP_NEO='This is a new promoter 3'
+g) added CASSETTE_IFITM2_INTRON_L1L2_GT2_LF2A_LACZ_BETACTP_NEO='This is a new promoter 4'
+h) added CASSETTE_IFITM2_INTRON_L1L2_GTK_LACZ_BETACTP_NEO='This is a new promoter 5'
+i) added CASSETTE_L1L2_GT1_LF2A_LACZ_BETACTP_NEO='This is a new promoter 6'
+j) added CASSETTE_L1L2_GT0_LF2A_LACZ_BETACTP_NEO='This is a new promoter 7'
+k) added CASSETTE_L1L2_GT2_LF2A_LACZ_BETACTP_NEO='This is a new promoter 8'
+
 TAG: targetedalleleload-tr6519-BP
 DATE: 01/31/2013
 STAFF: sc
