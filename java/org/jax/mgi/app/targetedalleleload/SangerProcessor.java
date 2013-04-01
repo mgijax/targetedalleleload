@@ -163,7 +163,6 @@ extends KnockoutAlleleProcessor
 		String note = getNoteTemplate(in);
 		int delSize = getDeletionSize(in); // not used for conditional alleles
 		String mutType = in.getMutationType();
-
 		// Determine the "type" of the allele based on the entry in
 		// the configuration file and set the rest of the mutation type
 		// specific values
@@ -346,6 +345,7 @@ extends KnockoutAlleleProcessor
 		String note = "";
 
 		// There is a special case for L1L2_Del_BactPneo_FFL cassettes
+		// There is a speciatl case for mutation sub-type = 'Artificial Intron'
 		// all other cassettes are treated equally
 		
 		String cassette = in.getCassette();
@@ -354,7 +354,12 @@ extends KnockoutAlleleProcessor
 			if (cassette.equals("L1L2_Del_BactPneo_FFL")) {
 				note = cfg.getNoteTemplateCondDel_BactPneo_FFL();
 			} else if (cassette.matches(PROMOTER_DRIVEN)) {
-				note = cfg.getNoteTemplateCondPromoter();
+				if (in.getMutationSubType().equals("Artificial Intron")) {
+				    note = cfg.getNoteTemplateCondAIPromoter();
+				}
+				else {
+				    note = cfg.getNoteTemplateCondPromoter();
+				}
 			} else if (cassette.matches(PROMOTER_LESS)) {
 				note = cfg.getNoteTemplateCondPromoterless();
 			} else {
@@ -368,7 +373,12 @@ extends KnockoutAlleleProcessor
 			if (cassette.equals("L1L2_Del_BactPneo_FFL")) {
 				note = cfg.getNoteTemplateNonCondDel_BactPneo_FFL();
 			} else if (cassette.matches(PROMOTER_DRIVEN)) {
-				note = cfg.getNoteTemplateNonCondPromoter();
+				if (in.getMutationSubType().equals("Artificial Intron")) {
+                                    note = cfg.getNoteTemplateNonCondAIPromoter();
+                                }
+                                else {
+				    note = cfg.getNoteTemplateNonCondPromoter();
+				}
 			} else if (cassette.matches(PROMOTER_LESS)) {
 				note = cfg.getNoteTemplateNonCondPromoterless();
 			} else {

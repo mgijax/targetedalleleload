@@ -325,6 +325,13 @@ public class TargetedAlleleLoadCfg extends InputDataCfg {
 	public String getNoteTemplateDeletionPromoterless() throws ConfigException {
 		return getConfigString("NOTE_TEMPLATE_DELETION_PROMOTERLESS");
 	}
+        public String getNoteTemplateCondAIPromoter() throws ConfigException {
+                return getConfigString("NOTE_TEMPLATE_CONDITIONAL_AI_PROMOTERDRIVEN");
+	}
+        public String getNoteTemplateNonCondAIPromoter() throws ConfigException {
+                return getConfigString("NOTE_TEMPLATE_NONCONDITIONAL_AI_PROMOTERDRIVEN");
+        }
+
 
 	/**
 	 * Get the string identifying promoter driven cassettes

@@ -40,6 +40,7 @@ public class SangerAlleleInput implements KnockoutAlleleInput {
 	private String esCellName = null;
 	private String parentESCellName = null;
 	private String mutationType = null;
+	private String mutationSubType = null;
 	private String locus1 = null;
 	private String locus2 = null;
 
@@ -87,7 +88,9 @@ public class SangerAlleleInput implements KnockoutAlleleInput {
 	public String getMutationType() {
 		return mutationType;
 	}
-
+        public String getMutationSubType() {
+                return mutationSubType;
+        }
 	public void setESCellName(String esCellName) {
 		this.esCellName = esCellName;
 	}
@@ -95,6 +98,10 @@ public class SangerAlleleInput implements KnockoutAlleleInput {
 	public void setMutationType(String mutationType) {
 		this.mutationType = mutationType;
 	}
+        public void setMutationSubType(String mutationSubType) {
+                this.mutationSubType = mutationSubType;
+        }
+
 
 	public void setParentESCellName(String parentESCellName) {
 		// The Sanger parental cell names come in with all sorts
@@ -171,6 +178,10 @@ public class SangerAlleleInput implements KnockoutAlleleInput {
         if ((this.mutationType == null) ? (other.mutationType != null) : !this.mutationType.equals(other.mutationType)) {
             return false;
         }
+        if ((this.mutationSubType == null) ? (other.mutationSubType != null) : !this.mutationSubType.equals(other.mutationSubType)) {
+            return false;
+        }
+
         if (this.locus1 != other.locus1 && (this.locus1 == null || !this.locus1.equals(other.locus1))) {
             return false;
         }
@@ -189,6 +200,7 @@ public class SangerAlleleInput implements KnockoutAlleleInput {
     	s += esCellName+", ";
     	s += parentESCellName+", ";
     	s += mutationType+", ";
+        s += mutationSubType+", ";
     	s += locus1+", ";
     	s += locus2;
     	s += ">";

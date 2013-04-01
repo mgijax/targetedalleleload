@@ -131,10 +131,13 @@ extends FullCachedLookup
 
 		return "SELECT a._allele_key 'alleleKey', " +
 			"m.symbol 'markerSymbol' " +
-			"FROM ALL_Allele a, MRK_Marker m " +
+			"FROM ALL_Allele a, MRK_Marker m, ACC_Accession aa " +
 			"WHERE a.symbol like '%<tm%" + provider + ">' " +
 			"AND a._Allele_Status_key != 847112 " +
 			"AND a._Marker_key = m._Marker_key " +
+			"AND a._Allele_key = aa._Object_key " + 
+			"AND aa._MGIType_key = 11 " +
+			"AND aa._LogicalDB_key in (125,126,138,143,166) " +
 			"ORDER BY m.symbol" ;
 	}
 

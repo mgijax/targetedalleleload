@@ -437,10 +437,10 @@ public class TargetedAlleleLoad extends DLALoader {
 			// If this record is not appropriate to be handled by this
 			// processor, skip it. The only reason we included it in the
 			// first place was to assist in the QC of all cell lines
-			// sc - I think interpreter isValid method filters this out
-			if (!in.getInputPipeline().equals(cfg.getPipeline())) {
-				continue;
-			}
+			// sc - N2MO I removed this because interpreter already filters this out
+			//if (!in.getInputPipeline().equals(cfg.getPipeline())) {
+			//	continue;
+			//}
 
 			if (alreadyProcessed.contains(in.getMutantCellLine())) {
 				String m = "Multiple input records for: ";

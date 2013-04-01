@@ -89,7 +89,6 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 	 * @throws RecordFormatException
 	 */
 	public Object interpret(String rec) throws MGIException {
-
 		SangerAlleleInput inputData = new SangerAlleleInput();
 		qcStatistics.record("SUMMARY", "Number of input records");
 
@@ -119,8 +118,11 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 		// 6 - Parent ES cell line name
 		// 7 - Sanger allele name
 		// 8 - Mutation type
-		// 9 - Insertion point 1
-		// 10 - Insertion point 2
+		// 9 - Mutation sub type
+		// 10 - Insertion point 1
+		// 11 - Insertion point 2
+		// 12 - loxp start
+		// 13 - loxp end
 
 		inputData.setGeneId(fields[0]);
 		inputData.setBuild(fields[1]);
@@ -141,13 +143,13 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 		} else if (fields[8].equals("Deletion")) {
 			inputData.setMutationType("Deletion");
 		}
-		
+		inputData.setMutationSubType(fields[9]); 
 		// Combine the coordinate pairs
-		String c1 = fields[9] + "-" + fields[10];
-        String c2 = "-";
-        if (fields.length == 13) {
-            c2 = fields[11] + "-" + fields[12];
-        }
+		String c1 = fields[10] + "-" + fields[11];
+		String c2 = "-";
+		if (fields.length == 14) {
+		    c2 = fields[12] + "-" + fields[13];
+		}
                               
 		
 		List coords = getCoords(c1, c2);
@@ -216,7 +218,6 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 	 *         (false)
 	 */
 	public boolean isValid(String rec) {
-		
 		try {
 			List list = parse(rec);
 			String[] parts = (String[]) list.toArray(new String[0]);
@@ -224,6 +225,7 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 			if (parts[0].equals("")) {
 				// Skip any missing ES Cell IDs 
 				return false;
+				
 			}
 			if (parts[0].equals("MGI ACCESSION ID")) {
 				// Ignore header line
@@ -240,7 +242,7 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 				// is not an integer
 				return false;
 			}
-			if (!parts[3].replaceAll("\"", "").matches(pipeline)) {
+			if (parts[3].replaceAll("\"", "").indexOf(pipeline) == -1) {
 				// Wrong project
 				return false;
 			}
@@ -278,25 +280,29 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 			}
 
 			try {
-				if(Integer.valueOf(parts[9]) == null) {return false;}
-				if(Integer.valueOf(parts[10]) == null) {return false;}
+				if(Integer.valueOf(parts[10]) == null) {
+				    return false;}
+				if(Integer.valueOf(parts[11]) == null) {
+				    return false;}
 			} catch (NumberFormatException e) {
 				return false;
 			}
 			
-			if (parts.length > 11) {
-				if(parts.length == 12 ) {
+			if (parts.length > 12) {
+				if(parts.length == 13 ) {
 					// Missing one of a pair of coords
 					return false;
 				}
-				if ((parts[11].length() < 1 && parts[12].length() > 1) ||
-					(parts[11].length() > 1 && parts[12].length() < 1)
+				if ((parts[12].length() < 1 && parts[13].length() > 1) ||
+					(parts[12].length() > 1 && parts[13].length() < 1)
 					) {
 						return false;
 				} else {
 					try {
-						if(Integer.valueOf(parts[11]) == null) {return false;}
-						if(Integer.valueOf(parts[12]) == null) {return false;}
+						if(Integer.valueOf(parts[12]) == null) {
+						    return false;}
+						if(Integer.valueOf(parts[13]) == null) {
+						    return false;}
 					} catch (NumberFormatException e) {
 						return false;
 					}
