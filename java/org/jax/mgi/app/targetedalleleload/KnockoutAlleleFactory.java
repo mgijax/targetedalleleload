@@ -15,18 +15,26 @@ abstract class KnockoutAlleleFactory
 		String provider = cfg.getProviderLabcode();
 
 		// The providers require different factories
-		if (provider.equals("Wtsi") || 
-			provider.equals("Hmgu") || 
-			provider.equals("Mbp")
-			) {
+		if (provider.equals("Wtsi") ) {
 
-			// mirKO uses a different processor than other sanger
-			// ESC
+			// mirKO wtsi
 			if (cfg.getPrimaryJNumber().equals("J:174268")) {
 				return new MirkoFactory();
 			}
+			// KOMP CSD wtsi - has two Jnums, this one is uniq, 
+			// other is the same as EUCOMM wtsi
+			else if (cfg.getPrimaryJNumber().indexOf("J:148605") > -1) {
+				return new KompCsdFactory();
+			}
+			// EUCOMM wtsi
 			return new SangerFactory();
 		}
+		else if (provider.equals("Mbp")) {
+			return new KompCsdFactory();
+		}
+		else if (provider.equals("Hmgu")) {
+			return new SangerFactory();
+		}	
 		else if (provider.equals("Vlcg")) {
 			return new RegeneronFactory();
 		}

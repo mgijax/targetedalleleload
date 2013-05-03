@@ -1,3 +1,13 @@
+TAG: targetedalleleload-5-1-2-2
+DATE: 05/3/2013
+STAFF: sc
+CHANGES: TR11363, fix KOMP CSD loads
+* When we updated EUCOMM loads, did not realized that KOMP CSD
+  shared code.
+1) Create KompCsdProcessor.java, KompCsdInterpreter.java and 
+    KompCsdFactory.java
+2) KnockoutAlleleFactory.java - updated to hand out the proper Factory for KOMP CSD.
+
 TAG: targetedalleleload-5-1-2-1
 DATE: -4/01/2013
 STAFF: sc
