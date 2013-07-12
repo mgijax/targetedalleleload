@@ -360,6 +360,9 @@ public class TargetedAlleleLoad extends DLALoader {
 		// to the QC pool (cell lines for other pipeline don't need QC
 		// during this run)
 		String [] jnumbers = cfg.getJNumbers();
+                // 5/16/13 - sc NOTE: jnumbers[0] parameter NOT USED BY LOOKUP -
+                // LOOKUP ALWAYS uses the primary JNUM (first one in the configured
+                // string)
 		LookupCelllinesByJnumber lookupCelllinesByJnumber = 
 			new LookupCelllinesByJnumber(sqlDBMgr, jnumbers[0]);
 		

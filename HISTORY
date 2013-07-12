@@ -1,3 +1,11 @@
+TAG: targetedalleleload-5-1-4-1
+DATE: 07/12/2013
+STAFF: sc
+CHANGES: TR11396 
+1. eucomm/komp csd loads- updated ALLOWED_CELLLINES
+a. csd_mbp/csd_wtsi - added  'B' and 'J'
+b. euccom_hmgi/eucomm/wtsi - added 'B' and 'M'
+
 TAG: targetedalleleload-5-1-3-1
 TAG: targetedalleleload-5-1-2-2
 DATE: 05/3/2013
