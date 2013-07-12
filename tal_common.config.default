@@ -213,5 +213,5 @@ DERIVATION_PARENTAL_KEY_C2NAGYP13='40241'
 # lab that made the cell line. Each run of the load should check that
 # no new providers have been added the the file without notification.
 #
-KNOWN_CELLLINES='E,H,D'
+KNOWN_CELLLINES='E,H,D,B,J,M'
 
