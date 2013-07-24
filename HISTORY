@@ -1,3 +1,10 @@
+TAG: targetedalleleload-5-1-4-2
+DATE: 07/24/2013
+STAFF: dbm
+CHANGES:
+1) build.xml - Use JUNIT setting instead of JAVALIB path
+2) tal_common.config.default - Use STAXAPI and STAXRI setting
+
 TAG: targetedalleleload-5-1-4-1
 DATE: 07/12/2013
 STAFF: sc
