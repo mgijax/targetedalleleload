@@ -152,5 +152,5 @@ DERIVATION_CREATOR_KEY='5348468'
 # lab that made the cell line. Each run of the load should
 # be concerned with cell lines from a single creator.
 #
-ALLOWED_CELLLINES='H,B,M'
+ALLOWED_CELLLINES='H'
 

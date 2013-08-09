@@ -1627,12 +1627,14 @@ public class TargetedAlleleLoad extends DLALoader {
 		if (qc != null) {
 			logger.logdInfo("\nERRORS", false);
 			logger.logpInfo("\nERRORS", false);
+			logger.logcInfo("\nERRORS", false);
 
 			iterator = qc.keySet().iterator();
 			while (iterator.hasNext()) {
 				String label = (String) iterator.next();
 				logger.logdInfo(label + ": " + qc.get(label), false);
 				logger.logpInfo(label + ": " + qc.get(label), false);
+				logger.logcInfo(label + ": " + qc.get(label), false);
 			}
 		}
 

@@ -34,7 +34,7 @@ fi
 
 JAVARUNTIMEOPTS="-Xms1000m -Xmx1000m"
 
-JAVA_LIB=${MGI_JAVALIB}/dla.jar:${MGI_JAVALIB}/core.jar:${MGI_JAVALIB}/dbsmgd.jar:${MGI_JAVALIB}/dbsrdr.jar:${STAXAPI}:${STAXRI}
+JAVA_LIB=${MGI_JAVALIB}/dla.jar:${MGI_JAVALIB}/core.jar:${MGI_JAVALIB}/dbsmgd.jar:${MGI_JAVALIB}/dbsrdr.jar:/usr/local/java/lib/jsr173_1.0_api.jar:/usr/local/java/lib/jsr173_1.0_ri.jar
 
 CLASSPATH=.:${TARGETEDALLELELOAD}/classes:${JAVA_LIB}:${COMMON_CLASSPATH}
 
@@ -213,5 +213,5 @@ DERIVATION_PARENTAL_KEY_C2NAGYP13='40241'
 # lab that made the cell line. Each run of the load should check that
 # no new providers have been added the the file without notification.
 #
-KNOWN_CELLLINES='E,H,D,B,J,M'
+KNOWN_CELLLINES='E,H,D'
 

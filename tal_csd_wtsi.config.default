@@ -116,7 +116,7 @@ MUTATION_TYPES_DELETION='Insertion, Intragenic deletion'
 # lab that made the cell line. Each run of the load should
 # be concerned with cell lines from a single creator.
 #
-ALLOWED_CELLLINES='E,J,B'
+ALLOWED_CELLLINES='E'
 
 #
 # New ES Cells are created with in the following logical database

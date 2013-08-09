@@ -270,9 +270,9 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 				qcStatistics.record("ERROR", 
 						"Records with a new provider (" +
 						firstLetter + ")");
-				logger.logInfo(
+				logger.logcInfo(
 						"Cell line record with a new provider (" + 
-						parts[5] + ")");
+						parts[5] + ")", false);
 				return false;
 			}
 			if (!allowedCelllines.contains(firstLetter)) {
