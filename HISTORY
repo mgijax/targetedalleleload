@@ -1,3 +1,8 @@
+TAG: targetedalleleload-5-1-4-5
+DATE: 08/22/2013
+STAFF: sc
+CHANGES: TR11455 - add JM8A3.N1.C2 PCL to tal_common.config
+
 TAG: targetedalleleload-5-1-4-4
 DATE: 08/09/2013
 STAFF: sc
@@ -7,7 +12,7 @@ a) tal_common.config.default: KNOWN_CELLLINES='E,H,D'
 b) tal_csd_mbp.config.default: ALLOWED_CELLLINES='D'
 c) tal_csd_wtsi.config.default: ALLOWED_CELLLINES='E'
 e) tal_eucomm_hmgu.config.default: ALLOWED_CELLLINES='H'
-f) tal_eucomm_wtsi.config.default: LLOWED_CELLLINES='E
+f) tal_eucomm_wtsi.config.default: ALLOWED_CELLLINES='E
 2) log new provider info to curator log as well as diag log
 a) KompCsdInterpreter.jav
 b) SangerInterpreter.java
