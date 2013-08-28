@@ -1,3 +1,13 @@
+TAG: targetedalleleload-5-1-4-6
+DATE: 08/28/2013
+STAFF: sc
+CHANGES: changed code from 8 char tab to 4 char for easier reading
+1) KompCsdInterpreter.java
+2) KompCsdProcessor.java
+3) SangerInterpreter.java
+4) SangerProcessor.java
+5) TargetedAlleleLoad.java
+
 TAG: targetedalleleload-5-1-4-5
 DATE: 08/22/2013
 STAFF: sc
