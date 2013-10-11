@@ -205,9 +205,10 @@ echo "targetedalleleLoad application in load mode completed successfully" >> ${L
 postload
 
 
-echo "Run the targetedalleleLoad QC report" >> ${LOG_PROC}
+echo "Run the targetedalleleLoad QC reports" >> ${LOG_PROC}
 
 ${PYTHON} ./bin/QCreport.py
+${PYTHON} ./bin/dupAlleleRpt.py
 
 echo "QC report for targetedalleleLoad completed successfully" >> ${LOG_PROC}
 
