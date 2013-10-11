@@ -1,3 +1,10 @@
+TAG: targetedalleleload-5-1-5-3
+DATE: 10/11/2013
+STAFF: sc
+CHANGES: TR11455
+1) 5-1-5-1 and 5-1-5-2 are bad tags, they have a debug version of 
+   TargetedAlleleload
+
 TAG: targetedalleleload-5-1-5-2
 TAG: targetedalleleload-5-1-5-1
 DATE: 10/11/2013
