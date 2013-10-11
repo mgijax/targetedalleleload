@@ -72,14 +72,16 @@ for line in wishared:
 # get all alleles grouped by the logical db that have less
 # than one attached mutant cell line
 results = db.sql("""
-SELECT a._Allele_key, a.symbol, count(_MutantCellLine_key) cnt
-FROM ACC_Accession acc, ALL_Allele a, ALL_Allele_CellLine ac
+SELECT a._Allele_key, a.symbol, a.creation_date, a.modification_date, acc.accid
+FROM ACC_Accession acc, ALL_Allele a
 WHERE acc._logicaldb_key = %s
+AND acc._MGIType_key = 11
 AND acc._object_key = a._Allele_key
-AND a._Allele_key *= ac._Allele_key
-GROUP BY a._Allele_key, a.symbol
-HAVING count(_MutantCellLine_key) < 1
-"""%logicaldb, 'auto')
+and not exists (select 1 
+from ALL_Allele_CellLine ac
+where a._Allele_key = ac._Allele_key)
+order by symbol
+""" %logicaldb, 'auto')
 
 try:
     outFile = open(outFilePath, 'w')
@@ -87,19 +89,17 @@ try:
 except:
     exit('Could not open file for writing %s or \n' %( outFilePath, outFilePathHTML))
 
-outFileHTML.write("<table><tr><th>%s</th><th>%s</th></tr>"%('Allele symbol','Allele key'))
+outFileHTML.write("<table><tr><th>%s</th><th>%s</th><th>%s</th><th>%s</th><th>%s</th></tr>"%('Allele symbol','Allele key', 'Creation date', 'Modification date', 'Project ID'))
 outFileHTML.write("\n")
 
-outFile.write(colDelim.join(['Allele symbol','Allele key', 'URL']))
+outFile.write(colDelim.join(['Allele symbol','Allele key', 'Creation date', 'Modification date', 'Project ID', 'URL']))
 outFile.write(lineDelim)
 
 for r in results:
     url = "%sWIFetch?page=alleleDetail&key=%s"%(wienv['JAVAWI_URL'], str(r['_Allele_key']))
-    outFile.write(colDelim.join([r['symbol'],str(r['_Allele_key']),url]))
+    outFile.write(colDelim.join([r['symbol'],str(r['_Allele_key']),str(r['creation_date']), str(r['modification_date']), str(r['accid']),url]))
     outFile.write(lineDelim)
-    outFileHTML.write("<tr><td><a href='%s'>%s</a></td><td>%s</td></tr>"%(url,
-        r['symbol'].replace("<","~~").replace(">","</sup>").replace("~~","<sup>"),
-        str(r['_Allele_key'])))
+    outFileHTML.write("<tr><td><a href='%s'>%s</a></td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>"%(url, r['symbol'].replace("<","~~").replace(">","</sup>").replace("~~","<sup>"), str(r['_Allele_key']), str(r['creation_date']), str(r['modification_date']), str(r['accid'])))
     outFileHTML.write(lineDelim)
 
 outFileHTML.write("</table>\n")
