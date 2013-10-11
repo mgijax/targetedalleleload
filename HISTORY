@@ -1,3 +1,16 @@
+TAG: targetedalleleload-5-1-5-1
+DATE: 10/11/2013
+STAFF: sc
+CHANGES: TR11455
+1) this TR was mostly a migration to fix bad PIDs and messed up alleles
+    caused by loading them. 
+a) We added dupAllele.py to track duplicate alleles being created by the load
+   this reports for ALL tal providers
+b) QCReport.py - added three new columns allele PID, creation_date 
+	and modification_date
+2) targetedalleleload.sh - added call to dupAllele.py
+3) index.html - added links to Abandoned Allele and Dup Allele reports
+
 TAG: targetedalleleload-5-1-4-6
 DATE: 08/28/2013
 STAFF: sc
