@@ -1,3 +1,4 @@
+TAG: targetedalleleload-5-1-5-2
 TAG: targetedalleleload-5-1-5-1
 DATE: 10/11/2013
 STAFF: sc
@@ -10,6 +11,7 @@ b) QCReport.py - added three new columns allele PID, creation_date
 	and modification_date
 2) targetedalleleload.sh - added call to dupAllele.py
 3) index.html - added links to Abandoned Allele and Dup Allele reports
+4) tal_common.config - export BASEDIR for use by dupAllele.py
 
 TAG: targetedalleleload-5-1-4-6
 DATE: 08/28/2013

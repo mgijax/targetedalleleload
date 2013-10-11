@@ -639,7 +639,7 @@ public class TargetedAlleleLoad extends DLALoader {
 			    if (alleleProjects.get(existing.getKey()) == null) {
 				alleleProjects
 				    .put(existing.getKey(), new HashSet());
-		}
+			    }
 
 			    // Record the updated project ID for this allele symbol
 			    Set projSet = (Set) alleleProjects.get(existing
@@ -689,7 +689,7 @@ public class TargetedAlleleLoad extends DLALoader {
 			    changeMutantCellLineAssociation(in, esCell, existing,
 				constructed);
 
-			} else if (!esCell.getDerivationKey().equals(
+			} /**else if (!esCell.getDerivationKey().equals(
 				getDerivationKey(in))) {
 			    // Check the derivation (this implicitly checks the
 			    // parental cell line, the creator, the vector and the
@@ -706,7 +706,7 @@ public class TargetedAlleleLoad extends DLALoader {
 			    logDerivationChange(in, esCell, existing);
 			    changeDerivationKey(getDerivationKey(in), esCell);
 
-			} else {
+			} */ else {
 
 			    // Compress the note fields to discount any extra spaces
 			    // that might have snuck in
@@ -745,6 +745,27 @@ public class TargetedAlleleLoad extends DLALoader {
 		    } catch (MGIException e) {
 			    logger.logdInfo(e.getMessage(), false);
 		    }
+		    try {
+			if (!esCell.getDerivationKey().equals(
+			    getDerivationKey(in))) {
+			// Check the derivation (this implicitly checks the
+			// parental cell line, the creator, the vector and the
+			// allele type)
+
+			// This QC check is a street sweeper. Derivation
+			// changes, by themselves, should not happen.
+			// If ONLY the derivation changed and nothing else
+			// (which was checked previously in the if-then)
+			// then we can go ahead and change the derivation
+			// association, but we will skip updating the note
+			// if it also changed.
+
+			logDerivationChange(in, esCell, existing);
+			changeDerivationKey(getDerivationKey(in), esCell);
+		    } catch (MGIException e) {
+                            logger.logdInfo(e.getMessage(), false);
+                    }
+
 
 		    // ********************************************************
 		    // END QC CHECKS
