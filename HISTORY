@@ -1,3 +1,11 @@
+TAG: targetedalleleload-5-1-5-4
+DATE: 01/09/2013
+STAFF: sc
+CHANGES: TR11529 - Handle new MCL prefixes B and M
+1) tal_eucomm_wtsi.config.default- :ALLOWED_CELLLINES='E,B,M'
+2) tal_csd_wtsi.config.default - ALLOWED_CELLLINES='E,B,M'
+3) tal_common.config.default - KNOWN_CELLLINES='E,H,D,B,M'
+
 TAG: targetedalleleload-5-1-5-3
 DATE: 10/11/2013
 STAFF: sc
