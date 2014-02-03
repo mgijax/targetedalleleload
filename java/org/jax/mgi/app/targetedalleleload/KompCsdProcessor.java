@@ -151,6 +151,7 @@ extends KnockoutAlleleProcessor
 	    mutationTypeKeys.add(key);
 	}
 	koAllele.setMutationTypes(mutationTypeKeys);
+        koAllele.setCollection(Constants.COLLECTION_KOMP_CSD);
 
 	// //////////////////////////////////////////////////////////////
 	// get the NEXT allele symbol sequence number and letter

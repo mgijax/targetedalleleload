@@ -77,7 +77,7 @@ implements Comparable
 			Constants.MKR_ASSOC_QUAL_NS_KEY);
 	private Integer mkrAssocStatusKey = new Integer(
 			Constants.MKR_ASSOC_STAT_CURATED_KEY);
-
+	private Integer collectionKey;
 	/**
 	 * Constructs a Knockout Allele object
 	 * @throws MGIException 
@@ -103,6 +103,12 @@ implements Comparable
 	public Integer getStatus() {
 		return this.statusKey;
 	}
+        public void setCollection(Integer key) {
+                this.collectionKey = key;
+        }
+        public Integer getCollection() {
+                return this.collectionKey;
+        }
 
 	public void setTransmissionKey(Integer key) {
 		this.transmissionKey = key;
@@ -390,6 +396,7 @@ implements Comparable
 		aState.setModeKey(modeKey);
 		aState.setAlleleTypeKey(typeKey);
 		aState.setAlleleStatusKey(statusKey);
+		aState.setCollectionKey(collectionKey);
 		aState.setTransmissionKey(transmissionKey);
 		aState.setSymbol(symbol);
 		aState.setName(name);

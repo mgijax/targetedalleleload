@@ -97,4 +97,10 @@ public class Constants {
 	public static final Integer MARKER_OFFICIAL = new Integer(1);
 	public static final Integer MARKER_WITHDRAWN = new Integer(2);
 
+	/*
+	 *  Collection Keys
+	 */
+	public static final Integer COLLECTION_KOMP_CSD = new Integer(11025570);
+	public static final Integer COLLECTION_EUCOMM = new Integer(11025572);
+
 }

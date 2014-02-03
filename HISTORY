@@ -1,3 +1,12 @@
+TAG: targetedalleleload-tr11515-1
+DATE: 02/03/2014
+STAFF: sc
+CHANGES:
+1) Constants.java - added COLLECTION_KOMP_CSD, COLLECTION_EUCOMM
+2) KnockoutAllele.java - added collectionKey and set/get methods
+3) KompCsdProcessor.java/SangerProcessor.java - added setting
+    of collection key in KnockoutAllele instance
+
 TAG: targetedalleleload-tr11515-BP
 DATE: 02/03/2014
 STAFF: sc
