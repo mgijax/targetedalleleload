@@ -98,8 +98,9 @@ export MGD_BCP_OK_TO_OVERWRITE
 ###########################################################################
 
 #  Recipient list for mailing the log files (comma-separated)
-MAIL_LOG_PROC="mgiadmin"
-export MAIL_LOG_PROC
+MAIL_LOG_PROC="mgiadmin,rmb"
+MAIL_LOG_CUR="sc,rmb"
+export MAIL_LOG_PROC MAIL_LOG_CUR
 
 #  Installation directory
 INSTALLDIR=${TARGETEDALLELELOAD}
