@@ -91,6 +91,8 @@ public class Constants {
 		MUTATION_TYPE_KEYS.put("Conditional", new Integer(847118));
 		MUTATION_TYPE_KEYS.put("Targeted non-conditional", new Integer(847119));
 	}
+	
+	public static final Integer ALLELE_TYPE_KEY = new Integer(847116);
 
 	public static final int VECTOR_TYPE_KEY = 3982979;
 	

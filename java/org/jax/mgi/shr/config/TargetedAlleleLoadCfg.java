@@ -199,8 +199,8 @@ public class TargetedAlleleLoadCfg extends InputDataCfg {
 	 * @throws ConfigException
 	 *             if the value is not found
 	 */
-	public Integer getAlleleType(String type) throws ConfigException {
-		return getConfigInteger("ALLELE_TYPE_" + type);
+	public Integer getAlleleType() throws ConfigException {
+		return getConfigInteger("ALLELE_TYPE");
 	}
 
 	/**

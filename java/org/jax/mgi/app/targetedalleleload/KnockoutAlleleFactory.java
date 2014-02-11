@@ -17,13 +17,9 @@ abstract class KnockoutAlleleFactory
 		// The providers require different factories
 		if (provider.equals("Wtsi") ) {
 
-			// mirKO wtsi
-			if (cfg.getPrimaryJNumber().equals("J:174268")) {
-				return new MirkoFactory();
-			}
 			// KOMP CSD wtsi - has two Jnums, this one is uniq, 
 			// other is the same as EUCOMM wtsi
-			else if (cfg.getPrimaryJNumber().indexOf("J:148605") > -1) {
+			if (cfg.getPrimaryJNumber().indexOf("J:148605") > -1) {
 				return new KompCsdFactory();
 			}
 			// EUCOMM wtsi
@@ -35,39 +31,6 @@ abstract class KnockoutAlleleFactory
 		else if (provider.equals("Hmgu")) {
 			return new SangerFactory();
 		}	
-		else if (provider.equals("Vlcg")) {
-			return new RegeneronFactory();
-		}
-		else if (provider.equals("Mfgc") || provider.equals("Cmhd")) {
-			return new NorcommFactory();
-		}
-
-//		String[] jNumber = cfg.getJNumbers();
-//
-//		// The reference number uniquely identifies which project
-//		// produced the alleles and cell lines we are about to load
-//		if (jNumber.equals("J:136110")) {
-//			// Regeneron
-//			return new RegeneronFactory();
-//		} else if (jNumber.equals("J:148605")) {
-//			// CSD Wtsi
-//			return new SangerFactory();
-//		} else if (jNumber.equals("J:157064")) {
-//			// CSD Ucd
-//			return new SangerFactory();
-//		} else if (jNumber.equals("J:155845")) {
-//			// EUCOMM Wtsi
-//			return new SangerFactory();
-//		} else if (jNumber.equals("J:157065")) {
-//			// EUCOMM Hmgu
-//			return new SangerFactory();
-//		} else if (jNumber.equals("J:165963")) {
-//			// NorCOMM Cmhd
-//			return new NorcommFactory();
-//		} else if (jNumber.equals("J:165964")) {
-//			// NorCOMM Mfgc
-//			return new NorcommFactory();
-//		}
 
 		throw new MGIException("Provider not found. Check cfg file.");
 	}

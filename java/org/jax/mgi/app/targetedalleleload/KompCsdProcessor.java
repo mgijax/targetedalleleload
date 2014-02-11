@@ -165,35 +165,20 @@ extends KnockoutAlleleProcessor
 	int delSize = getDeletionSize(in); // not used for conditional alleles
 	String mutType = in.getMutationType();
 
-	// Determine the "type" of the allele based on the entry in
-	// the configuration file and set the rest of the mutation type
-	// specific values
+	// TR11515 - allele type same for all TAL alleles
+	koAllele.setTypeKey(cfg.getAlleleType());
+
+	// set the mutation type specific values
 	if (mutType.equals("Conditional")) {
 	    let = "a";
-	    koAllele.setTypeKey(cfg.getAlleleType("CONDITIONAL"));
 	    qcStatistics.record("SUMMARY",
 				"Number of conditional input record(s)");
 	} else if (mutType.equals("Targeted non-conditional")) {
 	    let = "e";
-
-	    // Default value
-	    koAllele.setTypeKey(cfg.getAlleleType("NONCONDITIONAL"));
-
-	    if (in.getCassette().equals("L1L2_Del_BactPneo_FFL")) {
-		// SPECIAL CASE:
-		// Per C.Smith and H.Dene 2010-11-03, alleles with this
-		// cassette don't have a reporter, so they should not be
-		// of type "reporter" but they do have a region flanked
-		// by LoxP so allele type = "Targeted (Floxed/Frt)" (same
-		// as regular conditional alleles)
-		koAllele.setTypeKey(cfg.getAlleleType("CONDITIONAL"));
-	    }
-
 	    qcStatistics.record("SUMMARY",
 		"Number of targeted non-conditional input record(s)");
 	} else if (mutType.equals("Deletion")) {
 	    let = ""; // Empty string for Deletion alleles
-	    koAllele.setTypeKey(cfg.getAlleleType("DELETION"));
 	    qcStatistics.record(
 		"SUMMARY", 
 		"Number of deletion input record(s)");

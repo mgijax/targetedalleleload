@@ -98,8 +98,9 @@ export MGD_BCP_OK_TO_OVERWRITE
 ###########################################################################
 
 #  Recipient list for mailing the log files (comma-separated)
-MAIL_LOG_PROC="mgiadmin"
-export MAIL_LOG_PROC
+MAIL_LOG_PROC="mgiadmin,richard.baldarelli@jax.org"
+MAIL_LOG_CUR="sc,richard.baldarelli@jax.org"
+export MAIL_LOG_PROC MAIL_LOG_CUR
 
 #  Installation directory
 INSTALLDIR=${TARGETEDALLELELOAD}
@@ -113,9 +114,10 @@ INPUTDIR=${BASEDIR}/input
 #
 # Allele types created by these loads include:
 #
-ALLELE_TYPE_CONDITIONAL='847118'
-ALLELE_TYPE_NONCONDITIONAL='847119'
-ALLELE_TYPE_DELETION='847116'
+ALLELE_TYPE='847116'
+ALLELE_SUBTYPE_CONDITIONAL='847118'
+ALLELE_SUBTYPE_NONCONDITIONAL='847119'
+ALLELE_SUBTYPE_DELETION='847116'
 
 # Parental Cell Line AB2.2
 DERIVATION_PARENTAL_KEY_AB22='1002'

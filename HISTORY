@@ -1,3 +1,18 @@
+TAG: targetedalleleload-tr11515-2
+DATE: 02/11/2014
+STAFF: sc
+CHANGES:
+1) removed Mirko, Norcomm, Regeneron Processors, Interpreters, Factory and Input classes
+2) removed Mirko, Norcomm, Regeneron configuration
+3) KnockoutAlleleFactory - removed Mirko, Norcomm, Regeneron Factories
+4) Install - removed Mirko, Norcomm, Regeneron
+5) TargetedAlleleLoadCfg.java - updated getAlleleType to get the now single type
+6) Constants.java - added ALLELE_TYPE_KEY for single allele type
+7) TargetedAlleleLoad.java - get allele type from Constants
+8) KompCsdProcessor.java. SangerProcessor.java - get single allele type from Cfg and set in KnockOutAllele
+9) tal_common.config.default - added ALLELE_TYPE='847116'
+    Updated  ALLELE_TYPE_* to ALLELE_SUBTYPE_*
+
 TAG: targetedalleleload-tr11515-1
 DATE: 02/03/2014
 STAFF: sc
