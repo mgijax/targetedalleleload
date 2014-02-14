@@ -1,3 +1,16 @@
+TAG: targetedalleleload-tr11515-3
+DATE: 02/14/2014
+STAFF: sc
+CHANGES:
+1) TargetedAlleleLoadCfg.java - added getAlleleSubType method
+2) Constants.java - MUTATION_TYPE_* updated keys, added: SUBTYPE_ANNOT_TYPE_KEY, SUBTYPE_QUAL_KEY
+3) KnockoutAllele.java - added subtype, annottype, qualifier attributes get/set methods added
+	VOC_AnnotState/DAO creation and insertion
+4) KnockoutAlleleProcessor.java - added logger to this abstract class
+5) KompCsdProcessor.java/SangerProcessor.java - added setting of subtype in the knockoutAllele, 
+    added logging of and throwing exception for non-conditional/L1L2_Del_BactPneo_FFL input records
+6) tal_common.config.default -  corrected ALLELE_SUBTYPE_ values
+
 TAG: targetedalleleload-tr11515-2
 DATE: 02/11/2014
 STAFF: sc

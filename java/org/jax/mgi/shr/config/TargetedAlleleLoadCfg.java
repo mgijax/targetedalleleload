@@ -203,6 +203,20 @@ public class TargetedAlleleLoadCfg extends InputDataCfg {
 		return getConfigInteger("ALLELE_TYPE");
 	}
 
+        /**
+         * Get the allele sub type Integer from the config file
+         *
+         * @assumes The "ALLELE_TYPE_*" values are the keys of the VOC_Terms for the
+         *          allele types
+         * @effects Nothing
+         * @return The configuration value
+         * @throws ConfigException
+         *             if the value is not found
+         */
+        public Integer getAlleleSubType(String type) throws ConfigException {
+                return getConfigInteger("ALLELE_SUBTYPE_" + type);
+        }
+
 	/**
 	 * Get the mutation types string from the config file - a comma separated
 	 * list of mutation types
