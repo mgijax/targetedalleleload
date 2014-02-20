@@ -168,40 +168,41 @@ extends KnockoutAlleleProcessor
 	// TR11515 - allele type same for all TAL alleles
 	koAllele.setTypeKey(cfg.getAlleleType());
 
-	// set the mutation type specific values
-	if (mutType.equals("Conditional")) {
-	    let = "a";
-	    koAllele.setSubTypeKey(cfg.getAlleleSubType("CONDITIONAL"));
-	    qcStatistics.record("SUMMARY",
-		"Number of conditional input record(s)");
-	} else if (mutType.equals("Targeted non-conditional")) {
-	    let = "e";
-	    // Default value
-            koAllele.setSubTypeKey(cfg.getAlleleSubType("NONCONDITIONAL"));
-
-            if (in.getCassette().equals("L1L2_Del_BactPneo_FFL")) {
+	if (in.getCassette().equals("L1L2_Del_BactPneo_FFL")) {
                 // SPECIAL CASE:
                 // Per C.Smith and H.Dene 2010-11-03, alleles with this
                 // cassette don't have a reporter, so they should not be
                 // of type "reporter" but they do have a region flanked
                 // by LoxP so allele type = "Targeted (Floxed/Frt)" (same
                 // as regular conditional alleles)
-		// per Richard 2/14/14 - report and skip
-               qcStatistics.record("ERROR",
+                // per Richard 2/14/14 - report and skip
+                qcStatistics.record("ERROR",
                     "Number of targeted non-conditional/L1L2_Del_BactPneo_FFL input record(s)");
                 logger.logcInfo("Cell line record with non-conditional/L1L2_Del_BactPneo_FFL" + " (" + in.getMutantCellLine() + ")", false);
                 throw new MGIException(
                     "Targeted non-conditional/L1L2_Del_BactPneo_FFL input record" + " | " + in.getMutantCellLine());
-	
-	    }
+	}
+	// set the mutation type specific values
+	if (mutType.equals("Conditional")) {
+	    let = "a";
+	    koAllele.addSubTypeKey(cfg.getAlleleSubType("CONDITIONAL"));
+	    koAllele.addSubTypeKey(cfg.getAlleleSubType("NONCONDITIONAL"));
+	    koAllele.addSubTypeKey(cfg.getAlleleSubType("DELETION"));
 	    qcStatistics.record("SUMMARY",
-			    "Number of targeted non-conditional input record(s)");
+		"Number of conditional input record(s)");
+	} else if (mutType.equals("Targeted non-conditional")) {
+	    let = "e";
+	    // Default value
+            koAllele.addSubTypeKey(cfg.getAlleleSubType("NONCONDITIONAL"));
+	    koAllele.addSubTypeKey(cfg.getAlleleSubType("DELETION"));
+	    qcStatistics.record("SUMMARY",
+		"Number of targeted non-conditional input record(s)");
 	} else if (mutType.equals("Deletion")) {
 	    let = ""; // Empty string for Deletion alleles
-	    koAllele.setSubTypeKey(cfg.getAlleleSubType("DELETION"));
+	    koAllele.addSubTypeKey(cfg.getAlleleSubType("NONCONDITIONAL"));
+	    koAllele.addSubTypeKey(cfg.getAlleleSubType("DELETION"));
 	    qcStatistics.record(
-		"SUMMARY", 
-		"Number of deletion input record(s)");
+		"SUMMARY", "Number of deletion input record(s)");
 	} else {
 	    qcStatistics.record("ERROR",
 		"Number of records with unknown mutation type");

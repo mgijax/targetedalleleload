@@ -85,7 +85,7 @@ implements Comparable
 	private Integer collectionKey;
 
 	// for VOC_Annot allele subType annotation
-        private Integer subTypeKey;
+        private HashSet subTypeKeySet = new HashSet();
 	private Integer annotTypeKey = Constants.SUBTYPE_ANNOT_TYPE_KEY;
 	private Integer qualifierKey = Constants.SUBTYPE_QUAL_KEY;
 
@@ -145,12 +145,12 @@ implements Comparable
 		return this.typeKey;
 	}
 
-        public void setSubTypeKey(Integer key) {
-                this.subTypeKey = key;
+        public void addSubTypeKey(Integer key) {
+                this.subTypeKeySet.add(key);
         }
 
-        public Integer getSubTypeKey() {
-                return this.subTypeKey;
+        public HashSet getSubTypeKeySet() {
+                return this.subTypeKeySet;
         }
 
 	public Integer getMarkerKey() {
@@ -432,15 +432,18 @@ implements Comparable
 		// Set this object key to the newly created allele key from the DB
 		key = new Integer(aDAO.getKey().getKey().intValue());
 
-		// create the subtype annotation
-	 	VOC_AnnotState annotState = new VOC_AnnotState();
-		annotState.setObjectKey(key);
-		annotState.setAnnotTypeKey(annotTypeKey);
-		annotState.setQualifierKey(qualifierKey);
-		annotState.setTermKey(subTypeKey);
+		// create the subtype annotations
+		for (Iterator i = subTypeKeySet.iterator(); i.hasNext();) {
+		    Integer subTypeKey = (Integer) i.next();
+		    VOC_AnnotState annotState = new VOC_AnnotState();
+		    annotState.setObjectKey(key);
+		    annotState.setAnnotTypeKey(annotTypeKey);
+		    annotState.setQualifierKey(qualifierKey);
+		    annotState.setTermKey(subTypeKey);
 
-		VOC_AnnotDAO annotDAO = new VOC_AnnotDAO(annotState);
-		stream.insert(annotDAO);
+		    VOC_AnnotDAO annotDAO = new VOC_AnnotDAO(annotState);
+		    stream.insert(annotDAO);
+		}
 
 		// Create the marker associations
 		ALL_Marker_AssocState amaState = new ALL_Marker_AssocState();

@@ -1,3 +1,11 @@
+TAG: targetedalleleload-tr11515-4
+DATE: 02/20/2014
+STAFF: sc
+CHANGES:
+1) KnockoutAllele.java - handle multiple subtype/allele
+2) KompCsdProcessor.java / SangerProcessor.java - handle multiple alleles, kick out cassette 
+    L1L2_Del_BactPneo_FFL for all allele subtypes (not just non-conditional)
+
 TAG: targetedalleleload-tr11515-3
 DATE: 02/14/2014
 STAFF: sc
