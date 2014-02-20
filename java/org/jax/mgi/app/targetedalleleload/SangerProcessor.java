@@ -177,10 +177,10 @@ extends KnockoutAlleleProcessor
                 // as regular conditional alleles)
                 // per Richard 2/14/14 - report and skip
                 qcStatistics.record("ERROR",
-                    "Number of targeted non-conditional/L1L2_Del_BactPneo_FFL input record(s)");
-                logger.logcInfo("Cell line record with non-conditional/L1L2_Del_BactPneo_FFL" + " (" + in.getMutantCellLine() + ")", false);
+                    "Number of L1L2_Del_BactPneo_FFL input record(s)");
+                logger.logcInfo("Cell line record with L1L2_Del_BactPneo_FFL cassette" + " (" + in.getMutantCellLine() + ")", false);
                 throw new MGIException(
-                    "Targeted non-conditional/L1L2_Del_BactPneo_FFL input record" + " | " + in.getMutantCellLine());
+                    "L1L2_Del_BactPneo_FFL cassette input record" + " | " + in.getMutantCellLine());
 	}
 	// set the mutation type specific values
 	if (mutType.equals("Conditional")) {
