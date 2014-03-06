@@ -24,6 +24,8 @@ import org.jax.mgi.dbs.mgd.dao.MGI_NoteDAO;
 import org.jax.mgi.dbs.mgd.dao.MGI_NoteState;
 import org.jax.mgi.dbs.mgd.dao.MGI_Reference_AssocDAO;
 import org.jax.mgi.dbs.mgd.dao.MGI_Reference_AssocState;
+import org.jax.mgi.dbs.mgd.dao.VOC_AnnotDAO;
+import org.jax.mgi.dbs.mgd.dao.VOC_AnnotState;
 import org.jax.mgi.dbs.mgd.lookup.JNumberLookup;
 import org.jax.mgi.shr.cache.CacheException;
 import org.jax.mgi.shr.config.ConfigException;
@@ -78,6 +80,15 @@ implements Comparable
 	private Integer mkrAssocStatusKey = new Integer(
 			Constants.MKR_ASSOC_STAT_CURATED_KEY);
 
+	// TR11515 new attributes
+	// new allele attribute
+	private Integer collectionKey;
+
+	// for VOC_Annot allele subType annotation
+        private HashSet subTypeKeySet = new HashSet();
+	private Integer annotTypeKey = Constants.SUBTYPE_ANNOT_TYPE_KEY;
+	private Integer qualifierKey = Constants.SUBTYPE_QUAL_KEY;
+
 	/**
 	 * Constructs a Knockout Allele object
 	 * @throws MGIException 
@@ -103,6 +114,12 @@ implements Comparable
 	public Integer getStatus() {
 		return this.statusKey;
 	}
+        public void setCollection(Integer key) {
+                this.collectionKey = key;
+        }
+        public Integer getCollection() {
+                return this.collectionKey;
+        }
 
 	public void setTransmissionKey(Integer key) {
 		this.transmissionKey = key;
@@ -127,6 +144,14 @@ implements Comparable
 	public Integer getTypeKey() {
 		return this.typeKey;
 	}
+
+        public void addSubTypeKey(Integer key) {
+                this.subTypeKeySet.add(key);
+        }
+
+        public HashSet getSubTypeKeySet() {
+                return this.subTypeKeySet;
+        }
 
 	public Integer getMarkerKey() {
 		return markerKey;
@@ -390,6 +415,7 @@ implements Comparable
 		aState.setModeKey(modeKey);
 		aState.setAlleleTypeKey(typeKey);
 		aState.setAlleleStatusKey(statusKey);
+		aState.setCollectionKey(collectionKey);
 		aState.setTransmissionKey(transmissionKey);
 		aState.setSymbol(symbol);
 		aState.setName(name);
@@ -405,6 +431,19 @@ implements Comparable
 
 		// Set this object key to the newly created allele key from the DB
 		key = new Integer(aDAO.getKey().getKey().intValue());
+
+		// create the subtype annotations
+		for (Iterator i = subTypeKeySet.iterator(); i.hasNext();) {
+		    Integer subTypeKey = (Integer) i.next();
+		    VOC_AnnotState annotState = new VOC_AnnotState();
+		    annotState.setObjectKey(key);
+		    annotState.setAnnotTypeKey(annotTypeKey);
+		    annotState.setQualifierKey(qualifierKey);
+		    annotState.setTermKey(subTypeKey);
+
+		    VOC_AnnotDAO annotDAO = new VOC_AnnotDAO(annotState);
+		    stream.insert(annotDAO);
+		}
 
 		// Create the marker associations
 		ALL_Marker_AssocState amaState = new ALL_Marker_AssocState();

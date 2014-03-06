@@ -1187,7 +1187,7 @@ public class TargetedAlleleLoad extends DLALoader {
 	    throw new MGIException("Cannot find parental cell line key for "
 		+ in.getParentCellLine());
 	}
-	Integer typeKey = (Integer) Constants.MUTATION_TYPE_KEYS.get(aType);
+	Integer typeKey = (Integer) Constants.ALLELE_TYPE_KEY;
 
 	String dCompoundKey = vectorKey.toString();
 	dCompoundKey += "|" + creatorKey.toString();

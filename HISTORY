@@ -1,3 +1,9 @@
+TAG: targetedalleleload-5-1-8-1
+DATE: 03/06/2014
+STAFF: lec
+CHANGES:
+1) merge to trunk - branch of allele/schema changes
+
 TAG: targetedalleleload-5-1-7-6
 TAG: targetedalleleload-5-1-7-5
 DATE: 02/10/2014
@@ -6,6 +12,53 @@ CHANGES:
 1) tal_common.config.default - 
     Added MAIL_LOG_CUR and added Richard to MAIL_LOG_PROC
 
+TAG: targetedalleleload-tr11515-5
+TAG: targetedalleleload-tr11515-4
+DATE: 02/20/2014
+STAFF: sc
+CHANGES:
+1) KnockoutAllele.java - handle multiple subtype/allele
+2) KompCsdProcessor.java / SangerProcessor.java - handle multiple alleles, kick out cassette 
+    L1L2_Del_BactPneo_FFL for all allele subtypes (not just non-conditional)
+
+TAG: targetedalleleload-tr11515-3
+DATE: 02/14/2014
+STAFF: sc
+CHANGES:
+1) TargetedAlleleLoadCfg.java - added getAlleleSubType method
+2) Constants.java - MUTATION_TYPE_* updated keys, added: SUBTYPE_ANNOT_TYPE_KEY, SUBTYPE_QUAL_KEY
+3) KnockoutAllele.java - added subtype, annottype, qualifier attributes get/set methods added
+	VOC_AnnotState/DAO creation and insertion
+4) KnockoutAlleleProcessor.java - added logger to this abstract class
+5) KompCsdProcessor.java/SangerProcessor.java - added setting of subtype in the knockoutAllele, 
+    added logging of and throwing exception for non-conditional/L1L2_Del_BactPneo_FFL input records
+6) tal_common.config.default -  corrected ALLELE_SUBTYPE_ values
+
+TAG: targetedalleleload-tr11515-2
+DATE: 02/11/2014
+STAFF: sc
+CHANGES:
+1) removed Mirko, Norcomm, Regeneron Processors, Interpreters, Factory and Input classes
+2) removed Mirko, Norcomm, Regeneron configuration
+3) KnockoutAlleleFactory - removed Mirko, Norcomm, Regeneron Factories
+4) Install - removed Mirko, Norcomm, Regeneron
+5) TargetedAlleleLoadCfg.java - updated getAlleleType to get the now single type
+6) Constants.java - added ALLELE_TYPE_KEY for single allele type
+7) TargetedAlleleLoad.java - get allele type from Constants
+8) KompCsdProcessor.java. SangerProcessor.java - get single allele type from Cfg and set in KnockOutAllele
+9) tal_common.config.default - added ALLELE_TYPE='847116'
+    Updated  ALLELE_TYPE_* to ALLELE_SUBTYPE_*
+
+TAG: targetedalleleload-tr11515-1
+DATE: 02/03/2014
+STAFF: sc
+CHANGES:
+1) Constants.java - added COLLECTION_KOMP_CSD, COLLECTION_EUCOMM
+2) KnockoutAllele.java - added collectionKey and set/get methods
+3) KompCsdProcessor.java/SangerProcessor.java - added setting
+    of collection key in KnockoutAllele instance
+
+>>>>>>> 1.52.2.5
 TAG: targetedalleleload-tr11515-BP
 DATE: 02/03/2014
 STAFF: sc

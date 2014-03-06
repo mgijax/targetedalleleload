@@ -45,10 +45,6 @@ public class Constants {
 	 */
 	public static final int ALLELE_VOCABULARY = 36;
 
-	/*
-	 * VOC_Term key for Allele type (Targeted knock out)
-	 */
-	public static final int ALLELE_TYPE = 847116;
 
 	/*
 	 * VOC_Term key for Allele mode (N/A)
@@ -87,14 +83,31 @@ public class Constants {
 	 */
 	public static final Map MUTATION_TYPE_KEYS = new HashMap();
 	static {
-		MUTATION_TYPE_KEYS.put("Deletion", new Integer(847116));
-		MUTATION_TYPE_KEYS.put("Conditional", new Integer(847118));
-		MUTATION_TYPE_KEYS.put("Targeted non-conditional", new Integer(847119));
+		MUTATION_TYPE_KEYS.put("Deletion", new Integer(11025593));
+		MUTATION_TYPE_KEYS.put("Conditional", new Integer(11025587));
+		MUTATION_TYPE_KEYS.put("Targeted non-conditional", new Integer(11025589));
 	}
+
+	/*
+         * VOC_Term key for Allele Type 'Targeted'
+         */
+	public static final Integer ALLELE_TYPE_KEY = new Integer(847116);
 
 	public static final int VECTOR_TYPE_KEY = 3982979;
 	
 	public static final Integer MARKER_OFFICIAL = new Integer(1);
 	public static final Integer MARKER_WITHDRAWN = new Integer(2);
+
+	/*
+	 *  Collection Keys
+	 */
+	public static final Integer COLLECTION_KOMP_CSD = new Integer(11025570);
+	public static final Integer COLLECTION_EUCOMM = new Integer(11025572);
+
+	/*
+	 * Allele subtype annotation type key/qualifier key
+	 */
+	public static final Integer SUBTYPE_ANNOT_TYPE_KEY = new Integer(1014);
+	public static final Integer SUBTYPE_QUAL_KEY = new Integer(1614158);
 
 }

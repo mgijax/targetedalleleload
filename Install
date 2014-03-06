@@ -4,15 +4,11 @@
 # Installation script
 #
 # 1) cp tal_common.config.default tal_common.config
-# 2) cp tal_regeneron.config.default tal_regeneron.config
-# 3) cp tal_csd_mbp.config.default tal_csd_mbp.config
-# 4) cp tal_csd_wtsi.config.default tal_csd_wtsi.config
-# 5) cp tal_eucomm_wtsi.config.default tal_eucomm_wtsi.config
-# 6) cp tal_eucomm_hgmu.config.default tal_eucomm_hgmu.config
-# 7) cp tal_norcomm_cmhd.config.default tal_norcomm_cmhd.config
-# 8) cp tal_norcomm_mfgc.config.default tal_norcomm_mfgc.config
-# 9) cp tal_mirko_mfgc.config.default tal_mirko_mfgc.config
-# 10) Install 
+# 2) cp tal_csd_mbp.config.default tal_csd_mbp.config
+# 3) cp tal_csd_wtsi.config.default tal_csd_wtsi.config
+# 4) cp tal_eucomm_wtsi.config.default tal_eucomm_wtsi.config
+# 5) cp tal_eucomm_hgmu.config.default tal_eucomm_hgmu.config
+# 6) Install 
 #
 
 Usage=Install
@@ -50,14 +46,10 @@ fi
 cd `dirname $0`
 
 # establish the config file 
-REGENERON_CONFIG=tal_regeneron.config
 CSD_WTSI_CONFIG=tal_csd_wtsi.config
 CSD_MBP_CONFIG=tal_csd_mbp.config
 EUCOMM_WTSI_CONFIG=tal_eucomm_wtsi.config
 EUCOMM_HMGU_CONFIG=tal_eucomm_hmgu.config
-NORCOMM_CMHD_CONFIG=tal_norcomm_cmhd.config
-NORCOMM_MFGC_CONFIG=tal_norcomm_mfgc.config
-MIRKO_WTSI_CONFIG=tal_mirko_wtsi.config
 COMMON_CONFIG=tal_common.config
 
 #
@@ -100,23 +92,6 @@ else
 fi
 
 echo 'running DLAINSTALL for each configuration of the load'
-
-#########################################################################
-# run DLAInstall for tal_regeneron
-#
-# Make sure config file exists and source it
-# the resource the common config and run DLAINSTALL
-if [ -r ${REGENERON_CONFIG} ]
-then
-    echo "Source ${REGENERON_CONFIG}"
-    . ${REGENERON_CONFIG}
-else
-    echo "Cannot source configuration file: ${REGENERON_CONFIG}"
-    installFailed
-fi
-. ${COMMON_CONFIG}
-${DLAINSTALL} ${DEV} ${DO_BUILD}
-
 
 #########################################################################
 # run DLAInstall for tal_csd_wtsi
@@ -176,50 +151,6 @@ else
 fi
 . ${COMMON_CONFIG}
 ${DLAINSTALL} ${DEV} ${DO_BUILD}
-
-
-#########################################################################
-# run DLAInstall for tal_norcomm_cmhd
-#
-if [ -r ${NORCOMM_CMHD_CONFIG} ]
-then
-    echo "Source ${NORCOMM_CMHD_CONFIG}"
-    . ${NORCOMM_CMHD_CONFIG}
-else
-    echo "Cannot source configuration file: ${NORCOMM_CMHD_CONFIG}"
-    installFailed
-fi
-. ${COMMON_CONFIG}
-${DLAINSTALL} ${DEV} ${DO_BUILD}
-
-#########################################################################
-# run DLAInstall for tal_norcomm_mfgc
-#
-if [ -r ${NORCOMM_MFGC_CONFIG} ]
-then
-    echo "Source ${NORCOMM_MFGC_CONFIG}"
-    . ${NORCOMM_MFGC_CONFIG}
-else
-    echo "Cannot source configuration file: ${NORCOMM_MFGC_CONFIG}"
-    installFailed
-fi
-
-
-#########################################################################
-# run DLAInstall for tal_mirko_wtsi
-#
-if [ -r ${MIRKO_WTSI_CONFIG} ]
-then
-    echo "Source ${MIRKO_WTSI_CONFIG}"
-    . ${MIRKO_WTSI_CONFIG}
-else
-    echo "Cannot source configuration file: ${MIRKO_WTSI_CONFIG}"
-    installFailed
-fi
-. ${COMMON_CONFIG}
-${DLAINSTALL} ${DEV} ${DO_BUILD}
-
-
 
 #
 # run DLAInstall for the last time, this time build the software

@@ -7,6 +7,8 @@ import org.jax.mgi.shr.config.ConfigException;
 import org.jax.mgi.shr.dbutils.DBException;
 import org.jax.mgi.shr.exception.MGIException;
 import org.jax.mgi.shr.ioutils.RecordFormatException;
+import org.jax.mgi.shr.dla.log.DLALoggingException;
+import org.jax.mgi.shr.dla.log.DLALogger;
 
 /**
  * @is An abstract object that knows how to create KOMP Clone objects from an
@@ -24,11 +26,17 @@ import org.jax.mgi.shr.ioutils.RecordFormatException;
  */
 
 abstract class KnockoutAlleleProcessor {
+	protected QualityControlStatistics qcStatistics = null;
+        protected DLALogger logger =  null;
+
+	public KnockoutAlleleProcessor() throws MGIException {
+	    qcStatistics = new QualityControlStatistics();
+	    logger = DLALogger.getInstance();
+
+	}
 	public abstract KnockoutAllele process(KnockoutAlleleInput in)
 			throws RecordFormatException, ConfigException,
 			KeyNotFoundException, DBException, CacheException,
-			TranslationException, MGIException;
-
-	protected QualityControlStatistics qcStatistics = new QualityControlStatistics();
+			TranslationException, DLALoggingException, MGIException;
 
 }
