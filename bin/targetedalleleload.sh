@@ -148,7 +148,8 @@ preload ${OUTPUTDIR} ${INPUTDIR} ${LOGDIR}
 #
 #  Run the load application.
 #
-echo "\n`date`" >> ${LOG_PROC}
+echo "" >> ${LOG_PROC}
+echo "`date`" >> ${LOG_PROC}
 echo "Run the targetedalleleLoad application in update mode" >> ${LOG_PROC}
 ${JAVA} ${JAVARUNTIMEOPTS} -classpath ${CLASSPATH} \
         -DCONFIG=${CONFIG_MASTER},${CONFIG_LOAD_COMMON},${CONFIG_LOAD_MODE},${CONFIG_LOAD} \
@@ -187,7 +188,8 @@ fi
 #
 #  Run the load application.
 #
-echo "\n`date`" >> ${LOG_PROC}
+echo "" >> ${LOG_PROC}
+echo "`date`" >> ${LOG_PROC}
 echo "Run the targetedalleleLoad application in create mode" >> ${LOG_PROC}
 ${JAVA} ${JAVARUNTIMEOPTS} -classpath ${CLASSPATH} \
         -DCONFIG=${CONFIG_MASTER},${CONFIG_LOAD_COMMON},${CONFIG_LOAD_MODE},${CONFIG_LOAD} \
