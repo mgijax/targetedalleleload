@@ -1,5 +1,11 @@
+TAG: targetedalleleload-5-2-1-2
+DATE: 05/11/2015
+STAFF: sc
+CHANGES: TR12019 - remove generation of html versions of reports because
+   they create links to the obsolete production WI.
+
 TAG: targetedalleleload-5-2-1-1
-DATE: 03/12/2014
+DATE: 03/12/2015
 STAFF: sc
 CHANGES: TR11941 - added new eucomm hmgu cassette:
     Ifitm2_intron_L1L2_Bact_P

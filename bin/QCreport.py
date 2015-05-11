@@ -42,7 +42,6 @@ db.useOneConnection(1)
 #print '%s' % mgi_utils.date()
 
 outFilePath = os.environ['RPTDIR'] + "/AbandonedAllele.rpt"
-outFilePathHTML = os.environ['RPTDIR'] + "/AbandonedAllele.html"
 logicaldb = os.environ['PROJECT_LOGICAL_DB']
 webshare = "%s/getConfig.cgi"%os.environ['WEBSHARE_URL']
 
@@ -56,7 +55,6 @@ userKey = 0
 date = loadlib.loaddate
 
 
-#wishared = urllib.urlopen("http://rohan.informatics.jax.org/live/webshare/getConfig.cgi").readlines()
 wishared = urllib.urlopen(webshare).readlines()
 wienv = {}
 
@@ -83,26 +81,19 @@ where a._Allele_key = ac._Allele_key)
 order by symbol
 """ %logicaldb, 'auto')
 
+
 try:
     outFile = open(outFilePath, 'w')
-    outFileHTML = open(outFilePathHTML, 'w')
 except:
-    exit('Could not open file for writing %s or \n' %( outFilePath, outFilePathHTML))
+    exit('Could not open file for writing %s \n' % outFilePath)
 
-outFileHTML.write("<table><tr><th>%s</th><th>%s</th><th>%s</th><th>%s</th><th>%s</th></tr>"%('Allele symbol','Allele key', 'Creation date', 'Modification date', 'Project ID'))
-outFileHTML.write("\n")
-
-outFile.write(colDelim.join(['Allele symbol','Allele key', 'Creation date', 'Modification date', 'Project ID', 'URL']))
+outFile.write(colDelim.join(['Allele symbol','Allele key', 'Creation date', 'Modification date', 'Project ID']))
 outFile.write(lineDelim)
 
 for r in results:
-    url = "%sWIFetch?page=alleleDetail&key=%s"%(wienv['JAVAWI_URL'], str(r['_Allele_key']))
-    outFile.write(colDelim.join([r['symbol'],str(r['_Allele_key']),str(r['creation_date']), str(r['modification_date']), str(r['accid']),url]))
+    outFile.write(  colDelim.join(  [r['symbol'],str(r['_Allele_key']),str(r['creation_date']), str(r['modification_date']), str(r['accid'])]  )  )
     outFile.write(lineDelim)
-    outFileHTML.write("<tr><td><a href='%s'>%s</a></td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>"%(url, r['symbol'].replace("<","~~").replace(">","</sup>").replace("~~","<sup>"), str(r['_Allele_key']), str(r['creation_date']), str(r['modification_date']), str(r['accid'])))
-    outFileHTML.write(lineDelim)
 
-outFileHTML.write("</table>\n")
 
 #
 # Post Process

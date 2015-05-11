@@ -37,7 +37,6 @@ db.useOneConnection(1)
 #print '%s' % mgi_utils.date()
 
 outFilePath = os.environ['BASEDIR'] + "/duplicatedAllele.rpt"
-outFilePathHTML = os.environ['BASEDIR'] + "/duplicatedAllele.html"
 webshare = "%s/getConfig.cgi"%os.environ['WEBSHARE_URL']
 
 # column delimiter
@@ -50,7 +49,6 @@ userKey = 0
 date = loadlib.loaddate
 
 
-#wishared = urllib.urlopen("http://rohan.informatics.jax.org/live/webshare/getConfig.cgi").readlines()
 wishared = urllib.urlopen(webshare).readlines()
 wienv = {}
 
@@ -72,26 +70,15 @@ results = db.sql("""
 
 try:
     outFile = open(outFilePath, 'w')
-    outFileHTML = open(outFilePathHTML, 'w')
 except:
-    exit('Could not open file for writing %s or \n' %( outFilePath, outFilePathHTML))
+    exit('Could not open file for writing %s \n' %  outFilePath)
 
-outFileHTML.write("<table><tr><th>%s</th><th>%s</th></tr>"%('Allele symbol','Allele key'))
-outFileHTML.write("\n")
-
-outFile.write(colDelim.join(['Allele symbol','Allele key', 'URL']))
+outFile.write(colDelim.join(['Allele symbol','Allele key']))
 outFile.write(lineDelim)
 
 for r in results:
-    url = "%sWIFetch?page=alleleDetail&key=%s"%(wienv['JAVAWI_URL'], str(r['_Allele_key']))
-    outFile.write(colDelim.join([r['symbol'],str(r['_Allele_key']),url]))
+    outFile.write(colDelim.join([r['symbol'],str(r['_Allele_key'])]))
     outFile.write(lineDelim)
-    outFileHTML.write("<tr><td><a href='%s'>%s</a></td><td>%s</td></tr>"%(url,
-        r['symbol'].replace("<","~~").replace(">","</sup>").replace("~~","<sup>"),
-        str(r['_Allele_key'])))
-    outFileHTML.write(lineDelim)
-
-outFileHTML.write("</table>\n")
 
 #
 # Post Process
