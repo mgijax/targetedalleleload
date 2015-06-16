@@ -128,9 +128,8 @@ extends FullCachedLookup
 		} catch (ConfigException e) {
 			logger.logdInfo("Config Exception retrieving PROVIDER", false);
 		}
-
-		return "SELECT a._allele_key 'alleleKey', " +
-			"m.symbol 'markerSymbol' " +
+		return "SELECT a._allele_key as alleleKey, " +
+			"m.symbol as markerSymbol " +
 			"FROM ALL_Allele a, MRK_Marker m, ACC_Accession aa " +
 			"WHERE a.symbol like '%<tm%" + provider + ">' " +
 			"AND a._Allele_Status_key != 847112 " +

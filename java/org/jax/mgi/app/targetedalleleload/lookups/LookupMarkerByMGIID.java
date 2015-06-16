@@ -97,10 +97,9 @@ extends LazyCachedLookup
     public String getAddQuery(Object addObject)
     {
     	String MGIID = (String)addObject;
-
-    	return "SELECT  mgiid = a2.accID, markerKey = a2._Object_key, " +
-		"symbol = m.symbol, chromosome = m.chromosome, " +
-    	"statusKey = m._marker_status_key " +
+    	return "SELECT a2.accID as mgiid, a2._Object_key as markerKey, " +
+		"m.symbol, m.chromosome , " +
+    		"m._marker_status_key as statusKey " +
 		"FROM ACC_Accession a2, MRK_Marker m " +
 		"WHERE a2._MGIType_key = 2 " + 
 		"AND a2.accId = '" + MGIID + "' " +

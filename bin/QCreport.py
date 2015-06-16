@@ -10,14 +10,12 @@
 # Env Vars:
 #   1. PROJECT_LOGICAL_DB
 #   2. RPTDIR
-#   2. WEBSHARE_URL
 #   
 # Inputs:
 #   The MGI database 
 #       1. allele key
 #       2. allele symbol
 #       3. count of mutant cell lines (should be 0)
-#       4. webshare java_wi parameter
 # Outputs:
 #   1. rpt file 
 #   2. html files
@@ -43,7 +41,6 @@ db.useOneConnection(1)
 
 outFilePath = os.environ['RPTDIR'] + "/AbandonedAllele.rpt"
 logicaldb = os.environ['PROJECT_LOGICAL_DB']
-webshare = "%s/getConfig.cgi"%os.environ['WEBSHARE_URL']
 
 # column delimiter
 colDelim = "\t"
@@ -53,15 +50,6 @@ lineDelim = "\n"
 TAB= "\t"
 userKey = 0
 date = loadlib.loaddate
-
-
-wishared = urllib.urlopen(webshare).readlines()
-wienv = {}
-
-for line in wishared:
-    data = line.strip().split('\t')
-    if len(data) > 1:
-        wienv[data[0]] = data[1]
 
 #
 # Process

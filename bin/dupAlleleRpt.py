@@ -9,7 +9,6 @@
 # Usage: dupAllele.py
 # Env Vars:
 #   1. RPTDIR
-#   2. WEBSHARE_URL
 #   
 # Inputs:
 #   
@@ -37,7 +36,6 @@ db.useOneConnection(1)
 #print '%s' % mgi_utils.date()
 
 outFilePath = os.environ['BASEDIR'] + "/duplicatedAllele.rpt"
-webshare = "%s/getConfig.cgi"%os.environ['WEBSHARE_URL']
 
 # column delimiter
 colDelim = "\t"
@@ -49,24 +47,18 @@ userKey = 0
 date = loadlib.loaddate
 
 
-wishared = urllib.urlopen(webshare).readlines()
-wienv = {}
-
-for line in wishared:
-    data = line.strip().split('\t')
-    if len(data) > 1:
-        wienv[data[0]] = data[1]
-
 #
 # Process
 #
 
 # get all duplicated tal load created alleles
 results = db.sql("""
-    SELECT a._Allele_key, a.symbol
-    FROM ALL_Allele a
-    WHERE _CreatedBy_key = 1466
-    group by symbol having count(*) > 1""", 'auto')
+    select a._allele_key, a.symbol
+    from all_allele a
+    where _CreatedBy_key = 1466
+    and exists (select 1 from all_allele a2
+    where a2._allele_key != a._allele_key
+    and a.symbol = a2.symbol) """, 'auto')
 
 try:
     outFile = open(outFilePath, 'w')

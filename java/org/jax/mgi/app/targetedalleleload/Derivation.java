@@ -45,9 +45,9 @@ extends org.jax.mgi.dbs.mgd.loads.Alo.Derivation
 		state.setName(this.getName());
 		state.setDescription(this.getDescription());
 		state.setVectorKey(this.getVectorKey());
-		state.setVectorTypeKey(this.getVectorTypeKey());
-		state.setParentCellLineKey(this.getParentCellLineKey());
-		state.setDerivationTypeKey(this.getDerivationTypeKey());
+		state.setVectortypeKey(this.getVectorTypeKey());
+		state.setParentcellLineKey(this.getParentCellLineKey());
+		state.setDerivationtypeKey(this.getDerivationTypeKey());
 		state.setCreatorKey(this.getCreatorKey());
 		state.setRefsKey(this.getRefsKey());
 

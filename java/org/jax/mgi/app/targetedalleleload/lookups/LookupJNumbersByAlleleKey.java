@@ -119,7 +119,7 @@ extends FullCachedLookup
 	public String getFullInitQuery() 
 	{
 			return "SELECT distinct jnumid, " +
-				"mra._object_key '_allele_key' " + 
+				"mra._object_key as _allele_key " + 
 				"FROM MGI_Reference_Assoc mra, BIB_citation_cache bcc, " + 
 				"ACC_Accession acc2 " +
 				"WHERE mra._refs_key = bcc._refs_key " +
