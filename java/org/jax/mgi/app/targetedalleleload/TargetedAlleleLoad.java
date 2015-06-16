@@ -15,7 +15,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+import java.util.Collection;
 import org.jax.mgi.app.targetedalleleload.lookups.LookupAlleleByCellLine;
 import org.jax.mgi.app.targetedalleleload.lookups.LookupAlleleByKey;
 import org.jax.mgi.app.targetedalleleload.lookups.LookupAllelesByMarker;
@@ -230,7 +230,9 @@ public class TargetedAlleleLoad extends DLALoader {
 
 	logger.logdDebug("Initializing lookupAllelesByProjectId", true);
 	lookupAllelesByProjectId = LookupAllelesByProjectId.getInstance();
-
+	logger.logdInfo("lookupAllelesByProjectId cache:", true);
+	logger.logdInfo(lookupAllelesByProjectId.lookup("31080").toString(), true);
+        logger.logdInfo(lookupAllelesByProjectId.lookup("72104").toString(), true);
 	logger.logdDebug("Initializing lookupAllelesByMarker", true);
 	lookupAllelesByMarker = LookupAllelesByMarker.getInstance();
 	
@@ -278,6 +280,8 @@ public class TargetedAlleleLoad extends DLALoader {
 
 	logger.logdDebug("Filtering project IDs", true);
 	filterProjectIds(databaseProjectIds);
+	logger.logdInfo("databaseProjectsIds:", true);
+	logger.logdInfo(databaseProjectIds.toString(), true);
 
 	logger.logdDebug("Filtering cell lines", true);
 	filterCellLines(databaseCellLines);
@@ -324,14 +328,27 @@ public class TargetedAlleleLoad extends DLALoader {
 	    String label = (String) it.next();
 	    Map a = lookupAllelesByProjectId.lookup(label);
 
+
 	    // All alleles in the project belong to the same
 	    // pipeline/provider combination, so just look at the first one
-	    Map b = (Map) a.values().toArray()[0];
+	    // sc 6/12 - not true due to Orphans - need to find a non-orphan
+	    //Map b = (Map) a.values().toArray()[0];
+	
 
-	    // If the allele belongs to the same combination of pipeline
-	    // and provider, then add it to the QC check pool
-	    if (((String) b.get("symbol")).indexOf(loadProvider) >= 0) {
-		databaseProjectIds.add(label);
+	    logger.logdInfo(a.values().toString(), true);
+
+	    Collection b = a.values();
+
+	    // new code, check all alleles for correct loadProvider - 
+	    // pid can get added more than once, but databseProjectIds is a Set
+	    Iterator bIt = b.iterator();
+	    while (bIt.hasNext()) {
+		Map all = (Map)bIt.next();
+		// If the allele belongs to the same combination of pipeline
+		// and provider, then add it to the QC check pool
+		if (((String) all.get("symbol")).indexOf(loadProvider) >= 0) {
+		    databaseProjectIds.add(label);
+		}
 	    }
 	}
 
@@ -434,6 +451,7 @@ public class TargetedAlleleLoad extends DLALoader {
 
 	    // Keep track of the projects and mutant cell lines we've already
 	    // seen
+	    logger.logdInfo(in.getProjectId().toLowerCase(), true);
 	    databaseProjectIds.remove(in.getProjectId().toLowerCase());
 	    databaseCellLines.remove(in.getMutantCellLine().toLowerCase());
 

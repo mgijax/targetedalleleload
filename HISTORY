@@ -1,3 +1,11 @@
+TAG: targetedalleleload-5-2-1-3
+DATE: 06/16/2015
+STAFF: sc
+CHANGES: TR12052
+* updated filterProjectIds method of TargetedAlleleLoad.java 
+    targetedalleleload-5-2-1-3 to correctly report pids in the database 
+    not in the input file
+
 TAG: targetedalleleload-TR11750-BP
 DATE: 05/22/2015
 STAFF: sc
