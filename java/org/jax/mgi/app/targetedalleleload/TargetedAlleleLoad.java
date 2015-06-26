@@ -230,9 +230,6 @@ public class TargetedAlleleLoad extends DLALoader {
 
 	logger.logdDebug("Initializing lookupAllelesByProjectId", true);
 	lookupAllelesByProjectId = LookupAllelesByProjectId.getInstance();
-	logger.logdInfo("lookupAllelesByProjectId cache:", true);
-	logger.logdInfo(lookupAllelesByProjectId.lookup("31080").toString(), true);
-        logger.logdInfo(lookupAllelesByProjectId.lookup("72104").toString(), true);
 	logger.logdDebug("Initializing lookupAllelesByMarker", true);
 	lookupAllelesByMarker = LookupAllelesByMarker.getInstance();
 	
@@ -280,8 +277,6 @@ public class TargetedAlleleLoad extends DLALoader {
 
 	logger.logdDebug("Filtering project IDs", true);
 	filterProjectIds(databaseProjectIds);
-	logger.logdInfo("databaseProjectsIds:", true);
-	logger.logdInfo(databaseProjectIds.toString(), true);
 
 	logger.logdDebug("Filtering cell lines", true);
 	filterCellLines(databaseCellLines);
@@ -334,8 +329,6 @@ public class TargetedAlleleLoad extends DLALoader {
 	    // sc 6/12 - not true due to Orphans - need to find a non-orphan
 	    //Map b = (Map) a.values().toArray()[0];
 	
-
-	    logger.logdInfo(a.values().toString(), true);
 
 	    Collection b = a.values();
 
@@ -451,7 +444,6 @@ public class TargetedAlleleLoad extends DLALoader {
 
 	    // Keep track of the projects and mutant cell lines we've already
 	    // seen
-	    logger.logdInfo(in.getProjectId().toLowerCase(), true);
 	    databaseProjectIds.remove(in.getProjectId().toLowerCase());
 	    databaseCellLines.remove(in.getMutantCellLine().toLowerCase());
 
