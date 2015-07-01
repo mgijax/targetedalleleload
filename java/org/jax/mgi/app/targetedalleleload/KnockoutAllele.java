@@ -16,8 +16,6 @@ import org.jax.mgi.dbs.mgd.dao.ALL_AlleleDAO;
 import org.jax.mgi.dbs.mgd.dao.ALL_AlleleState;
 import org.jax.mgi.dbs.mgd.dao.ALL_Allele_MutationDAO;
 import org.jax.mgi.dbs.mgd.dao.ALL_Allele_MutationState;
-import org.jax.mgi.dbs.mgd.dao.ALL_Marker_AssocDAO;
-import org.jax.mgi.dbs.mgd.dao.ALL_Marker_AssocState;
 import org.jax.mgi.dbs.mgd.dao.MGI_NoteChunkDAO;
 import org.jax.mgi.dbs.mgd.dao.MGI_NoteChunkState;
 import org.jax.mgi.dbs.mgd.dao.MGI_NoteDAO;
@@ -75,10 +73,6 @@ implements Comparable
 	private Boolean isWildType = new Boolean(false);
 	private Boolean isExtinct = new Boolean(false);
 	private Boolean isMixed = new Boolean(false);
-	private Integer mkrAssocQualKey = new Integer(
-			Constants.MKR_ASSOC_QUAL_NS_KEY);
-	private Integer mkrAssocStatusKey = new Integer(
-			Constants.MKR_ASSOC_STAT_CURATED_KEY);
 
 	// TR11515 new attributes
 	// new allele attribute
@@ -353,7 +347,7 @@ implements Comparable
 		MGI_NoteState nState = new MGI_NoteState();
 		nState.setObjectKey(key);
 		nState.setMGITypeKey(new Integer(Constants.ALLELE_MGI_TYPE));
-		nState.setNoteTypeKey(new Integer(Constants.NOTE_TYPE_MOLECULAR));
+		nState.setNotetypeKey(new Integer(Constants.NOTE_TYPE_MOLECULAR));
 
 		MGI_NoteDAO nDAO = new MGI_NoteDAO(nState);
 		stream.insert(nDAO);
@@ -419,11 +413,11 @@ implements Comparable
 		aState.setTransmissionKey(transmissionKey);
 		aState.setSymbol(symbol);
 		aState.setName(name);
-		aState.setNomenSymbol(null);
+		aState.setNomensymbol(null);
 		aState.setIsWildType(isWildType);
 		aState.setIsExtinct(isExtinct);
 		aState.setIsMixed(isMixed);
-		aState.setApprovedByKey(rdCfg.getJobStreamKey());
+		aState.setApprovedbyKey(rdCfg.getJobStreamKey());
 		aState.setApprovalDate(currentTime);
 
 		ALL_AlleleDAO aDAO = new ALL_AlleleDAO(aState);
@@ -437,23 +431,13 @@ implements Comparable
 		    Integer subTypeKey = (Integer) i.next();
 		    VOC_AnnotState annotState = new VOC_AnnotState();
 		    annotState.setObjectKey(key);
-		    annotState.setAnnotTypeKey(annotTypeKey);
+		    annotState.setAnnottypeKey(annotTypeKey);
 		    annotState.setQualifierKey(qualifierKey);
 		    annotState.setTermKey(subTypeKey);
 
 		    VOC_AnnotDAO annotDAO = new VOC_AnnotDAO(annotState);
 		    stream.insert(annotDAO);
 		}
-
-		// Create the marker associations
-		ALL_Marker_AssocState amaState = new ALL_Marker_AssocState();
-		amaState.setAlleleKey(key);
-		amaState.setMarkerKey(markerKey);
-		amaState.setQualifierKey(mkrAssocQualKey);
-		amaState.setStatusKey(mkrAssocStatusKey);
-
-		ALL_Marker_AssocDAO amaDAO = new ALL_Marker_AssocDAO(amaState);
-		stream.insert(amaDAO);
 
 		// Create the mutation type references
 		for (Iterator i = mutationTypes.iterator(); i.hasNext();) {

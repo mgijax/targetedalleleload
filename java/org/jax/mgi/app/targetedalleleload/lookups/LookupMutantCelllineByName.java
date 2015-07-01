@@ -74,6 +74,7 @@ extends FullCachedLookup
 	 * @return the full initialization query
 	 */
 	public String getFullInitQuery() {
+
 		return "SELECT a.accID, a._logicalDB_key, ldb.name as ldbName, " +
 				"c._CellLine_key, c.cellLine, c._CellLine_Type_key, " +
 				"v.term as cellLineType, c._Strain_key, s.strain, " +
@@ -88,7 +89,7 @@ extends FullCachedLookup
 				"AND c.isMutant = 1 " +
 				"AND c._CellLine_Type_key = v._Term_key " +
 				"AND c._Strain_key = s._Strain_key " +
-				"AND c._Derivation_key != null " +
+				"AND c._Derivation_key is not null " +
 				"AND a._LogicalDB_Key in (108,109,137,142,165)" ;
 	}
 

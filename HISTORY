@@ -11,6 +11,26 @@ CHANGES: TR12052
     targetedalleleload-5-2-1-3 to correctly report pids in the database 
     not in the input file
 
+TAG: targetedalleleload-TR11750-1
+DATE: 05/22/2015
+STAFF: sc
+CHANGES:
+1)dupAlleleRpt.py, QCreport.py - remove references to WEBSHARE_URL, update
+   group by query to be postgres friendly
+2) QCReport.py - remove references to WEBSHARE_URL
+3) tal_common.config.default - upped memory: JAVARUNTIMEOPTS="-Xms2g -Xmx2g"
+4) KnockoutAllele.java - removed ALL_Marker_Assoc objects
+5) Derivation.java - updated DerivationState camel case:
+    state.setVectorTypeKey --> state.setVectortypeKey
+    state.setParentCellLineKey --> state.setParentcellLineKey
+    state.setDerivationTypeKey --> state.setDerivationtypeKey
+6) TargetedAlleleLoad.java
+* build a Vector of tables specifying the table order for bcp
+* Fix the determination of PIDs in the database not in the input file (production bug also
+    done on trunk) This is the 'filterProjectID method.
+* Added import of Vector, Collection, Table and BCP_Stream to accomplish above
+* all lookups - update SQL
+ 
 TAG: targetedalleleload-TR11750-BP
 DATE: 05/22/2015
 STAFF: sc
@@ -88,7 +108,6 @@ CHANGES:
 3) KompCsdProcessor.java/SangerProcessor.java - added setting
     of collection key in KnockoutAllele instance
 
->>>>>>> 1.52.2.5
 TAG: targetedalleleload-tr11515-BP
 DATE: 02/03/2014
 STAFF: sc

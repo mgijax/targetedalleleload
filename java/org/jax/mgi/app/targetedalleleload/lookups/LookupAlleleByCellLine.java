@@ -76,7 +76,9 @@ extends FullCachedLookup
 		lookupJNumbersByAlleleKey = LookupJNumbersByAlleleKey.getInstance();
 
 		logger = DLALogger.getInstance();
+		//logger.setDebug(true);
 		this.initCache();
+		//this.setDebug(true);
 	}
 
 	/**
@@ -138,53 +140,54 @@ extends FullCachedLookup
 	 */
 	public String getFullInitQuery() 
 	{
-		TargetedAlleleLoadCfg cfg;
-		String provider;
-		try {
-			cfg = new TargetedAlleleLoadCfg();
-			provider = cfg.getProviderLabcode();
-		} catch (MGIException e) {
-			// Cannot get load provider lab code.  Bail!
-			return "";
-		}
-		logger.logdDebug(
-				"LookupAlleleByCellLine, getting init query ", 
-				true);
-
-		return "SELECT alleleKey=a._Allele_key, alleleName=a.name, " +
-				"alleleSymbol=a.symbol, alleleType=a._Allele_Type_key, " +
-				"geneSymbol=mrk.symbol, chr=mrk.chromosome, " +
-				"geneKey=mrk._Marker_key, geneMgiid=acc.accID, " +
-				"alleleNote=nc.note, alleleTrans=a._Transmission_key, " +
-				"alleleNoteSeq=nc.sequenceNum, " +
-				"alleleNoteKey=nc._note_key, " +
-				"alleleNoteModifiedBy=n._ModifiedBy_key, " +
-				"alleleNoteCreatedBy=n._CreatedBy_key, " +
-				"projectId=acc2.accId, " +
-				"aac._MutantCellLine_key, ac.cellLine " +
-				"FROM ALL_Allele a, " +
-				"MRK_Marker mrk, ALL_Allele_CellLine aac, " +
-				"ALL_Cellline ac, MGI_Note n, MGI_NoteChunk nc, " +
-				"ACC_Accession acc, ACC_Accession acc2 " +
-				"WHERE a.symbol like '%tm%" + provider + ">' " +
-				"AND aac._Allele_key = a._Allele_key " +
-				"AND aac._MutantCellLine_key = ac._cellline_key " +
-				"and a._Marker_key = mrk._Marker_key " +
-				"and acc.preferred=1 " +
-				"and acc._Object_key = mrk._Marker_key " +
-				"and acc.prefixpart='MGI:' " +
-				"and acc._LogicalDB_key=1 " +
-				"and acc._MGIType_key=2 " +
-				"and acc2.preferred=1 " +
-				"and acc2.private=1 " +
-				"and acc2._Object_key = a._Allele_key " +
-				"and acc2._LogicalDB_key in (125,126,138,143,166) " +
-				"and acc2._MGIType_key=11 " +
-				"and n._Object_key =* a._Allele_key " +
-				"and n._MGIType_key = 11 " +
-				"and n._NoteType_key = 1021 " +
-				"and n._Note_key *= nc._Note_key " +
-				"order by alleleKey, cellLine, alleleNoteSeq " ;
+	    TargetedAlleleLoadCfg cfg;
+	    String provider;
+	    try {
+		cfg = new TargetedAlleleLoadCfg();
+		provider = cfg.getProviderLabcode();
+	    } catch (MGIException e) {
+		// Cannot get load provider lab code.  Bail!
+		return "";
+	    }
+	    logger.logdDebug(
+		"LookupAlleleByCellLine, getting init query ", 
+		true);
+	    return "SELECT a._Allele_key as alleleKey, a.name as alleleName, " +
+		"a.symbol as alleleSymbol, a._Allele_Type_key as alleleType, " +
+		"mrk.symbol as geneSymbol, mrk.chromosome as chr, " +
+		"mrk._Marker_key as geneKey, acc.accID as geneMgiid, " +
+		"nc.note as alleleNote, a._Transmission_key as alleleTrans, " +
+		"nc.sequenceNum as alleleNoteSeq, " +
+		"nc._note_key as alleleNoteKey, " +
+		"n._ModifiedBy_key as alleleNoteModifiedBy, " +
+		"n._CreatedBy_key as alleleNoteCreatedBy, " +
+		"acc2.accId as projectId, " +
+		"aac._MutantCellLine_key, ac.cellLine " +
+		"FROM MRK_Marker mrk, ALL_Allele_CellLine aac, " +
+		"ALL_Cellline ac, " +
+		"ACC_Accession acc, ACC_Accession acc2, " +
+		"ALL_Allele a  " +
+                "LEFT OUTER JOIN MGI_Note n on " +
+                "    (a._Allele_key = n._Object_key " +
+                "    and n._MGIType_key = 11 " +
+                "    and n._NoteType_key = 1021) " +
+                "LEFT OUTER JOIN MGI_NoteChunk nc on " +
+                "    (nc._note_key = n._note_key) " +
+		"WHERE a.symbol like '%tm%" + provider + ">' " +
+		"AND aac._Allele_key = a._Allele_key " +
+		"AND aac._MutantCellLine_key = ac._cellline_key " +
+		"and a._Marker_key = mrk._Marker_key " +
+		"and acc.preferred=1 " +
+		"and acc._Object_key = mrk._Marker_key " +
+		"and acc.prefixpart='MGI:' " +
+		"and acc._LogicalDB_key=1 " +
+		"and acc._MGIType_key=2 " +
+		"and acc2.preferred=1 " +
+		"and acc2.private=1 " +
+		"and acc2._Object_key = a._Allele_key " +
+		"and acc2._LogicalDB_key in (125,126,138,143,166) " +
+		"and acc2._MGIType_key=11 " +
+		"order by alleleKey, cellLine, alleleNoteSeq " ;
 	}
 
 	/**

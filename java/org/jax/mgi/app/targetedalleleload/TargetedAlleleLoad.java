@@ -13,9 +13,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.Collection;
+
 import org.jax.mgi.app.targetedalleleload.lookups.LookupAlleleByCellLine;
 import org.jax.mgi.app.targetedalleleload.lookups.LookupAlleleByKey;
 import org.jax.mgi.app.targetedalleleload.lookups.LookupAllelesByMarker;
@@ -44,6 +46,8 @@ import org.jax.mgi.shr.config.TargetedAlleleLoadCfg;
 import org.jax.mgi.shr.dbutils.DBException;
 import org.jax.mgi.shr.dbutils.SQLDataManager;
 import org.jax.mgi.shr.dbutils.SQLDataManagerFactory;
+import org.jax.mgi.shr.dbutils.dao.BCP_Stream;
+import org.jax.mgi.shr.dbutils.Table;
 import org.jax.mgi.shr.dla.loader.DLALoader;
 import org.jax.mgi.shr.dla.loader.DLALoaderException;
 import org.jax.mgi.shr.exception.MGIException;
@@ -230,6 +234,10 @@ public class TargetedAlleleLoad extends DLALoader {
 
 	logger.logdDebug("Initializing lookupAllelesByProjectId", true);
 	lookupAllelesByProjectId = LookupAllelesByProjectId.getInstance();
+	//logger.logdInfo("lookupAllelesByProjectId cache:", true);
+	//logger.logdInfo(lookupAllelesByProjectId.lookup("31080").toString(), true);
+	//logger.logdInfo(lookupAllelesByProjectId.lookup("72104").toString(), true);
+
 	logger.logdDebug("Initializing lookupAllelesByMarker", true);
 	lookupAllelesByMarker = LookupAllelesByMarker.getInstance();
 	
@@ -277,6 +285,8 @@ public class TargetedAlleleLoad extends DLALoader {
 
 	logger.logdDebug("Filtering project IDs", true);
 	filterProjectIds(databaseProjectIds);
+	//logger.logdInfo("databaseProjectsIds:", true);
+	//logger.logdInfo(databaseProjectIds.toString(), true);
 
 	logger.logdDebug("Filtering cell lines", true);
 	filterCellLines(databaseCellLines);
@@ -314,15 +324,23 @@ public class TargetedAlleleLoad extends DLALoader {
     throws MGIException {
 
 	logger.logdInfo("Building project ID filter\n", true);
-
+	// sc - for eucomm hmgu: "(EUCOMM)Hmgu"
 	String loadProvider = 
 	    "(" + cfg.getPipeline() + ")" + cfg.getProviderLabcode();
 
 	Iterator it = lookupAllelesByProjectId.getKeySet().iterator();
+	// sc - 'label is PID'
 	while (it.hasNext()) {
 	    String label = (String) it.next();
+	    // sc note:
+	    // Map a -  {symbol1:alleleSet, symbol2:alleleSet, ...}
+	    // alleleSet is a set of  HashMaps - 
+	    //        {"projectID":String, "key":Integer, "symbol":String, 
+	    // 		"parentCellLine":String, "parentCellLineKey":Integer,
+	    // 		"mutantCellLines":ArrayList}
+	    // where key is allele key, symbol is allele symbol, mutantCellLines is 
+	    //         ArrayList of String   MCL IDs	
 	    Map a = lookupAllelesByProjectId.lookup(label);
-
 
 	    // All alleles in the project belong to the same
 	    // pipeline/provider combination, so just look at the first one
@@ -344,7 +362,6 @@ public class TargetedAlleleLoad extends DLALoader {
 		}
 	    }
 	}
-
 	logger.logdInfo("Finished building project ID filter\n", true);
 
     }
@@ -403,6 +420,24 @@ public class TargetedAlleleLoad extends DLALoader {
 	qcStats.record("SUMMARY", NUM_ALLELES_CREATED, 0);
 	qcStats.record("SUMMARY", NUM_CELLLINES_CREATED, 0);
 
+	// Build a vector that contains a Table object for each table to be
+	// written to in the "load" database.
+	//
+	Vector loadTables = new Vector();
+        loadTables.add(Table.getInstance("ALL_Allele", loadDBMgr));
+        loadTables.add(Table.getInstance("ALL_CellLine", loadDBMgr));
+        loadTables.add(Table.getInstance("ALL_Allele_CellLine", loadDBMgr));
+        loadTables.add(Table.getInstance("ALL_Allele_Mutation", loadDBMgr));
+	loadTables.add(Table.getInstance("ACC_Accession", loadDBMgr));
+	loadTables.add(Table.getInstance("VOC_Annot", loadDBMgr));
+        loadTables.add(Table.getInstance("MGI_Note", loadDBMgr));
+        loadTables.add(Table.getInstance("MGI_NoteChunk", loadDBMgr));
+        loadTables.add(Table.getInstance("MGI_Reference_Assoc", loadDBMgr));
+
+	// Initialize writers for each table if a BCP stream if being used.
+	//                                                              
+	if (loadStream.isBCP())
+	    ((BCP_Stream)loadStream).initBCPWriters(loadTables);
 	logger.logdInfo("Finished preprocessing Targeted allele load\n", true);
 
     }
@@ -444,9 +479,9 @@ public class TargetedAlleleLoad extends DLALoader {
 
 	    // Keep track of the projects and mutant cell lines we've already
 	    // seen
+	   
 	    databaseProjectIds.remove(in.getProjectId().toLowerCase());
 	    databaseCellLines.remove(in.getMutantCellLine().toLowerCase());
-
 	    // If this record is not appropriate to be handled by this
 	    // processor, skip it. The only reason we included it in the
 	    // first place was to assist in the QC of all cell lines

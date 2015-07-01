@@ -108,10 +108,10 @@ extends FullCachedLookup
 	 */
 	public String getFullInitQuery() 
 	{
-		return "SELECT acc.accID 'projectid', a._Allele_key 'allelekey', "
-				+ "c.cellLine 'mutantCellLine', aa.symbol 'symbol', "
-				+ "p._CellLine_key 'parentCellLine_key', "
-				+ "p.cellLine 'parentCellLine' FROM ACC_Accession acc, "
+		return "SELECT acc.accID  as projectid, a._Allele_key as allelekey, "
+				+ "c.cellLine  as mutantCellLine, aa.symbol  as symbol, "
+				+ "p._CellLine_key  as parentCellLine_key, "
+				+ "p.cellLine  as parentCellLine FROM ACC_Accession acc, "
 				+ "ALL_Allele_CellLine a, ALL_CellLine c, "
 				+ "ALL_Allele aa, ALL_CellLine p, "
 				+ "ALL_CellLine_Derivation d WHERE acc._logicaldb_key = "

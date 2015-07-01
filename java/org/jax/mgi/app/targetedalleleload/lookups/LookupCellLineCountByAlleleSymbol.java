@@ -82,10 +82,10 @@ extends FullCachedLookup
 	{
 		return "SELECT DISTINCT a.symbol, " +
 			"COUNT(ac._mutantcellline_key) as cnt " +
-			"FROM All_allele a, All_allele_cellline ac, " +
+			"FROM All_allele a " +
+			    "LEFT OUTER JOIN  All_allele_cellline ac on (a._allele_key = ac._allele_key)," +
 			"ACC_Accession acc2 " +
-			"WHERE a._allele_key *= ac._allele_key " +
-			"AND acc2.preferred = 1 " +
+			"WHERE acc2.preferred = 1 " +
 			"AND acc2.private = 1 " +
 			"AND acc2._Object_key = a._Allele_key " +
 			"AND acc2._LogicalDB_key in (125,126,138,143,166) " +
@@ -106,8 +106,9 @@ extends FullCachedLookup
     {
     	String symbol = (String)addObject;
 		return "SELECT a.symbol, COUNT(ac._mutantcellline_key) as cnt " +
-				"FROM All_allele a, All_allele_cellline ac " +
-				"WHERE a._allele_key *= ac._allele_key " +
+				"FROM All_allele a " +
+				"LEFT OUTER JOIN All_allele_cellline ac " +
+				"on (a._allele_key = ac._allele_key) " +
 				"AND a.symbol = '" + symbol + "' " +
 				"GROUP BY a.symbol " +
 				"ORDER BY COUNT(ac._mutantcellline_key)" ;

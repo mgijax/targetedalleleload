@@ -123,10 +123,10 @@ extends FullCachedLookup
 	 */
 	public String getFullInitQuery() 
 	{
-		return "SELECT _Derivation_key, _Vector_key 'vectorkey', " +
-				"_ParentCellLine_key 'parentalkey', " +
-				"_Creator_key 'creatorkey', " +
-				"_DerivationType_key 'typekey' " +
+		return "SELECT _Derivation_key, _Vector_key  as vectorkey, " +
+				"_ParentCellLine_key  as parentalkey, " +
+				"_Creator_key  as creatorkey, " +
+				"_DerivationType_key as typekey " +
 				"FROM ALL_CellLine_Derivation " ;
 	}
 
