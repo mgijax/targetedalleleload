@@ -27,9 +27,9 @@ public class KompCsdInterpreter extends KnockoutAlleleInterpreter {
     protected static final String NUM_UNKNOWN_PARENT = "Input record(s) with unknown parental cell line skipped";
     protected static final Set alleleTypes = new HashSet();
     static {
-	alleleTypes.add("Conditional Ready");
-	alleleTypes.add("Targeted Non Conditional");
-	alleleTypes.add("Deletion");
+	alleleTypes.add("a");
+	alleleTypes.add("e");
+	alleleTypes.add("");
     }
 
     // The minimum length of a valid input record (including NL character).
@@ -108,19 +108,22 @@ public class KompCsdInterpreter extends KnockoutAlleleInterpreter {
 	List list = parse(rec);
 	String[] fields = (String[]) list.toArray(new String[0]);
 
-	// Set the attributes of the inputData object using the fields parsed
-	// from the input record.
-	// 0 - Gene ID
-	// 1 - Genome Build
-	// 2 - Cassette
-	// 3 - Project (KOMP, EUCOMM, NorCOMM)
-	// 4 - Project ID
-	// 5 - Mutant ES cell line ID
-	// 6 - Parent ES cell line name
-	// 7 - Sanger allele name
-	// 8 - Mutation type
-	// 9 - Insertion point 1
-	// 10 - Insertion point 2
+        // Set the attributes of the inputData object using the fields parsed
+        // from the input record.
+        // 0 - mgi_accession_id (Gene ID) 
+        // 1 - assembly (Genome Build)
+        // 2 - cassette
+        // 3 - pipeline (KOMP, EUCOMM, NorCOMM)
+        // 4 - ikmc_project_id
+        // 5 - es_cell_clone
+        // 6 - parent_cell_line
+        // 7 - allele_symbol_superscript (Sanger allele name)
+        // 8 - mutation_type
+        // 9 - cassete_start
+        // 10 - cascette_end
+        // 11 - loxp_start
+        // 12 - loxp_end
+        // 13 - is_mixed
 
 	inputData.setGeneId(fields[0]);
 	inputData.setBuild(fields[1]);
@@ -134,18 +137,19 @@ public class KompCsdInterpreter extends KnockoutAlleleInterpreter {
 	inputData.setESCellName(fields[5]);
 	inputData.setParentESCellName(fields[6]);
 	
-	if(fields[8].equals("Conditional Ready")) {
+	if(fields[8].equals("a")) {
 	    inputData.setMutationType("Conditional");
-	} else if (fields[8].equals("Targeted Non Conditional")) {
+	} else if (fields[8].equals("e")) {
 	    inputData.setMutationType("Targeted non-conditional");
-	} else if (fields[8].equals("Deletion")) {
+	// (blank) is assumed
+	} else {
 	    inputData.setMutationType("Deletion");
 	}
 	
 	// Combine the coordinate pairs
 	String c1 = fields[9] + "-" + fields[10];
 	String c2 = "-";
-	if (fields.length == 13) {
+	if (fields.length == 14) {
 	    c2 = fields[11] + "-" + fields[12];
 	}
 	
@@ -221,10 +225,14 @@ public class KompCsdInterpreter extends KnockoutAlleleInterpreter {
 	    String[] parts = (String[]) list.toArray(new String[0]);
 
 	    if (parts[0].equals("")) {
-		// Skip any missing ES Cell IDs 
+		// Skip any missing MGI IDs 
 		return false;
 	    }
-	    if (parts[0].equals("MGI ACCESSION ID")) {
+            if (parts[0].equals("CGI:")) {
+                // Skip any invalid MGI IDs 
+                return false;
+            }
+	    if (parts[0].equals("mgi_accession_id")) {
 		// Ignore header line
 		return false;
 	    }

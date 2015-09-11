@@ -424,6 +424,7 @@ public class TargetedAlleleLoad extends DLALoader {
 	// written to in the "load" database.
 	//
 	Vector loadTables = new Vector();
+        loadTables.add(Table.getInstance("ALL_CellLine_Derivation", loadDBMgr));
         loadTables.add(Table.getInstance("ALL_Allele", loadDBMgr));
         loadTables.add(Table.getInstance("ALL_CellLine", loadDBMgr));
         loadTables.add(Table.getInstance("ALL_Allele_CellLine", loadDBMgr));

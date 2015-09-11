@@ -69,26 +69,6 @@ public class Constants {
 	public static final int MOLECULAR_REFERENCE = 1012;
 
 	/*
-	 * VOC_Term key for Marker-Allele Association Qualifier "Not Specified"
-	 */
-	public static final int MKR_ASSOC_QUAL_NS_KEY = 4268547;
-
-	/*
-	 * VOC_Term key for Marker-Allele Association Status "Curated"
-	 */
-	public static final int MKR_ASSOC_STAT_CURATED_KEY = 4268545;
-
-	/*
-	 * VOC_Term key for Marker-Allele Association Status "Curated"
-	 */
-	public static final Map MUTATION_TYPE_KEYS = new HashMap();
-	static {
-		MUTATION_TYPE_KEYS.put("Deletion", new Integer(11025593));
-		MUTATION_TYPE_KEYS.put("Conditional", new Integer(11025587));
-		MUTATION_TYPE_KEYS.put("Targeted non-conditional", new Integer(11025589));
-	}
-
-	/*
          * VOC_Term key for Allele Type 'Targeted'
          */
 	public static final Integer ALLELE_TYPE_KEY = new Integer(847116);

@@ -27,9 +27,9 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
     protected static final String NUM_UNKNOWN_PARENT = "Input record(s) with unknown parental cell line skipped";
     protected static final Set alleleTypes = new HashSet();
     static {
-	alleleTypes.add("Conditional Ready");
-	alleleTypes.add("Targeted Non Conditional");
-	alleleTypes.add("Deletion");
+	alleleTypes.add("a");
+	alleleTypes.add("e");
+	alleleTypes.add("");
     }
 
     // The minimum length of a valid input record (including NL character).
@@ -109,20 +109,20 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 
 	// Set the attributes of the inputData object using the fields parsed
 	// from the input record.
-	// 0 - Gene ID
-	// 1 - Genome Build
-	// 2 - Cassette
-	// 3 - Project (KOMP, EUCOMM, NorCOMM)
-	// 4 - Project ID
-	// 5 - Mutant ES cell line ID
-	// 6 - Parent ES cell line name
-	// 7 - Sanger allele name
-	// 8 - Mutation type
-	// 9 - Mutation sub type
-	// 10 - Insertion point 1
-	// 11 - Insertion point 2
-	// 12 - loxp start
-	// 13 - loxp end
+	// 0 - mgi_accession_id (Gene ID)
+	// 1 - assembly (Genome Build)
+	// 2 - cassette
+	// 3 - pipeline (KOMP, EUCOMM, NorCOMM)
+	// 4 - ikmc_project_id
+	// 5 - es_cell_clone
+	// 6 - parent_cell_line
+	// 7 - allele_symbol_superscript (Sanger allele name)
+	// 8 - mutation_type
+	// 9 - cassete_start
+	// 10 - cascette_end
+	// 11 - loxp_start
+	// 12 - loxp_end
+	// 13 - is_mixed
 
 	inputData.setGeneId(fields[0]);
 	inputData.setBuild(fields[1]);
@@ -136,19 +136,20 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 	inputData.setESCellName(fields[5]);
 	inputData.setParentESCellName(fields[6]);
 	
-	if(fields[8].equals("Conditional Ready")) {
+	if(fields[8].equals("a")) {
 	    inputData.setMutationType("Conditional");
-	} else if (fields[8].equals("Targeted Non Conditional")) {
+	} else if (fields[8].equals("e")) {
 	    inputData.setMutationType("Targeted non-conditional");
-	} else if (fields[8].equals("Deletion")) {
+	// (blank) is assumed
+	} else {
 	    inputData.setMutationType("Deletion");
 	}
-	inputData.setMutationSubType(fields[9]); 
+
 	// Combine the coordinate pairs
-	String c1 = fields[10] + "-" + fields[11];
+	String c1 = fields[9] + "-" + fields[10];
 	String c2 = "-";
 	if (fields.length == 14) {
-	    c2 = fields[12] + "-" + fields[13];
+	    c2 = fields[11] + "-" + fields[12];
 	}
 		      
 	
@@ -223,10 +224,14 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 	    String[] parts = (String[]) list.toArray(new String[0]);
 
 	    if (parts[0].equals("")) {
-		// Skip any missing ES Cell IDs 
+		// Skip any missing MGI IDs 
 		return false;
 	    }
-	    if (parts[0].equals("MGI ACCESSION ID")) {
+	    if (parts[0].equals("CGI:")) {
+		// Skip any invalid MGI IDs 
+		return false;
+	    }
+	    if (parts[0].equals("mgi_accession_id")) {
 		// Ignore header line
 		return false;
 	    }
@@ -279,28 +284,28 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 	    }
 
 	    try {
-		if(Integer.valueOf(parts[10]) == null) {
+		if(Integer.valueOf(parts[9]) == null) {
 		    return false;}
-		if(Integer.valueOf(parts[11]) == null) {
+		if(Integer.valueOf(parts[10]) == null) {
 		    return false;}
 	    } catch (NumberFormatException e) {
 		return false;
 	    }
 	    
-	    if (parts.length > 12) {
-		if(parts.length == 13 ) {
+	    if (parts.length > 11) {
+		if(parts.length == 12 ) {
 		    // Missing one of a pair of coords
 		    return false;
 		}
-		if ((parts[12].length() < 1 && parts[13].length() > 1) ||
-		    (parts[12].length() > 1 && parts[13].length() < 1)
+		if ((parts[11].length() < 1 && parts[12].length() > 1) ||
+		    (parts[11].length() > 1 && parts[12].length() < 1)
 		    ) {
 				return false;
 		} else {
 		    try {
-			if(Integer.valueOf(parts[12]) == null) {
+			if(Integer.valueOf(parts[11]) == null) {
 			    return false;}
-			if(Integer.valueOf(parts[13]) == null) {
+			if(Integer.valueOf(parts[12]) == null) {
 			    return false;}
 		    } catch (NumberFormatException e) {
 			return false;

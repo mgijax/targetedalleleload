@@ -419,6 +419,8 @@ implements Comparable
 		aState.setIsMixed(isMixed);
 		aState.setApprovedbyKey(rdCfg.getJobStreamKey());
 		aState.setApprovalDate(currentTime);
+		// voc_term._term_key = 4268544/Loaded
+		aState.setMarkeralleleStatusKey(4268544); 
 
 		ALL_AlleleDAO aDAO = new ALL_AlleleDAO(aState);
 		stream.insert(aDAO);

@@ -26,9 +26,9 @@ LOG_CUR=${LOGDIR}/tal.cur.log
 LOG_VAL=${LOGDIR}/tal.val.log
 
 #  Full path of the downloaded and input files
-DOWNLOADFILE_PATH=/data/downloads/www.i-dcc.org
-DOWNLOADFILE_NAME=kompcsd_clones.tsv
-INFILE_NAME=${INPUTDIR}/kompcsd_clones.tsv
+DOWNLOADFILE_PATH=/data/downloads/www.mousephenotype.org
+DOWNLOADFILE_NAME=mgi_es_cell_allele_report.tsv
+INFILE_NAME=${INPUTDIR}/mgi_es_cell_allele_report.tsv
 
 export LOG_PROC LOG_DIAG LOG_CUR LOG_VAL
 export FILEDIR LOGDIR RPTDIR ARCHIVEDIR OUTPUTDIR 
