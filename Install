@@ -50,6 +50,8 @@ CSD_WTSI_CONFIG=tal_csd_wtsi.config
 CSD_MBP_CONFIG=tal_csd_mbp.config
 EUCOMM_WTSI_CONFIG=tal_eucomm_wtsi.config
 EUCOMM_HMGU_CONFIG=tal_eucomm_hmgu.config
+EUCOMMTOOLS_WTSI_CONFIG=tal_eucommtools_wtsi.config
+EUCOMMTOOLS_HMGU_CONFIG=tal_eucommtools_hmgu.config
 COMMON_CONFIG=tal_common.config
 
 #
@@ -147,6 +149,35 @@ then
     . ${EUCOMM_HMGU_CONFIG}
 else
     echo "Cannot source configuration file: ${EUCOMM_HMGU_CONFIG}"
+    installFailed
+fi
+. ${COMMON_CONFIG}
+${DLAINSTALL} ${DEV} ${DO_BUILD}
+
+#########################################################################
+# run DLAInstall for tal_eucommtools_wtsi
+#
+if [ -r ${EUCOMMTOOLS_WTSI_CONFIG} ]
+then
+    echo "Source ${EUCOMMTOOLS_WTSI_CONFIG}"
+    . ${EUCOMMTOOLS_WTSI_CONFIG}
+else
+    echo "Cannot source configuration file: ${EUCOMMTOOLS_WTSI_CONFIG}"
+    installFailed
+fi
+. ${COMMON_CONFIG}
+${DLAINSTALL} ${DEV} ${DO_BUILD}
+
+
+#########################################################################
+# run DLAInstall for tal_eucommtools_hmgu
+#
+if [ -r ${EUCOMMTOOLS_HMGU_CONFIG} ]
+then
+    echo "Source ${EUCOMMTOOLS_HMGU_CONFIG}"
+    . ${EUCOMMTOOLS_HMGU_CONFIG}
+else
+    echo "Cannot source configuration file: ${EUCOMMTOOLS_HMGU_CONFIG}"
     installFailed
 fi
 . ${COMMON_CONFIG}
