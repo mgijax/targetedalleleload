@@ -98,8 +98,8 @@ export MGD_BCP_OK_TO_OVERWRITE
 ###########################################################################
 
 #  Recipient list for mailing the log files (comma-separated)
-MAIL_LOG_PROC="mgiadmin,richard.baldarelli@jax.org"
-MAIL_LOG_CUR="richard.baldarelli@jax.org,meiyee.law@jax.org"
+MAIL_LOG_PROC="lec"
+MAIL_LOG_CUR="lec"
 export MAIL_LOG_PROC MAIL_LOG_CUR
 
 #  Installation directory
