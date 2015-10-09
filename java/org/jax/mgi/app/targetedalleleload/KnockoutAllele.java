@@ -70,6 +70,7 @@ implements Comparable
 	private Integer typeKey;
 	private Integer statusKey = new Integer(Constants.ALLELE_STATUS_APPROVED);
 	private Integer transmissionKey = new Integer(Constants.ALLELE_TRANSMISSION_CELLLINE);
+	private Integer markeralleleStatusKey = new Integer(Constants.MARKER_ALLELE_STATUS);
 	private Boolean isWildType = new Boolean(false);
 	private Boolean isExtinct = new Boolean(false);
 	private Boolean isMixed = new Boolean(false);
@@ -121,6 +122,14 @@ implements Comparable
 
 	public Integer getTransmissionKey() {
 		return this.transmissionKey;
+	}
+
+	public void setMarkeralleleStatusKey(Integer key) {
+		this.markeralleleStatusKey = key;
+	}
+
+	public Integer getMarkeralleleStatusKey() {
+		return this.markeralleleStatusKey;
 	}
 
 	public Integer getKey() {
@@ -411,6 +420,7 @@ implements Comparable
 		aState.setAlleleStatusKey(statusKey);
 		aState.setCollectionKey(collectionKey);
 		aState.setTransmissionKey(transmissionKey);
+		aState.setMarkeralleleStatusKey(markeralleleStatusKey);
 		aState.setSymbol(symbol);
 		aState.setName(name);
 		aState.setNomensymbol(null);
@@ -419,8 +429,6 @@ implements Comparable
 		aState.setIsMixed(isMixed);
 		aState.setApprovedbyKey(rdCfg.getJobStreamKey());
 		aState.setApprovalDate(currentTime);
-		// voc_term._term_key = 4268544/Loaded
-		aState.setMarkeralleleStatusKey(4268544); 
 
 		ALL_AlleleDAO aDAO = new ALL_AlleleDAO(aState);
 		stream.insert(aDAO);

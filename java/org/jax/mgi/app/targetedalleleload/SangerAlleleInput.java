@@ -19,17 +19,23 @@ public class SangerAlleleInput implements KnockoutAlleleInput {
 	// Variables //
 	// ///////////////
 
-	// fields parsed from an input record:
-	// 0 - Gene ID
-	// 1 - Genome Build
-	// 2 - Cassette
-	// 3 - Pipeline
-	// 4 - Project ID
-	// 5 - Mutant ES cell line ID
-	// 6 - Parent ES cell line name
-	// 8 - Mutation type
-	// 9 - Insertion point 1
-	// 10 - Insertion point 2
+	// Set the attributes of the inputData object using the fields parsed
+	// from the input record.
+	// 0 - mgi_accession_id
+	// 1 - assembly
+	// 2 - cassette
+	// 3 - pipeline (KOMP, EUCOMM, NorCOMM)
+	// 4 - ikmc_project_id
+	// 5 - es_cell_clone
+	// 6 - parent_cell_line
+	// 7 - allele_symbol_superscript
+	// 8 - mutation_type
+	// 9 - mutation_subtype
+	// 10 - cassette_start
+	// 11 - cassette_end
+	// 12 - loxp_start
+	// 13 - loxp_end
+	// 14 - is_mixed
 
 	// From file
 	private String geneId = null;
@@ -40,6 +46,7 @@ public class SangerAlleleInput implements KnockoutAlleleInput {
 	private String esCellName = null;
 	private String parentESCellName = null;
 	private String mutationType = null;
+	private String mutationSubType = null;
 	private String locus1 = null;
 	private String locus2 = null;
 
@@ -87,6 +94,9 @@ public class SangerAlleleInput implements KnockoutAlleleInput {
 	public String getMutationType() {
 		return mutationType;
 	}
+        public String getMutationSubType() {
+                return mutationSubType;
+        }
 	public void setESCellName(String esCellName) {
 		this.esCellName = esCellName;
 	}
@@ -94,6 +104,10 @@ public class SangerAlleleInput implements KnockoutAlleleInput {
 	public void setMutationType(String mutationType) {
 		this.mutationType = mutationType;
 	}
+        public void setMutationSubType(String mutationSubType) {
+                this.mutationSubType = mutationSubType;
+        }
+
 
 	public void setParentESCellName(String parentESCellName) {
 		// The Sanger parental cell names come in with all sorts
@@ -170,6 +184,9 @@ public class SangerAlleleInput implements KnockoutAlleleInput {
         if ((this.mutationType == null) ? (other.mutationType != null) : !this.mutationType.equals(other.mutationType)) {
             return false;
         }
+        if ((this.mutationSubType == null) ? (other.mutationSubType != null) : !this.mutationSubType.equals(other.mutationSubType)) {
+            return false;
+        }
 
         if (this.locus1 != other.locus1 && (this.locus1 == null || !this.locus1.equals(other.locus1))) {
             return false;
@@ -189,6 +206,7 @@ public class SangerAlleleInput implements KnockoutAlleleInput {
     	s += esCellName+", ";
     	s += parentESCellName+", ";
     	s += mutationType+", ";
+        s += mutationSubType+", ";
     	s += locus1+", ";
     	s += locus2;
     	s += ">";

@@ -27,9 +27,9 @@ public class KompCsdInterpreter extends KnockoutAlleleInterpreter {
     protected static final String NUM_UNKNOWN_PARENT = "Input record(s) with unknown parental cell line skipped";
     protected static final Set alleleTypes = new HashSet();
     static {
-	alleleTypes.add("a");
-	alleleTypes.add("e");
-	alleleTypes.add("");
+	alleleTypes.add("Conditional Ready");
+	alleleTypes.add("Targeted Non Conditional");
+	alleleTypes.add("Deletion");
     }
 
     // The minimum length of a valid input record (including NL character).
@@ -108,22 +108,23 @@ public class KompCsdInterpreter extends KnockoutAlleleInterpreter {
 	List list = parse(rec);
 	String[] fields = (String[]) list.toArray(new String[0]);
 
-        // Set the attributes of the inputData object using the fields parsed
-        // from the input record.
-        // 0 - mgi_accession_id (Gene ID) 
-        // 1 - assembly (Genome Build)
-        // 2 - cassette
-        // 3 - pipeline (KOMP, EUCOMM, NorCOMM)
-        // 4 - ikmc_project_id
-        // 5 - es_cell_clone
-        // 6 - parent_cell_line
-        // 7 - allele_symbol_superscript (Sanger allele name)
-        // 8 - mutation_type
-        // 9 - cassete_start
-        // 10 - cascette_end
-        // 11 - loxp_start
-        // 12 - loxp_end
-        // 13 - is_mixed
+	// Set the attributes of the inputData object using the fields parsed
+	// from the input record.
+	// 0 - mgi_accession_id
+	// 1 - assembly
+	// 2 - cassette
+	// 3 - pipeline (KOMP, EUCOMM, NorCOMM)
+	// 4 - ikmc_project_id
+	// 5 - es_cell_clone
+	// 6 - parent_cell_line
+	// 7 - allele_symbol_superscript
+	// 8 - mutation_type
+	// 9 - mutation_subtype
+	// 10 - cassette_start
+	// 11 - cassette_end
+	// 12 - loxp_start
+	// 13 - loxp_end
+	// 14 - is_mixed
 
 	inputData.setGeneId(fields[0]);
 	inputData.setBuild(fields[1]);
@@ -137,20 +138,19 @@ public class KompCsdInterpreter extends KnockoutAlleleInterpreter {
 	inputData.setESCellName(fields[5]);
 	inputData.setParentESCellName(fields[6]);
 	
-	if(fields[8].equals("a")) {
+	if(fields[8].equals("Conditional Ready")) {
 	    inputData.setMutationType("Conditional");
-	} else if (fields[8].equals("e")) {
+	} else if (fields[8].equals("Targeted Non Conditional")) {
 	    inputData.setMutationType("Targeted non-conditional");
-	// (blank) is assumed
-	} else {
+	} else if (fields[8].equals("Deletion")) {
 	    inputData.setMutationType("Deletion");
 	}
 	
 	// Combine the coordinate pairs
-	String c1 = fields[9] + "-" + fields[10];
+	String c1 = fields[10] + "-" + fields[11];
 	String c2 = "-";
-	if (fields.length == 14) {
-	    c2 = fields[11] + "-" + fields[12];
+	if (fields.length > 12) {
+	    c2 = fields[12] + "-" + fields[13];
 	}
 	
 	List coords = getCoords(c1, c2);
@@ -225,14 +225,10 @@ public class KompCsdInterpreter extends KnockoutAlleleInterpreter {
 	    String[] parts = (String[]) list.toArray(new String[0]);
 
 	    if (parts[0].equals("")) {
-		// Skip any missing MGI IDs 
+		// Skip any missing ES Cell IDs 
 		return false;
 	    }
-            if (parts[0].equals("CGI:")) {
-                // Skip any invalid MGI IDs 
-                return false;
-            }
-	    if (parts[0].equals("mgi_accession_id")) {
+	    if (parts[0].equals("MGI ACCESSION ID")) {
 		// Ignore header line
 		return false;
 	    }
@@ -285,25 +281,25 @@ public class KompCsdInterpreter extends KnockoutAlleleInterpreter {
 	    }
 
 	    try {
-		if(Integer.valueOf(parts[9]) == null) {return false;}
 		if(Integer.valueOf(parts[10]) == null) {return false;}
+		if(Integer.valueOf(parts[11]) == null) {return false;}
 	    } catch (NumberFormatException e) {
 		return false;
 	    }
 	    
-	    if (parts.length > 11) {
-		if(parts.length == 12 ) {
+	    if (parts.length > 12) {
+		if(parts.length == 13 ) {
 		    // Missing one of a pair of coords
 		    return false;
 		}
-		if ((parts[11].length() < 1 && parts[12].length() > 1) ||
-			(parts[11].length() > 1 && parts[12].length() < 1)
+		if ((parts[12].length() < 1 && parts[13].length() > 1) ||
+			(parts[12].length() > 1 && parts[13].length() < 1)
 			) {
 		    return false;
 		} else {
 		    try {
-			if(Integer.valueOf(parts[11]) == null) {return false;}
 			if(Integer.valueOf(parts[12]) == null) {return false;}
+			if(Integer.valueOf(parts[13]) == null) {return false;}
 		    } catch (NumberFormatException e) {
 			return false;
 		    }

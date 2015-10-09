@@ -361,12 +361,12 @@ extends KnockoutAlleleProcessor
 	    if (cassette.equals("L1L2_Del_BactPneo_FFL")) {
 		note = cfg.getNoteTemplateCondDel_BactPneo_FFL();
 	    } else if (cassette.matches(PROMOTER_DRIVEN)) {
-		//if (in.getMutationSubType().equals("Artificial Intron")) {
-		    //note = cfg.getNoteTemplateCondAIPromoter();
-		//}
-		//else {
-		note = cfg.getNoteTemplateCondPromoter();
-		//}
+		if (in.getMutationSubType().equals("Artificial Intron")) {
+		    note = cfg.getNoteTemplateCondAIPromoter();
+		}
+		else {
+		    note = cfg.getNoteTemplateCondPromoter();
+		}
 	    } else if (cassette.matches(PROMOTER_LESS)) {
 		note = cfg.getNoteTemplateCondPromoterless();
 	    } else {
@@ -380,12 +380,12 @@ extends KnockoutAlleleProcessor
 	    if (cassette.equals("L1L2_Del_BactPneo_FFL")) {
 		note = cfg.getNoteTemplateNonCondDel_BactPneo_FFL();
 	    } else if (cassette.matches(PROMOTER_DRIVEN)) {
-		//if (in.getMutationSubType().equals("Artificial Intron")) {
-		    //note = cfg.getNoteTemplateNonCondAIPromoter();
-		//}
-		//else {
-		note = cfg.getNoteTemplateNonCondPromoter();
-		//}
+		if (in.getMutationSubType().equals("Artificial Intron")) {
+		    note = cfg.getNoteTemplateNonCondAIPromoter();
+		}
+		else {
+		    note = cfg.getNoteTemplateNonCondPromoter();
+		}
 	    } else if (cassette.matches(PROMOTER_LESS)) {
 		note = cfg.getNoteTemplateNonCondPromoterless();
 	    } else {
