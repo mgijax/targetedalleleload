@@ -387,6 +387,7 @@ public class TargetedAlleleLoad extends DLALoader {
 	// to the QC pool (cell lines for other pipeline don't need QC
 	// during this run)
 	String [] jnumbers = cfg.getJNumbers();
+
 	// 5/16/13 - sc NOTE: jnumbers[0] parameter NOT USED BY LOOKUP -
 	// LOOKUP ALWAYS uses the primary JNUM (first one in the configured
 	// string)
@@ -483,6 +484,7 @@ public class TargetedAlleleLoad extends DLALoader {
 	   
 	    databaseProjectIds.remove(in.getProjectId().toLowerCase());
 	    databaseCellLines.remove(in.getMutantCellLine().toLowerCase());
+
 	    // If this record is not appropriate to be handled by this
 	    // processor, skip it. The only reason we included it in the
 	    // first place was to assist in the QC of all cell lines

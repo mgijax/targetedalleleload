@@ -288,26 +288,27 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 		return false;
 	    }
 	    
-	    if (parts.length > 12) {
-		if(parts.length == 13 ) {
-		    // Missing one of a pair of coords
-		    return false;
-		}
-		if ((parts[12].length() < 1 && parts[13].length() > 1) ||
-		    (parts[12].length() > 1 && parts[13].length() < 1)
-		    ) {
-				return false;
-		} else {
-		    try {
-			if(Integer.valueOf(parts[12]) == null) {
-			    return false;}
-			if(Integer.valueOf(parts[13]) == null) {
-			    return false;}
-		    } catch (NumberFormatException e) {
-			return false;
-		    }
-		}
-	    }
+	    // removed these checks : TR12011/IKMC Biomart Portal change : no needed
+	    //if (parts.length > 12) {
+		//if(parts.length == 13 ) {
+		    //// Missing one of a pair of coords
+		    //return false;
+		//}
+		//if ((parts[12].length() < 1 && parts[13].length() > 1) ||
+		    //(parts[12].length() > 1 && parts[13].length() < 1)
+		    //) {
+				//return false;
+		//} else {
+		    //try {
+			//if(Integer.valueOf(parts[12]) == null) {
+			    //return false;}
+			//if(Integer.valueOf(parts[13]) == null) {
+			    //return false;}
+		    //} catch (NumberFormatException e) {
+			//return false;
+		    //}
+		//}
+	    //}
 
 	    // Default action is to indicate this record as valid
 	    return true;			
