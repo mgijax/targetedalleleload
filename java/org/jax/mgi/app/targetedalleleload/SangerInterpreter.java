@@ -271,8 +271,8 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 			"Records with a new provider (" +
 			firstLetter + ")");
 		logger.logcInfo(
-			"Cell line record with a new provider (" + 
-			parts[5] + ")", false);
+			"Cell line record with a new provider : skipping record", false);
+		logger.logcInfo(parts[0] + "\t" + parts[5] + "\t" + parts[6] + "\t" + parts[7] + "\n", false);
 		return false;
 	    }
 	    if (!allowedCelllines.contains(firstLetter)) {

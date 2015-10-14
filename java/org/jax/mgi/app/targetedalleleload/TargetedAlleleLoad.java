@@ -526,11 +526,8 @@ public class TargetedAlleleLoad extends DLALoader {
 	    if (mrk == null) {
 		qcStats.record("ERROR", BAD_MARKER_ID);
 
-		String m = "Marker " +
-		    in.getGeneId() +
-		    " can't be found, but cell line " +
-		    in.getMutantCellLine() +
-		    " is associated to it, skipping record\n";
+		String m = "Invalid/Secondary Marker ID; Cell Line is associated to Marker : skipping record\n" +
+			in.toString() + "\n";
 		logger.logcInfo(m, false);
 		continue;
 		    
