@@ -525,7 +525,6 @@ public class TargetedAlleleLoad extends DLALoader {
 
 	    if (mrk == null) {
 		qcStats.record("ERROR", BAD_MARKER_ID);
-
 		String m = "Invalid/Secondary Marker ID : skipping record\n" + in.toString() + "\n";
 		logger.logcInfo(m, false);
 		continue;
@@ -534,12 +533,7 @@ public class TargetedAlleleLoad extends DLALoader {
 	    //  sc - log and skip if marker has been withdrawn
 	    if (mrk.getStatusKey().equals(Constants.MARKER_WITHDRAWN)) {
 		qcStats.record("ERROR", NUM_WITHDRAWN_MARKER);
-
-		String m = "Marker " +
-		    in.getGeneId() +
-		    " has been withdrawn, but cell line " +
-		    in.getMutantCellLine() +
-		    " is associated to it, skipping record\n";
+		String m = "Marker has been withdrawn : skipping record\n" + in.toString() + "\n";
 		logger.logcInfo(m, false);
 		continue;
 	    }
