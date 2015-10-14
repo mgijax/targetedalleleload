@@ -530,6 +530,7 @@ public class TargetedAlleleLoad extends DLALoader {
 		continue;
 		    
 	    }
+
 	    //  sc - log and skip if marker has been withdrawn
 	    if (mrk.getStatusKey().equals(Constants.MARKER_WITHDRAWN)) {
 		qcStats.record("ERROR", NUM_WITHDRAWN_MARKER);
@@ -538,7 +539,6 @@ public class TargetedAlleleLoad extends DLALoader {
 		continue;
 	    }
 
-	    
 	    // Construct the allele from the input record
 	    KnockoutAllele constructed = null;
 
