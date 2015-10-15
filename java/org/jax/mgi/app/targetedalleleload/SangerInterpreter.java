@@ -112,7 +112,7 @@ public class SangerInterpreter extends KnockoutAlleleInterpreter {
 	// 0 - mgi_accession_id
 	// 1 - assembly
 	// 2 - cassette
-	// 3 - pipeline (KOMP, EUCOMM, NorCOMM)
+	// 3 - pipeline
 	// 4 - ikmc_project_id
 	// 5 - es_cell_clone
 	// 6 - parent_cell_line
