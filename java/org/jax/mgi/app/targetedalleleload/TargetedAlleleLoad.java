@@ -121,10 +121,10 @@ public class TargetedAlleleLoad extends DLALoader {
 
     // String constants for Log messages
     private static final String LOG_ALLELE_NOT_FOUND = "Cell line ~~INPUT_MCL~~ found in database, but cannot find associated allele\n";
-    private static final String LOG_MARKER_CHANGED = "MUTANT ES CELL CHANGED MARKER\n"
+    private static final String LOG_MARKER_CHANGED = "MUTANT ES CELL CHANGED MARKER, SKIPPING RECORD\n"
 		    + "Mutant Cell line: ~~INPUT_MCL~~\n"
 		    + "Existing Marker: ~~EXISTING_MARKER~~\n"
-		    + "Changed to: ~~INPUT_MARKER~~\n";
+		    + "To changed to: ~~INPUT_MARKER~~\n";
     private static final String LOG_ALLELE_TRANSMISSION_CHANGED = "ALLELE GERMLINE TRANSMISSION\n"
 		    + "An attempt to change Mutant Cell line ~~INPUT_MCL~~ from allele\n"
 		    + "~~EXISTING_ALLELE~~ to allele ~~CONSTRUCTED_ALLELE~~ failed because\n"
