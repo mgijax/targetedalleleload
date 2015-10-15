@@ -129,21 +129,18 @@ fi
 
 #
 # Copy the input files into place
+# sed 'EUCOMMTools(tab)' -> 'EUCOMM(tab)'
 #
 DOWNLOAD=${DOWNLOADFILE_PATH}/${DOWNLOADFILE_NAME}
 INPUT=${INPUTDIR}/${DOWNLOADFILE_NAME}
-cp ${DOWNLOAD} ${INPUTDIR}
-
-if [ `echo ${DOWNLOAD} | awk -F"." '{ print $NF }'` = "gz" ]
-then
-    gunzip -f ${INPUT}
-fi
+rm -rf ${INPUTDIR}/${DOWNLOADFILE_NAME} ${INPUTDIR}/${DOWNLOADFILE_NAME}.orig
+cp ${DOWNLOAD} ${INPUTDIR}/${DOWNLOADFILE_NAME}.orig
+sed 's/EUCOMMTools\t/EUCOMM\t/g' ${INPUTDIR}/${DOWNLOADFILE_NAME}.orig > ${INPUTDIR}/${DOWNLOADFILE_NAME}
 
 #
 #  Perform pre-load tasks.
 #
 preload ${OUTPUTDIR} ${INPUTDIR} ${LOGDIR}
-#preload
 
 #
 #  Run the load application.

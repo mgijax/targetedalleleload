@@ -123,31 +123,31 @@ public class TargetedAlleleLoad extends DLALoader {
     private static final String LOG_ALLELE_NOT_FOUND = "Cell line ~~INPUT_MCL~~ found in database, but cannot find associated allele\n";
     private static final String LOG_MARKER_CHANGED = "MUTANT ES CELL CHANGED MARKER, SKIPPING RECORD\n"
 		    + "Mutant Cell line: ~~INPUT_MCL~~\n"
-		    + "Existing Marker: ~~EXISTING_MARKER~~\n"
-		    + "To changed to: ~~INPUT_MARKER~~\n";
+		    + "Existing MGI Marker: ~~EXISTING_MARKER~~\n"
+		    + "From Input file: ~~INPUT_MARKER~~\n";
     private static final String LOG_ALLELE_TRANSMISSION_CHANGED = "ALLELE GERMLINE TRANSMISSION\n"
 		    + "An attempt to change Mutant Cell line ~~INPUT_MCL~~ from allele\n"
 		    + "~~EXISTING_ALLELE~~ to allele ~~CONSTRUCTED_ALLELE~~ failed because\n"
 		    + "the transmission is germline.  No further automated action can be taken on ~~EXISTING_ALLELE~~.\n";
     private static final String LOG_CELLLINE_TYPE_CHANGED = "MUTANT ES CELL CHANGED TYPE\n"
 		    + "Mutant Cell line: ~~INPUT_MCL~~\n"
-		    + "Existing allele symbol: ~~EXISTING_SYMBOL~~\n"
+		    + "Existing MGI allele symbol: ~~EXISTING_SYMBOL~~\n"
 		    + "New allele symbol: ~~INPUT_SYMBOL~~\n";
     private static final String LOG_CELLLINE_GROUP_CHANGED = "MUTANT ES CELL CHANGED GROUP\n"
 		    + "Mutant Cell line: ~~INPUT_MCL~~\n"
-		    + "Existing allele symbol: ~~EXISTING_SYMBOL~~\n"
+		    + "Existing MGI allele symbol: ~~EXISTING_SYMBOL~~\n"
 		    + "New allele symbol: ~~INPUT_SYMBOL~~\n";
     private static final String LOG_CELLLINE_CREATOR_CHANGED = "MUTANT ES CELL CHANGED CREATOR\n"
 		    + "Mutant Cell line: ~~INPUT_MCL~~\n"
-		    + "Existing allele symbol: ~~EXISTING_SYMBOL~~\n"
+		    + "Existing MGI allele symbol: ~~EXISTING_SYMBOL~~\n"
 		    + "New allele symbol: ~~INPUT_SYMBOL~~\n";
     private static final String LOG_CELLLINE_DERIVATION_CHANGED = "MUTANT ES CELL CHANGED DERIVATION\n"
 		    + "Mutant Cell line: ~~INPUT_MCL~~\n"
-		    + "Existing allele symbol: ~~EXISTING_SYMBOL~~\n"
+		    + "Existing MGI allele symbol: ~~EXISTING_SYMBOL~~\n"
 		    + "Changed derivation from ~~EXISTING_DERIVATION~~ to ~~INPUT_DERIVATION~~\n";
     private static final String LOG_CELLLINE_NUMBER_CHANGED = "MUTANT ES CELL CHANGED SEQUENCE NUMBER\n"
 		    + "Mutant Cell line: ~~INPUT_MCL~~\n"
-		    + "Existing allele symbol: ~~EXISTING_SYMBOL~~\n"
+		    + "Existing MGI allele symbol: ~~EXISTING_SYMBOL~~\n"
 		    + "New allele symbol: ~~INPUT_SYMBOL~~\n";
     private static final String LOG_CELLLINE_ALLELE_CHANGED = "MUTANT ES CELL CHANGED ALLELE\n"
 		    + "Mutant Cell line: ~~INPUT_MCL~~\n"
