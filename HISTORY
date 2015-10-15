@@ -5,9 +5,7 @@ CHANGES:
 1) TR12011/12070/scrum-dog/use new input file
 see /mgi/all/wts_projects/12000/12011/tr12011.csh
 2) added new input file
-3) added tal_eucommtools_hmgu.config.default
-4) added tal_eucommtools_wtsi.config.default
-5) per Meiyee, made some changes to error log text
+3) per Meiyee, made some changes to error log text
 
 TAG: targetedalleleload-6-0-0-1
 DATE: 07/24/2015

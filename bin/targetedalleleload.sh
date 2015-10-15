@@ -129,7 +129,7 @@ fi
 
 #
 # Copy the input files into place
-# sed 'EUCOMMTools(tab)' -> 'EUCOMM(tab)'
+# convert pipeline 'EUCOMMTools' to 'EUCOMM'
 #
 DOWNLOAD=${DOWNLOADFILE_PATH}/${DOWNLOADFILE_NAME}
 INPUT=${INPUTDIR}/${DOWNLOADFILE_NAME}
