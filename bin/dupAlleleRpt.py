@@ -26,51 +26,59 @@
 #
 ###########################################################################
 
-import urllib
 import os
 import db
-import mgi_utils
-import loadlib
+import string
 
 db.useOneConnection(1)
-#print '%s' % mgi_utils.date()
 
 outFilePath = os.environ['BASEDIR'] + "/duplicatedAllele.rpt"
 
-# column delimiter
-colDelim = "\t"
-# record delimiter
-lineDelim = "\n"
 
-TAB= "\t"
-userKey = 0
-date = loadlib.loaddate
-
+TAB= '\t'
+CRT = '\n'
 
 #
 # Process
 #
 
 # get all duplicated tal load created alleles
-results = db.sql("""
-    select a._allele_key, a.symbol
-    from all_allele a
-    where _CreatedBy_key = 1466
+db.sql('''
+    select to_char(a.creation_date, 'MM/dd/yyyy') as cdate, a._allele_key, a.symbol, t.term as status
+    into temporary table dups
+    from all_allele a, VOC_Term t
+    where a._CreatedBy_key = 1466
+	and a._Allele_Status_key = t._Term_key
     and exists (select 1 from all_allele a2
     where a2._allele_key != a._allele_key
-    and a.symbol = a2.symbol) """, 'auto')
+    and a.symbol = a2.symbol)
+    order by a.symbol ''', None)
 
+db.sql('create index idx1 on dups(_Allele_key)', None)
+results = db.sql('''select d.*, c.cellLine
+	from dups d
+	left outer join ALL_Allele_CellLine aac on (d._Allele_key = aac._Allele_key)
+	left outer join ALL_CellLine c on (aac._MutantCellLine_key = c._CellLine_key)''', 'auto')
 try:
     outFile = open(outFilePath, 'w')
 except:
-    exit('Could not open file for writing %s \n' %  outFilePath)
+    exit('Could not open file for writing %s %s' %  (outFilePath, CRT))
 
-outFile.write(colDelim.join(['Allele symbol','Allele key']))
-outFile.write(lineDelim)
+outFile.write(TAB.join(['cellline','allele_status', 'allele_key','symbol','creation_date']))
+outFile.write(CRT)
 
+# map the dup allele attributes to their cell lines
+resultsDict = {}
 for r in results:
-    outFile.write(colDelim.join([r['symbol'],str(r['_Allele_key'])]))
-    outFile.write(lineDelim)
+    symbol = r['symbol']
+    key = r['_Allele_key']
+    status = r['status']
+    date = r['cdate']
+    cellLine = r['cellLine']
+    if cellLine == None:
+	cellLine = ''
+    #resultsDict[key].append(cellLine)
+    outFile.write('%s%s%s%s%s%s%s%s%s%s' % (cellLine, TAB, status, TAB, key, TAB, symbol, TAB, date, CRT ))
 
 #
 # Post Process
@@ -78,5 +86,4 @@ for r in results:
 
 outFile.close()
 
-#print '%s' % mgi_utils.date()
 db.useOneConnection(0)
