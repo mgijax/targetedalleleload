@@ -42,7 +42,6 @@ import org.jax.mgi.shr.exception.MGIException;
 public class KnockoutAllele 
 implements Comparable 
 {
-	private final int NOTECHUNKSIZE = 255;
 	private RecordStampCfg rdCfg;
 	private JNumberLookup jnumLookup;
 	private LookupJNumbersByAlleleKey lookupJNumbersByAlleleKey;
@@ -364,30 +363,12 @@ implements Comparable
 		// Set this note key to the newly created note key from the DB
 		noteKey = new Integer(nDAO.getKey().getKey().intValue());
 
-		// Insert the note chunks for this allele note
-		for (int i = 0; i < newNote.length(); i += NOTECHUNKSIZE) {
-			// Create the NoteChunk
-			MGI_NoteChunkState ncState = new MGI_NoteChunkState();
-			ncState.setNoteKey(noteKey);
-
-			// Calculate THIS note chunk sequence number based on how many
-			// times we've gone through the loop already
-			ncState.setSequenceNum(new Integer((i / NOTECHUNKSIZE) + 1));
-
-			// Set the note chunk to the current 255 characters if that will
-			// not overflow the note, otherwise, just add whatever's left
-			// to the notechunk.
-			String thisNoteChunk = "";
-			if (i + NOTECHUNKSIZE < newNote.length()) {
-				thisNoteChunk = newNote.substring(i, i + NOTECHUNKSIZE);
-			} else {
-				thisNoteChunk = newNote.substring(i, note.length());
-			}
-			ncState.setNote(thisNoteChunk);
-
-			MGI_NoteChunkDAO ncDAO = new MGI_NoteChunkDAO(ncState);
-			stream.insert(ncDAO);
-		}
+		// Create the NoteChunk
+		MGI_NoteChunkState ncState = new MGI_NoteChunkState();
+		ncState.setNoteKey(noteKey);
+		ncState.setSequenceNum(new Integer(1));
+		MGI_NoteChunkDAO ncDAO = new MGI_NoteChunkDAO(ncState);
+		stream.insert(ncDAO);
 	}
 
 	/**

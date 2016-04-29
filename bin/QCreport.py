@@ -36,6 +36,9 @@ import db
 import mgi_utils
 import loadlib
 
+db.setAutoTranslate(False)
+db.setAutoTranslateBE(False)
+
 db.useOneConnection(1)
 #print '%s' % mgi_utils.date()
 

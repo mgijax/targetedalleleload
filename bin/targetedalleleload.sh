@@ -206,8 +206,8 @@ postload
 
 echo "Run the targetedalleleLoad QC reports" >> ${LOG_PROC}
 
-${PYTHON} ./bin/QCreport.py
-${PYTHON} ./bin/dupAlleleRpt.py
+${TARGETEDALLELELOAD}/bin/QCreport.py
+${TARGETEDALLELELOAD}/bin/dupAlleleRpt.py
 
 echo "QC report for targetedalleleLoad completed successfully" >> ${LOG_PROC}
 
