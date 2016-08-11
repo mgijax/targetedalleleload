@@ -1,8 +1,10 @@
+TAG: targetedalleleload-6-0-5-2
 TAG: targetedalleleload-6-0-5-1
 DATE: 08/11/2016
 STAFF: lec
 CHANGES: 
 1) while testing TR12083/lib_py_dataload/loadlib change, found loadlib was not used bin/QCreport.py
+2) added .gitignore
 
 TAG: targetedalleleload-6-0-4-3
 TAG: targetedalleleload-6-0-4-2
