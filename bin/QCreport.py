@@ -30,17 +30,11 @@
 #
 ###########################################################################
 
-import urllib
 import os
 import db
-import mgi_utils
-import loadlib
 
 db.setAutoTranslate(False)
 db.setAutoTranslateBE(False)
-
-db.useOneConnection(1)
-#print '%s' % mgi_utils.date()
 
 outFilePath = os.environ['RPTDIR'] + "/AbandonedAllele.rpt"
 logicaldb = os.environ['PROJECT_LOGICAL_DB']
@@ -49,10 +43,6 @@ logicaldb = os.environ['PROJECT_LOGICAL_DB']
 colDelim = "\t"
 # record delimiter
 lineDelim = "\n"
-
-TAB= "\t"
-userKey = 0
-date = loadlib.loaddate
 
 #
 # Process
@@ -91,6 +81,3 @@ for r in results:
 #
 
 outFile.close()
-
-#print '%s' % mgi_utils.date()
-db.useOneConnection(0)

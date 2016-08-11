@@ -1,0 +1,5 @@
+classes/
+javadocs/
+*.config
+*.jar
+*.log
