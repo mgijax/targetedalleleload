@@ -30,9 +30,6 @@ import os
 import db
 import string
 
-db.setAutoTranslate(False)
-db.setAutoTranslateBE(False)
-
 db.useOneConnection(1)
 
 outFilePath = os.environ['BASEDIR'] + "/duplicatedAllele.rpt"

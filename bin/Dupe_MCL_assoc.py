@@ -29,9 +29,6 @@ import os
 import db
 import string
 
-db.setAutoTranslate(False)
-db.setAutoTranslateBE(False)
-
 db.useOneConnection(1)
 
 outFilePath = os.environ['BASEDIR'] + "/Dupe_MCL_assoc.rpt"

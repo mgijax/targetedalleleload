@@ -33,9 +33,6 @@
 import os
 import db
 
-db.setAutoTranslate(False)
-db.setAutoTranslateBE(False)
-
 outFilePath = os.environ['RPTDIR'] + "/AbandonedAllele.rpt"
 logicaldb = os.environ['PROJECT_LOGICAL_DB']
 

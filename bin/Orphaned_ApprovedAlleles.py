@@ -31,9 +31,6 @@ import db
 import mgi_utils
 import loadlib
 
-db.setAutoTranslate(False)
-db.setAutoTranslateBE(False)
-
 db.useOneConnection(1)
 
 outFilePath = os.environ['BASEDIR'] + "/Orphaned_ApprovedAlleles.rpt"
