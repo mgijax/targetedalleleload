@@ -423,7 +423,6 @@ implements Comparable
 		aState.setMarkeralleleStatusKey(markeralleleStatusKey);
 		aState.setSymbol(symbol);
 		aState.setName(name);
-		aState.setNomensymbol(null);
 		aState.setIsWildType(isWildType);
 		aState.setIsExtinct(isExtinct);
 		aState.setIsMixed(isMixed);
