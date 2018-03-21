@@ -1,3 +1,10 @@
+TAG: targetedalleleload-6-0-12-2
+DATE: 03/07/2018
+STAFF: sc
+CHANGES: 
+1) TR12806 Update molecular note template in configs
+2) TR12817 - new file with different mutation values, remove sequencing of notes
+
 TAG: targetedalleleload-6-0-12-1
 DATE: 03/07/2018
 STAFF: sc
