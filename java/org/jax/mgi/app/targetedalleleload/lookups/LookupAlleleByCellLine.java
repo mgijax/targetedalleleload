@@ -157,7 +157,6 @@ extends FullCachedLookup
 		"mrk.symbol as geneSymbol, mrk.chromosome as chr, " +
 		"mrk._Marker_key as geneKey, acc.accID as geneMgiid, " +
 		"nc.note as alleleNote, a._Transmission_key as alleleTrans, " +
-		"nc.sequenceNum as alleleNoteSeq, " +
 		"nc._note_key as alleleNoteKey, " +
 		"n._ModifiedBy_key as alleleNoteModifiedBy, " +
 		"n._CreatedBy_key as alleleNoteCreatedBy, " +
@@ -187,7 +186,7 @@ extends FullCachedLookup
 		"and acc2._Object_key = a._Allele_key " +
 		"and acc2._LogicalDB_key in (125,126,138,143,166) " +
 		"and acc2._MGIType_key=11 " +
-		"order by alleleKey, cellLine, alleleNoteSeq " ;
+		"order by alleleKey, cellLine" ;
 	}
 
 	/**
@@ -220,8 +219,6 @@ extends FullCachedLookup
 			}
 
 			public Object interpretRows(Vector v) {
-				// All rows return the same values for every columns EXCEPT
-				// for the alleleNote column (one row per note chunk)
 				logger.logdDebug(
 						"LookupAlleleByCellLine, RowDataInterpreter.interpretRows\n", 
 						true);
@@ -258,15 +255,6 @@ extends FullCachedLookup
 					logger.logdInfo(e.getMessage(), true);
 					return null;
 				}
-
-				for (Iterator it = v.iterator(); it.hasNext();) {
-					rd = (RowData) it.next();
-
-					// combine all the note chunks together in the allele note
-					completeNote += rd.alleleNote;
-				}
-
-				koAllele.setNote(completeNote.trim());
 
 				try {
 					koAllele.setMarkerKey(lookupMarkerByMGIID.lookup(

@@ -27,8 +27,11 @@ public class KompCsdInterpreter extends KnockoutAlleleInterpreter {
     protected static final String NUM_UNKNOWN_PARENT = "Input record(s) with unknown parental cell line skipped";
     protected static final Set alleleTypes = new HashSet();
     static {
-	alleleTypes.add("Conditional Ready");
-	alleleTypes.add("Targeted Non Conditional");
+	// file change 3/20/2018
+	//alleleTypes.add("Conditional Ready");
+	//alleleTypes.add("Targeted Non Conditional");
+	alleleTypes.add("a"); //Conditional Ready
+	alleleTypes.add("e"); // Targeted Non Conditional
 	alleleTypes.add("Deletion");
     }
 
@@ -138,9 +141,9 @@ public class KompCsdInterpreter extends KnockoutAlleleInterpreter {
 	inputData.setESCellName(fields[5]);
 	inputData.setParentESCellName(fields[6]);
 	
-	if(fields[8].equals("Conditional Ready")) {
+	if(fields[8].equals("a")) {
 	    inputData.setMutationType("Conditional");
-	} else if (fields[8].equals("Targeted Non Conditional")) {
+	} else if (fields[8].equals("e")) {
 	    inputData.setMutationType("Targeted non-conditional");
 	} else if (fields[8].equals("Deletion")) {
 	    inputData.setMutationType("Deletion");

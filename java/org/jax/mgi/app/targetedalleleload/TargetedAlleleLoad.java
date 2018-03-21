@@ -604,7 +604,6 @@ public class TargetedAlleleLoad extends DLALoader {
 	    if (cfg.getUpdateOnlyMode()) {
 		if (esCell != null) {
 		    // Mutant ES Cell found in MGI, check the associated allele
-
 		    // Find the existing associated allele
 		    KnockoutAllele existing = lookupAlleleByCellLine.lookup(in
 				    .getMutantCellLine());
@@ -748,8 +747,11 @@ public class TargetedAlleleLoad extends DLALoader {
 
 			    // Compress the note fields to discount any extra spaces
 			    // that might have snuck in
-			    String existingNote = existing.getNote()
-				.replaceAll("\\n", "").replaceAll(" ", "");
+			    String existingNote =  existing.getNote();
+			    if (existingNote == null) {
+				existingNote = ""; 
+			    }
+			    existingNote = existingNote.replaceAll("\\n", "").replaceAll(" ", "");
 			    String constructedNote = constructed.getNote()
 				.replaceAll("\\n", "").replaceAll(" ", "");
 
@@ -1634,7 +1636,8 @@ public class TargetedAlleleLoad extends DLALoader {
 		    // Multiple notes for this allele!
 		    logger.logdInfo("Molecular note for " + a.getSymbol()
 					+ " could NOT be updated to:\n" + notes, false);
-		} else if (!a.getNote().equals(notes.get(0))) {
+		// 3/20/2018 updated to check for and update note if it doesn't exist (null)
+		} else if (a.getNote() == null || !a.getNote().equals(notes.get(0))) {
 
 		    // The MCLs all agree that there should be a new note
 		    logger.logdInfo("Molecular note for " + a.getSymbol()
@@ -1648,14 +1651,10 @@ public class TargetedAlleleLoad extends DLALoader {
 			query += a.getNoteKey();
 
 			executeQuery(query);
-
-			// Attach the new note to the existing allele
-			a.updateNote(loadStream, (String) notes.get(0));
-			qcStats.record("SUMMARY", NUM_ALLELES_NOTE_CHANGE);
-		    } else {
-			logger.logdInfo("Note key for " + a.getSymbol()
-			    + " could NOT be found", false);
 		    }
+		    // Attach the new note to the existing allele
+		    a.updateNote(loadStream, (String) notes.get(0));
+		    qcStats.record("SUMMARY", NUM_ALLELES_NOTE_CHANGE);
 		}
 	    }
 	}
