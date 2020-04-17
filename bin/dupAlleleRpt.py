@@ -1,5 +1,3 @@
-#!/usr/local/bin/python
-
 ##########################################################################
 #
 # Purpose:
@@ -28,7 +26,6 @@
 
 import os
 import db
-import string
 
 db.useOneConnection(1)
 
@@ -47,7 +44,7 @@ db.sql('''
     into temporary table dups
     from all_allele a, VOC_Term t
     where a._CreatedBy_key = 1466
-	and a._Allele_Status_key = t._Term_key
+        and a._Allele_Status_key = t._Term_key
     and exists (select 1 from all_allele a2
     where a2._allele_key != a._allele_key
     and a.symbol = a2.symbol)
@@ -55,9 +52,9 @@ db.sql('''
 
 db.sql('create index idx1 on dups(_Allele_key)', None)
 results = db.sql('''select d.*, c.cellLine
-	from dups d
-	left outer join ALL_Allele_CellLine aac on (d._Allele_key = aac._Allele_key)
-	left outer join ALL_CellLine c on (aac._MutantCellLine_key = c._CellLine_key)''', 'auto')
+        from dups d
+        left outer join ALL_Allele_CellLine aac on (d._Allele_key = aac._Allele_key)
+        left outer join ALL_CellLine c on (aac._MutantCellLine_key = c._CellLine_key)''', 'auto')
 try:
     outFile = open(outFilePath, 'w')
 except:
@@ -75,7 +72,7 @@ for r in results:
     date = r['cdate']
     cellLine = r['cellLine']
     if cellLine == None:
-	cellLine = ''
+        cellLine = ''
     #resultsDict[key].append(cellLine)
     outFile.write('%s%s%s%s%s%s%s%s%s%s' % (cellLine, TAB, status, TAB, key, TAB, symbol, TAB, date, CRT ))
 

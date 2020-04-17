@@ -1,5 +1,3 @@
-#!/usr/local/bin/python
-
 ##########################################################################
 #
 # Purpose:
@@ -27,7 +25,6 @@
 
 import os
 import db
-import string
 
 db.useOneConnection(1)
 
@@ -54,7 +51,7 @@ db.sql('''create index idx2 on dups(_MutantCellLine_key)''', None)
 
 results = db.sql('''select aa.symbol, aa._Allele_key, c.cellLine, c._CellLine_key, aac.creation_date, u.login
     from ALL_Allele_CellLine aac, dups d, ALL_Allele aa,
-	ALL_CellLine c, MGI_User u
+        ALL_CellLine c, MGI_User u
     where aac._MutantCellLine_key = d._MutantCellLine_key
     and aac._Allele_key = d._Allele_key
     and aac._Allele_key = aa._Allele_key
@@ -68,12 +65,12 @@ dupDict = {}
 lineDict = {}
 for r in results:
     key = '%s|%s' % (r['symbol'], r['cellLine'])
-    if not dupDict.has_key(key):
-	dupDict[key] = 1
-	lineDict[key] = [r]
+    if key not in dupDict:
+        dupDict[key] = 1
+        lineDict[key] = [r]
     else:
-	dupDict[key] += 1
-	lineDict[key].append(r)
+        dupDict[key] += 1
+        lineDict[key].append(r)
 try:
     outFile = open(outFilePath, 'w')
 except:
@@ -86,7 +83,7 @@ for key in dupDict:
     count = dupDict[key]
     resultList = lineDict[key]
     for r in resultList:
-	outFile.write('%s%s%s%s%s%s%s%s%s%s%s%s%s%s' % (r['cellLine'], TAB, r['_CellLine_key'], TAB, count, TAB, r['_Allele_key'], TAB, r['symbol'], TAB, r['creation_date'], TAB, r['login'], CRT))
+        outFile.write('%s%s%s%s%s%s%s%s%s%s%s%s%s%s' % (r['cellLine'], TAB, r['_CellLine_key'], TAB, count, TAB, r['_Allele_key'], TAB, r['symbol'], TAB, r['creation_date'], TAB, r['login'], CRT))
 
 #
 # Post Process

@@ -1,3 +1,11 @@
+TAG: targetedalleleload-?
+DATE: 
+STAFF: lec
+CHANGES: TR13204/Infrastruture/python 3
+not used:
+bin/Dupe_MCL_assoc.py
+bin/Orphaned_ApprovedAlleles.py
+
 TAG: targetedalleleload-6-0-14-1
 DATE: 01/02/2020
 STAFF: sc

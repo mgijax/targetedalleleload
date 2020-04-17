@@ -1,5 +1,3 @@
-#!/usr/local/bin/python
-
 ##########################################################################
 #
 # Purpose:
@@ -25,7 +23,7 @@
 #
 ###########################################################################
 
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import os
 import db
 import mgi_utils
