@@ -485,7 +485,7 @@ implements Comparable
 				projectLogicalDb, // Logical DB for these project IDs
 				key, // Allele object key
 				new Integer(Constants.ALLELE_MGI_TYPE), // MGI type
-				Boolean.TRUE, // Private?
+				Boolean.FALSE, // Private?
 				Boolean.TRUE // Preferred?
 		);
 
